@@ -162,6 +162,10 @@ const ImportPage: React.FC = () => {
                   <ProductListV2
                     batchId={selectedBatch.BatchID}
                     onProductCountChange={() => fetchActualProductCount(selectedBatch.BatchID)}
+                    batchInfo={{
+                      totalQuantity: selectedBatch.TotalQuantity,
+                      currentCount: actualProductCount
+                    }}
                   />
                 </div>
               )}

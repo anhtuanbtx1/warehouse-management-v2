@@ -319,12 +319,13 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
                         <td>
                           {onViewBatchDetails && (
                             <Button
-                              variant="outline-primary"
-                              size="sm"
+                              variant="primary"
                               onClick={() => onViewBatchDetails(item.BatchCode)}
+                              className="btn-compact"
                               title="Xem chi tiết lô hàng"
                             >
-                              <i className="fas fa-eye"></i>
+                              <span className="me-1">👁️</span>
+                              Chi tiết
                             </Button>
                           )}
                         </td>

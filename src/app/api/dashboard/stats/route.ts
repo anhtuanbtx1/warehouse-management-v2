@@ -3,13 +3,13 @@ import { executeQuery } from '@/lib/database';
 
 interface DashboardStats {
   revenue: {
-    today: number;
+    today: number;       // Doanh thu hôm nay
     thisMonth: number;
     thisYear: number;
     growth: number;
   };
   profit: {
-    today: number;
+    today: number;       // Lợi nhuận hôm nay
     thisMonth: number;
     thisYear: number;
     margin: number;
@@ -21,7 +21,7 @@ interface DashboardStats {
     lowStock: number;
   };
   sales: {
-    todayCount: number;
+    todayCount: number;     // Số đơn hôm nay
     thisMonthCount: number;
     avgOrderValue: number;
   };
@@ -29,19 +29,27 @@ interface DashboardStats {
 
 export async function GET(request: NextRequest) {
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const currentDate = new Date();
-    const thisYear = currentDate.getFullYear();
-    const thisMonth = currentDate.getMonth() + 1; // JavaScript months are 0-based
+    // Get Vietnam timezone date (UTC+7)
+    const vietnamDate = new Date(new Date().getTime() + (7 * 60 * 60 * 1000));
+    const today = vietnamDate.toISOString().split('T')[0];
+    const thisYear = vietnamDate.getFullYear();
+    const thisMonth = vietnamDate.getMonth() + 1; // JavaScript months are 0-based
 
-    console.log('Dashboard Stats - Date params:', { today, thisYear, thisMonth });
+    console.log('Dashboard Stats - Vietnam Date params:', {
+      today,
+      thisYear,
+      thisMonth,
+      vietnamDateTime: vietnamDate.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
+    });
 
-    // Revenue Statistics
+    // Revenue statistics - Today vs Yesterday
     const revenueStats = await executeQuery(`
       SELECT
+        -- Doanh thu hôm nay
         ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @today THEN SalePrice ELSE 0 END), 0) as todayRevenue,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = @thisMonth THEN SalePrice ELSE 0 END), 0) as monthRevenue,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear THEN SalePrice ELSE 0 END), 0) as yearRevenue,
+        -- Doanh thu hôm qua để tính growth
         ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = DATEADD(day, -1, @today) THEN SalePrice ELSE 0 END), 0) as yesterdayRevenue
       FROM CRM_Products
       WHERE Status = 'SOLD' AND SoldDate IS NOT NULL
@@ -50,6 +58,7 @@ export async function GET(request: NextRequest) {
     // Profit Statistics
     const profitStats = await executeQuery(`
       SELECT
+        -- Lợi nhuận hôm nay
         ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @today THEN (SalePrice - ImportPrice) ELSE 0 END), 0) as todayProfit,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = @thisMonth THEN (SalePrice - ImportPrice) ELSE 0 END), 0) as monthProfit,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear THEN (SalePrice - ImportPrice) ELSE 0 END), 0) as yearProfit,
@@ -78,6 +87,7 @@ export async function GET(request: NextRequest) {
     // Sales Count Statistics
     const salesStats = await executeQuery(`
       SELECT
+        -- Số đơn hôm nay
         COUNT(CASE WHEN CAST(SoldDate AS DATE) = @today THEN 1 END) as todayCount,
         COUNT(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = MONTH(GETDATE()) THEN 1 END) as monthCount,
         ISNULL(AVG(CASE WHEN Status = 'SOLD' THEN SalePrice END), 0) as avgOrderValue
@@ -91,7 +101,7 @@ export async function GET(request: NextRequest) {
     const sales = salesStats[0];
 
     // Calculate growth rate
-    const growthRate = revenue.yesterdayRevenue > 0 
+    const growthRate = revenue.yesterdayRevenue > 0
       ? ((revenue.todayRevenue - revenue.yesterdayRevenue) / revenue.yesterdayRevenue * 100)
       : 0;
 

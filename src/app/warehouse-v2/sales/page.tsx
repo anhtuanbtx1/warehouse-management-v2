@@ -297,59 +297,7 @@ const SalesPage: React.FC = () => {
               </Card>
             </Tab>
 
-            <Tab eventKey="statistics" title={
-              <span>
-                <i className="fas fa-chart-bar me-2"></i>
-                Thống kê bán hàng
-              </span>
-            }>
-              <Row>
-                <Col md={3}>
-                  <Card className="border-success">
-                    <Card.Body className="text-center">
-                      <i className="fas fa-shopping-cart fa-2x text-success mb-2"></i>
-                      <h4 className="text-success">{recentSales.length}</h4>
-                      <small className="text-muted">Giao dịch hôm nay</small>
-                    </Card.Body>
-                  </Card>
-                </Col>
-                <Col md={3}>
-                  <Card className="border-primary">
-                    <Card.Body className="text-center">
-                      <i className="fas fa-money-bill-wave fa-2x text-primary mb-2"></i>
-                      <h6 className="text-primary">
-                        {formatCurrency(
-                          recentSales.reduce((sum, sale) => sum + (sale.ProductSalePrice || sale.FinalAmount), 0)
-                        )}
-                      </h6>
-                      <small className="text-muted">Doanh thu hôm nay</small>
-                    </Card.Body>
-                  </Card>
-                </Col>
-                <Col md={3}>
-                  <Card className="border-warning">
-                    <Card.Body className="text-center">
-                      <i className="fas fa-mobile-alt fa-2x text-warning mb-2"></i>
-                      <h4 className="text-warning">{recentSales.length}</h4>
-                      <small className="text-muted">Sản phẩm đã bán</small>
-                    </Card.Body>
-                  </Card>
-                </Col>
-                <Col md={3}>
-                  <Card className="border-info">
-                    <Card.Body className="text-center">
-                      <i className="fas fa-percentage fa-2x text-info mb-2"></i>
-                      <h4 className="text-info">
-                        {recentSales.length > 0 
-                          ? (recentSales.filter(s => s.PaymentMethod === 'CASH').length / recentSales.length * 100).toFixed(0)
-                          : 0}%
-                      </h4>
-                      <small className="text-muted">Thanh toán tiền mặt</small>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              </Row>
-            </Tab>
+
           </Tabs>
 
           {/* Sell Product Form Modal */}

@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status'); // IN_STOCK, SOLD, etc.
     const categoryId = searchParams.get('categoryId');
     const batchId = searchParams.get('batchId');
+    const batchCode = searchParams.get('batchCode'); // Filter theo batch code
     const search = searchParams.get('search'); // Tìm theo tên hoặc IMEI
     const availableOnly = searchParams.get('availableOnly') === 'true'; // Chỉ lấy sản phẩm còn hàng
     
@@ -88,6 +89,11 @@ export async function GET(request: NextRequest) {
     if (batchId) {
       whereClause += ' AND p.BatchID = @batchId';
       params.batchId = parseInt(batchId);
+    }
+
+    if (batchCode) {
+      whereClause += ' AND b.BatchCode = @batchCode';
+      params.batchCode = batchCode;
     }
     
     if (search) {

@@ -28,22 +28,29 @@ interface ProductListV2Props {
   onSellProduct?: (product: ProductV2) => void;
   availableOnly?: boolean;
   batchId?: number;
+  batchCode?: string; // Thêm hỗ trợ filter theo batchCode
   onProductCountChange?: () => void;
   showAddButton?: boolean; // Điều khiển hiển thị nút thêm sản phẩm
   hideCategoryFilter?: boolean; // Ẩn tìm kiếm theo danh mục
   hideColumns?: string[]; // Ẩn các cột cụ thể
   hideResetButton?: boolean; // Ẩn button đặt lại
+  batchInfo?: {
+    totalQuantity: number; // Tổng số lượng dự kiến của lô
+    currentCount: number;  // Số lượng hiện tại trong lô
+  };
 }
 
 const ProductListV2: React.FC<ProductListV2Props> = ({
   onSellProduct,
   availableOnly = false,
   batchId,
+  batchCode,
   onProductCountChange,
   showAddButton = true, // Mặc định hiển thị nút thêm
   hideCategoryFilter = false, // Mặc định hiển thị filter danh mục
   hideColumns = [], // Mặc định không ẩn cột nào
-  hideResetButton = false // Mặc định hiển thị button đặt lại
+  hideResetButton = false, // Mặc định hiển thị button đặt lại
+  batchInfo
 }) => {
   const { showSuccess, showError } = useToast();
   const [products, setProducts] = useState<ProductV2[]>([]);
@@ -54,6 +61,10 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [categories, setCategories] = useState<any[]>([]);
+
+  // Check if batch is full (không cho thêm sản phẩm nữa)
+  const isBatchFull = batchInfo && batchInfo.currentCount >= batchInfo.totalQuantity;
+  const canAddProduct = showAddButton && !isBatchFull;
 
   // Add product modal states (chỉ khi showAddButton = true)
   const [showAddModal, setShowAddModal] = useState(false);
@@ -90,6 +101,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
         ...(statusFilter && { status: statusFilter }),
         ...(categoryFilter && { categoryId: categoryFilter }),
         ...(batchId && { batchId: batchId.toString() }),
+        ...(batchCode && { batchCode: batchCode }),
         ...(availableOnly && { availableOnly: 'true' })
       });
 
@@ -123,7 +135,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-  }, [batchId, availableOnly]);
+  }, [batchId, batchCode, availableOnly]);
 
   const handleSearch = () => {
     fetchProducts(1);
@@ -351,8 +363,15 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
     <Card>
       <Card.Header>
         <h5 className="mb-0">
+          <span className="me-2">📱</span>
           {availableOnly ? 'Sản phẩm có thể bán' : 'Danh sách sản phẩm'}
-          {batchId && <small className="text-muted ms-2">(Lô hàng cụ thể)</small>}
+          {(batchId || batchCode) && <small className="text-muted ms-2">(Lô hàng cụ thể)</small>}
+          {batchInfo && (
+            <span className={`badge ms-2 ${isBatchFull ? 'bg-danger' : 'bg-info'}`}>
+              {batchInfo.currentCount}/{batchInfo.totalQuantity}
+              {isBatchFull && ' - Đã đủ'}
+            </span>
+          )}
         </h5>
       </Card.Header>
       
@@ -449,13 +468,14 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                 </Button>
                 {showAddButton && (
                   <Button
-                    variant="success"
+                    variant={isBatchFull ? "secondary" : "success"}
                     onClick={handleShowAddModal}
-                    title="Thêm sản phẩm mới"
+                    title={isBatchFull ? "Lô hàng đã đủ số lượng" : "Thêm sản phẩm mới"}
                     className="btn-compact"
+                    disabled={isBatchFull}
                   >
-                    <span className="me-1">➕</span>
-                    Thêm SP
+                    <span className="me-1">{isBatchFull ? "🚫" : "➕"}</span>
+                    {isBatchFull ? "Đã đủ" : "Thêm SP"}
                   </Button>
                 )}
               </div>
@@ -465,13 +485,14 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
           {hideResetButton && showAddButton && (
             <div className="col-md-2">
               <Button
-                variant="success"
+                variant={isBatchFull ? "secondary" : "success"}
                 onClick={handleShowAddModal}
-                title="Thêm sản phẩm mới"
+                title={isBatchFull ? "Lô hàng đã đủ số lượng" : "Thêm sản phẩm mới"}
                 className="btn-compact w-100"
+                disabled={isBatchFull}
               >
-                <span className="me-1">➕</span>
-                Thêm SP
+                <span className="me-1">{isBatchFull ? "🚫" : "➕"}</span>
+                {isBatchFull ? "Đã đủ" : "Thêm SP"}
               </Button>
             </div>
           )}

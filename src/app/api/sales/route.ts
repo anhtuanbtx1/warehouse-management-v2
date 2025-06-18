@@ -188,9 +188,12 @@ export async function POST(request: NextRequest) {
       )
     `;
 
+    // Use Vietnam timezone for sale date
+    const vietnamDate = new Date(new Date().getTime() + (7 * 60 * 60 * 1000));
+
     const invoiceParams = {
       invoiceNumber,
-      saleDate: new Date().toISOString(),
+      saleDate: vietnamDate.toISOString(),
       totalAmount: body.SalePrice,
       finalAmount: body.SalePrice
     };
@@ -234,7 +237,7 @@ export async function POST(request: NextRequest) {
     const updateParams = {
       productId: body.ProductID,
       salePrice: body.SalePrice,
-      soldDate: new Date().toISOString(),
+      soldDate: vietnamDate.toISOString(),
       invoiceNumber,
       customerInfo: 'Khách lẻ'
     };

@@ -31,10 +31,24 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  // Set default date range to 1 month (Vietnam timezone)
+  const getDefaultDateRange = () => {
+    const vietnamDate = new Date(new Date().getTime() + (7 * 60 * 60 * 1000));
+    const toDate = vietnamDate.toISOString().split('T')[0];
+
+    const fromDateObj = new Date(vietnamDate);
+    fromDateObj.setMonth(fromDateObj.getMonth() - 1);
+    const fromDate = fromDateObj.toISOString().split('T')[0];
+
+    return { fromDate, toDate };
+  };
+
+  const defaultDates = getDefaultDateRange();
+
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
+  const [fromDate, setFromDate] = useState(defaultDates.fromDate);
+  const [toDate, setToDate] = useState(defaultDates.toDate);
   const [categories, setCategories] = useState<any[]>([]);
 
   const fetchBatches = async (page: number = 1) => {
@@ -196,22 +210,10 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
             />
           </div>
           <div className="col-md-3">
-            <div className="d-flex btn-group-compact">
-              <Button variant="outline-primary" onClick={handleFilter} className="btn-compact">
-                <span className="me-1">🔍</span>
-                Lọc
-              </Button>
-              <Button variant="outline-secondary" onClick={() => {
-                setCategoryFilter('');
-                setStatusFilter('');
-                setFromDate('');
-                setToDate('');
-                fetchBatches(1);
-              }} className="btn-compact">
-                <span className="me-1">🔄</span>
-                Đặt lại
-              </Button>
-            </div>
+            <Button variant="outline-primary" onClick={handleFilter} className="btn-compact">
+              <span className="me-1">🔍</span>
+              Lọc
+            </Button>
           </div>
         </div>
 
