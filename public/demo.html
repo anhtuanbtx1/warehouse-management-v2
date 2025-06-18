@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Management V2 - Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hover-shadow:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-mobile-alt me-2"></i>
+                Warehouse V2
+                <small class="ms-2 text-muted">Phone Management</small>
+            </a>
+            
+            <div class="navbar-nav me-auto">
+                <a class="nav-link active" href="#dashboard">
+                    <i class="fas fa-tachometer-alt me-1"></i>
+                    Dashboard
+                </a>
+                <a class="nav-link" href="#import">
+                    <i class="fas fa-arrow-down me-1"></i>
+                    Nhập hàng
+                </a>
+                <a class="nav-link" href="#sales">
+                    <i class="fas fa-shopping-cart me-1"></i>
+                    Bán hàng
+                </a>
+                <a class="nav-link" href="#inventory">
+                    <i class="fas fa-warehouse me-1"></i>
+                    Tồn kho
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-1">
+                    <i class="fas fa-tachometer-alt text-primary me-2"></i>
+                    Dashboard Quản lý Kho V2
+                </h2>
+                <p class="text-muted mb-0">
+                    Tổng quan hệ thống quản lý điện thoại theo IMEI
+                </p>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-primary h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-boxes fa-3x text-primary mb-3"></i>
+                        <h3 class="text-primary">5</h3>
+                        <p class="text-muted mb-0">Tổng lô hàng</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-success h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-mobile-alt fa-3x text-success mb-3"></i>
+                        <h3 class="text-success">25</h3>
+                        <p class="text-muted mb-0">Sản phẩm còn hàng</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x text-warning mb-3"></i>
+                        <h5 class="text-warning">150,000,000 VNĐ</h5>
+                        <p class="text-muted mb-0">Doanh thu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-success h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-dollar-sign fa-3x text-success mb-3"></i>
+                        <h5 class="text-success">25,000,000 VNĐ</h5>
+                        <p class="text-muted mb-0">Lãi/Lỗ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Quick Actions -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>
+                            Thao tác nhanh
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card border-primary h-100 hover-shadow">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-arrow-down fa-2x text-primary mb-2"></i>
+                                        <h6 class="text-primary">Nhập hàng</h6>
+                                        <small class="text-muted">Tạo lô hàng mới</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card border-success h-100 hover-shadow">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-shopping-cart fa-2x text-success mb-2"></i>
+                                        <h6 class="text-success">Bán hàng</h6>
+                                        <small class="text-muted">Bán sản phẩm có sẵn</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card border-info h-100 hover-shadow">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-warehouse fa-2x text-info mb-2"></i>
+                                        <h6 class="text-info">Tồn kho</h6>
+                                        <small class="text-muted">Báo cáo tồn kho</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Data Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-mobile-alt me-2"></i>
+                            Sản phẩm có thể bán
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Tên sản phẩm</th>
+                                        <th>IMEI</th>
+                                        <th>Danh mục</th>
+                                        <th>Lô hàng</th>
+                                        <th>Giá nhập</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>iPhone 16 Pro Max 256GB</strong></td>
+                                        <td><code class="text-primary">356789012345671</code></td>
+                                        <td><span class="badge bg-info">iPhone 16</span></td>
+                                        <td><code>LOT20240618001</code></td>
+                                        <td>25,000,000 VNĐ</td>
+                                        <td><span class="badge bg-success">Còn hàng</span></td>
+                                        <td>
+                                            <button class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Samsung Galaxy S24 Ultra</strong></td>
+                                        <td><code class="text-primary">356789012345672</code></td>
+                                        <td><span class="badge bg-info">Samsung S24</span></td>
+                                        <td><code>LOT20240618002</code></td>
+                                        <td>18,000,000 VNĐ</td>
+                                        <td><span class="badge bg-success">Còn hàng</span></td>
+                                        <td>
+                                            <button class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>iPhone 15 Pro 128GB</strong></td>
+                                        <td><code class="text-primary">356789012345673</code></td>
+                                        <td><span class="badge bg-info">iPhone 15</span></td>
+                                        <td><code>LOT20240618003</code></td>
+                                        <td>20,000,000 VNĐ</td>
+                                        <td><span class="badge bg-success">Còn hàng</span></td>
+                                        <td>
+                                            <button class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>
+                            Hoạt động gần đây
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center py-3 text-muted">
+                            <i class="fas fa-clock fa-2x mb-2"></i>
+                            <div>Chưa có hoạt động nào</div>
+                            <small>Dữ liệu sẽ hiển thị khi kết nối database</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Info -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Thông tin hệ thống
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <i class="fas fa-mobile-alt text-primary me-2"></i>
+                            <strong>Quản lý theo IMEI</strong>
+                            <div><small class="text-muted">Theo dõi từng sản phẩm cụ thể</small></div>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-boxes text-success me-2"></i>
+                            <strong>Quản lý theo lô</strong>
+                            <div><small class="text-muted">Tính toán lãi/lỗ theo lô hàng</small></div>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-chart-line text-warning me-2"></i>
+                            <strong>Báo cáo real-time</strong>
+                            <div><small class="text-muted">Thống kê tự động cập nhật</small></div>
+                        </div>
+                        <div class="mb-0">
+                            <i class="fas fa-receipt text-info me-2"></i>
+                            <strong>Hóa đơn tự động</strong>
+                            <div><small class="text-muted">Tạo hóa đơn khi bán hàng</small></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-3 mt-5">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <small>
+                        © 2024 Warehouse Management System V2. 
+                        <span class="text-muted ms-2">
+                            Chuyên biệt cho quản lý điện thoại theo IMEI
+                        </span>
+                    </small>
+                </div>
+                <div class="col-md-6 text-end">
+                    <small class="text-muted">
+                        <i class="fas fa-code me-1"></i>
+                        Phiên bản 2.0.0
+                        <span class="ms-3">
+                            <i class="fas fa-database me-1"></i>
+                            SQL Server
+                        </span>
+                        <span class="ms-3">
+                            <i class="fab fa-react me-1"></i>
+                            Next.js 14
+                        </span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
