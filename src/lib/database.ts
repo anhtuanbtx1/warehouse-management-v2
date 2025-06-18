@@ -8,23 +8,43 @@ const config: sql.config = {
   port: parseInt(process.env.DB_PORT || '1433'),
   database: process.env.DB_NAME || 'zen50558_ManagementStore',
   options: {
-    encrypt: process.env.DB_ENCRYPT === 'true',
-    trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
+    encrypt: false,  // Disable TLS encryption for IP-based connection
+    trustServerCertificate: true,
     enableArithAbort: true,
-    requestTimeout: 30000,
-    connectionTimeout: 30000
+    requestTimeout: 15000,  // Reduced from 30s
+    connectionTimeout: 10000  // Reduced from 30s
   },
   pool: {
-    max: 10,
-    min: 0,
-    idleTimeoutMillis: 30000
+    max: 5,  // Reduced from 10
+    min: 1,  // Keep 1 connection alive
+    idleTimeoutMillis: 60000,  // Increased to 60s
+    acquireTimeoutMillis: 10000  // Add acquire timeout
   }
 };
 
 let pool: sql.ConnectionPool | null = null;
+let connecting = false;
 
 export async function getConnection(): Promise<sql.ConnectionPool> {
-  if (!pool || !pool.connected) {
+  // If pool exists and is connected, return it
+  if (pool && pool.connected) {
+    return pool;
+  }
+
+  // If already connecting, wait for it
+  if (connecting) {
+    while (connecting) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    if (pool && pool.connected) {
+      return pool;
+    }
+  }
+
+  try {
+    connecting = true;
+
+    // Close existing pool if any
     if (pool) {
       try {
         await pool.close();
@@ -32,11 +52,16 @@ export async function getConnection(): Promise<sql.ConnectionPool> {
         console.log('Error closing existing pool:', error);
       }
     }
+
+    // Create new pool
     pool = new sql.ConnectionPool(config);
     await pool.connect();
     console.log('Database connection established');
+
+    return pool;
+  } finally {
+    connecting = false;
   }
-  return pool;
 }
 
 export async function executeQuery<T = any>(

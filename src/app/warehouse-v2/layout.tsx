@@ -25,7 +25,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
         <Container fluid>
           <Navbar.Brand as={Link} href="/warehouse-v2" className="fw-bold">
             <span className="me-2">📱</span>
-            <span className="fs-5">Hệ thống Quản lý Kho TT</span>
+            <span className="fs-5">Hệ thống Quản lý Kho HTran</span>
           </Navbar.Brand>
           
           <Navbar.Toggle aria-controls="warehouse-navbar" />
@@ -133,24 +133,15 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
           <div className="row align-items-center">
             <div className="col-md-6">
               <small>
-                © 2024 Warehouse Management System V2. 
+                © 2024 Hệ thống Quản lý Kho thiết kế bởi AT
                 <span className="text-muted ms-2">
-                  Chuyên biệt cho quản lý điện thoại theo IMEI
+                  Quản lý điện thoại theo IMEI
                 </span>
               </small>
             </div>
             <div className="col-md-6 text-end">
               <small className="text-muted">
-                <i className="fas fa-code me-1"></i>
-                Phiên bản 2.0.0
-                <span className="ms-3">
-                  <i className="fas fa-database me-1"></i>
-                  SQL Server
-                </span>
-                <span className="ms-3">
-                  <i className="fab fa-react me-1"></i>
-                  Next.js 14
-                </span>
+                Phiên bản 1.0.0
               </small>
             </div>
           </div>
@@ -548,6 +539,78 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
 
         .warehouse-v2 .btn-group-sm .btn span {
           font-size: 14px !important;
+        }
+
+        /* Import Page Styling */
+        .warehouse-v2 .import-page {
+          font-size: 1.1rem !important;
+        }
+
+        .warehouse-v2 .import-page .breadcrumb {
+          font-size: 1.1rem !important;
+        }
+
+        .warehouse-v2 .import-page h2 {
+          font-size: 2rem !important;
+          font-weight: 700 !important;
+        }
+
+        .warehouse-v2 .import-page .text-muted {
+          font-size: 1.1rem !important;
+        }
+
+        .warehouse-v2 .import-page .nav-tabs .nav-link {
+          font-size: 1.1rem !important;
+          font-weight: 600 !important;
+          padding: 0.75rem 1.5rem !important;
+        }
+
+        .warehouse-v2 .import-page .badge {
+          font-size: 0.9rem !important;
+        }
+
+        .warehouse-v2 .import-page .bg-light {
+          font-size: 1.05rem !important;
+        }
+
+        .warehouse-v2 .import-page .bg-light strong {
+          font-size: 1.1rem !important;
+          font-weight: 600 !important;
+        }
+
+        .warehouse-v2 .import-page .text-primary,
+        .warehouse-v2 .import-page .text-info,
+        .warehouse-v2 .import-page .text-success {
+          font-size: 1.1rem !important;
+          font-weight: 500 !important;
+        }
+
+        /* Compact Reset and Add Product Buttons */
+        .warehouse-v2 .btn-compact {
+          padding: 0.375rem 0.75rem !important;
+          font-size: 0.9rem !important;
+          font-weight: 600 !important;
+          border-radius: 0.375rem !important;
+          min-width: auto !important;
+          white-space: nowrap !important;
+        }
+
+        .warehouse-v2 .btn-compact span {
+          font-size: 0.9rem !important;
+        }
+
+        .warehouse-v2 .btn-compact:hover {
+          transform: translateY(-1px) !important;
+          box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Button group for reset and add product */
+        .warehouse-v2 .btn-group-compact {
+          gap: 0.5rem !important;
+        }
+
+        .warehouse-v2 .btn-group-compact .btn {
+          flex: 0 0 auto !important;
         }
 
         /* Breadcrumb Styling Fix */

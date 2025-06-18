@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         SalePrice,
         SoldDate,
         InvoiceNumber
-      FROM CRM_Products 
+      FROM CRM_Products
       WHERE Status = 'SOLD' AND SoldDate IS NOT NULL
       ORDER BY SoldDate DESC
     `);
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         IMEI,
         ImportPrice,
         CreatedAt
-      FROM CRM_Products 
+      FROM CRM_Products
       WHERE CreatedAt IS NOT NULL
       ORDER BY CreatedAt DESC
     `);

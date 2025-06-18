@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Badge, Table, Modal, Form, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import Link from 'next/link';
+import RevenueChart from '@/components/warehouse-v2/RevenueChart';
 
 interface DashboardStats {
   revenue: {
@@ -41,65 +42,12 @@ interface Activity {
   color: string;
 }
 
-interface BatchSummary {
-  batchId: number;
-  batchCode: string;
-  categoryName: string;
-  totalQuantity: number;
-  soldQuantity: number;
-  remainingQuantity: number;
-  totalImportValue: number;
-  totalSalesValue: number;
-  profit: number;
-  profitMargin: number;
-  importDate: string;
-  status: 'ACTIVE' | 'COMPLETED' | 'PARTIAL';
-}
 
-interface DashboardStats {
-  totalBatches: number;
-  totalProducts: number;
-  inStockProducts: number;
-  soldProducts: number;
-  totalSoldValue: number;
-  totalProfitLoss: number;
-  avgProfitMargin: number;
-}
-
-interface RecentActivity {
-  type: 'IMPORT' | 'SALE';
-  description: string;
-  amount: number;
-  date: string;
-  status: string;
-}
-
-interface Product {
-  ProductID: number;
-  ProductName: string;
-  IMEI: string;
-  CategoryName: string;
-  BatchCode: string;
-  ImportPrice: number;
-  Status: string;
-}
 
 const WarehouseV2Dashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [batches, setBatches] = useState<BatchSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
-
-  // Sale modal states
-  const [showSaleModal, setShowSaleModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [salePrice, setSalePrice] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [saleLoading, setSaleLoading] = useState(false);
-  const [saleError, setSaleError] = useState('');
 
   useEffect(() => {
     fetchDashboardData();
@@ -125,13 +73,7 @@ const WarehouseV2Dashboard: React.FC = () => {
         setRecentActivities(activitiesResult.data);
       }
 
-      // Fetch available products
-      const productsResponse = await fetch('/api/products-v2?status=IN_STOCK&limit=5');
-      const productsResult = await productsResponse.json();
 
-      if (productsResult.success && productsResult.data?.data) {
-        setProducts(productsResult.data.data);
-      }
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -148,79 +90,21 @@ const WarehouseV2Dashboard: React.FC = () => {
   };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('vi-VN');
+    // Parse UTC time và hiển thị như UTC (không convert timezone)
+    const date = new Date(dateString);
+
+    // Sử dụng UTC methods để hiển thị đúng thời gian gốc
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'IN_STOCK':
-        return <Badge bg="success">Còn hàng</Badge>;
-      case 'SOLD':
-        return <Badge bg="secondary">Đã bán</Badge>;
-      case 'RESERVED':
-        return <Badge bg="warning">Đã đặt</Badge>;
-      default:
-        return <Badge bg="light">{status}</Badge>;
-    }
-  };
 
-  const handleSellProduct = (product: Product) => {
-    setSelectedProduct(product);
-    setSalePrice(product.ImportPrice.toString());
-    setCustomerName('');
-    setCustomerPhone('');
-    setSaleError('');
-    setShowSaleModal(true);
-  };
-
-  const handleSaleSubmit = async () => {
-    if (!selectedProduct || !salePrice || !customerName) {
-      setSaleError('Vui lòng điền đầy đủ thông tin');
-      return;
-    }
-
-    const salePriceNum = parseFloat(salePrice);
-    if (isNaN(salePriceNum) || salePriceNum <= 0) {
-      setSaleError('Giá bán không hợp lệ');
-      return;
-    }
-
-    try {
-      setSaleLoading(true);
-      setSaleError('');
-
-      const saleData = {
-        ProductID: selectedProduct.ProductID,
-        SalePrice: salePriceNum,
-        CustomerName: customerName,
-        CustomerPhone: customerPhone,
-        SaleDate: new Date().toISOString()
-      };
-
-      const response = await fetch('/api/sales', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(saleData),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setShowSaleModal(false);
-        fetchDashboardData(); // Refresh data
-        alert('Bán hàng thành công!');
-      } else {
-        setSaleError(result.error || 'Có lỗi xảy ra khi bán hàng');
-      }
-    } catch (error) {
-      setSaleError('Có lỗi xảy ra khi bán hàng');
-      console.error('Sale error:', error);
-    } finally {
-      setSaleLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -444,63 +328,10 @@ const WarehouseV2Dashboard: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Products Table */}
+      {/* Revenue Chart */}
       <Row className="mt-4">
         <Col md={12}>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">
-                <i className="fas fa-mobile-alt me-2"></i>
-                Sản phẩm có thể bán
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="table-responsive">
-                <Table striped hover>
-                  <thead>
-                    <tr>
-                      <th>Tên sản phẩm</th>
-                      <th>IMEI</th>
-                      <th>Danh mục</th>
-                      <th>Lô hàng</th>
-                      <th>Giá nhập</th>
-                      <th>Trạng thái</th>
-                      <th>Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((product) => (
-                      <tr key={product.ProductID}>
-                        <td><strong>{product.ProductName}</strong></td>
-                        <td><code className="text-primary">{product.IMEI}</code></td>
-                        <td><Badge bg="info">{product.CategoryName}</Badge></td>
-                        <td><code>{product.BatchCode}</code></td>
-                        <td>{formatCurrency(product.ImportPrice)}</td>
-                        <td>{getStatusBadge(product.Status)}</td>
-                        <td>
-                          <Button
-                            variant="outline-success"
-                            size="sm"
-                            onClick={() => handleSellProduct(product)}
-                            title="Bán sản phẩm"
-                          >
-                            <i className="fas fa-shopping-cart"></i>
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
-              {products.length === 0 && (
-                <div className="text-center py-3 text-muted">
-                  <i className="fas fa-mobile-alt fa-2x mb-2"></i>
-                  <div>Chưa có sản phẩm nào</div>
-                  <small>Hãy nhập hàng để bắt đầu</small>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
+          <RevenueChart />
         </Col>
       </Row>
 
@@ -735,110 +566,7 @@ const WarehouseV2Dashboard: React.FC = () => {
         }
       `}</style>
 
-      {/* Sale Modal */}
-      <Modal show={showSaleModal} onHide={() => setShowSaleModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <i className="fas fa-shopping-cart me-2"></i>
-            Bán sản phẩm
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedProduct && (
-            <>
-              <div className="mb-3 p-3 bg-light rounded">
-                <h6>Thông tin sản phẩm:</h6>
-                <div><strong>Tên:</strong> {selectedProduct.ProductName}</div>
-                <div><strong>IMEI:</strong> <code>{selectedProduct.IMEI}</code></div>
-                <div><strong>Danh mục:</strong> {selectedProduct.CategoryName}</div>
-                <div><strong>Giá nhập:</strong> {formatCurrency(selectedProduct.ImportPrice)}</div>
-              </div>
 
-              {saleError && (
-                <Alert variant="danger">
-                  <i className="fas fa-exclamation-triangle me-2"></i>
-                  {saleError}
-                </Alert>
-              )}
-
-              <Form>
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Giá bán *</Form.Label>
-                      <Form.Control
-                        type="number"
-                        value={salePrice}
-                        onChange={(e) => setSalePrice(e.target.value)}
-                        placeholder="Nhập giá bán"
-                        min="0"
-                        step="1000"
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Tên khách hàng *</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        placeholder="Nhập tên khách hàng"
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Số điện thoại</Form.Label>
-                      <Form.Control
-                        type="tel"
-                        value={customerPhone}
-                        onChange={(e) => setCustomerPhone(e.target.value)}
-                        placeholder="Nhập số điện thoại"
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Lợi nhuận dự kiến</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={salePrice ? formatCurrency(parseFloat(salePrice) - selectedProduct.ImportPrice) : '0 VNĐ'}
-                        readOnly
-                        className={parseFloat(salePrice || '0') > selectedProduct.ImportPrice ? 'text-success' : 'text-danger'}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-              </Form>
-            </>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowSaleModal(false)}>
-            Hủy
-          </Button>
-          <Button
-            variant="success"
-            onClick={handleSaleSubmit}
-            disabled={saleLoading}
-          >
-            {saleLoading ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Đang xử lý...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-check me-2"></i>
-                Xác nhận bán
-              </>
-            )}
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </Container>
   );
 };

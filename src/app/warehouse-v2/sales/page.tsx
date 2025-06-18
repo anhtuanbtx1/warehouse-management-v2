@@ -93,11 +93,32 @@ const SalesPage: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN');
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
   };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('vi-VN');
+    // Parse date string - nếu database trả về UTC time
+    let date = new Date(dateString);
+
+    // Nếu database trả về time không có timezone info và là UTC
+    // thì cần thêm 7 giờ cho múi giờ VN
+    if (!dateString.includes('Z') && !dateString.includes('+')) {
+      // Giả sử database time là UTC, thêm 7 giờ
+      date = new Date(date.getTime() + (7 * 60 * 60 * 1000));
+    }
+
+    return date.toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const getPaymentMethodBadge = (method: string) => {

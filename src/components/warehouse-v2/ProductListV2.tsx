@@ -432,36 +432,33 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
 
           {!hideResetButton && (
             <div className="col-md-2">
-              <Button
-                variant="outline-primary"
-                onClick={() => {
-                  setSearchTerm('');
-                  setStatusFilter('');
-                  setCategoryFilter('');
-                  fetchProducts(1);
-                }}
-                title="Đặt lại bộ lọc"
-                className="w-100 d-flex align-items-center justify-content-center fw-medium"
-                style={{
-                  borderColor: '#0d6efd',
-                  color: '#0d6efd',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <span className="me-2">🔄</span>
-                Đặt lại
-              </Button>
-              {showAddButton && (
+              <div className="d-flex btn-group-compact">
                 <Button
-                  variant="success"
-                  onClick={handleShowAddModal}
-                  title="Thêm sản phẩm mới"
-                  className="mt-2 w-100 d-flex align-items-center justify-content-center fw-medium"
+                  variant="outline-primary"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setStatusFilter('');
+                    setCategoryFilter('');
+                    fetchProducts(1);
+                  }}
+                  title="Đặt lại bộ lọc"
+                  className="btn-compact"
                 >
-                  <span className="me-1">➕</span>
-                  Thêm SP
+                  <span className="me-1">🔄</span>
+                  Đặt lại
                 </Button>
-              )}
+                {showAddButton && (
+                  <Button
+                    variant="success"
+                    onClick={handleShowAddModal}
+                    title="Thêm sản phẩm mới"
+                    className="btn-compact"
+                  >
+                    <span className="me-1">➕</span>
+                    Thêm SP
+                  </Button>
+                )}
+              </div>
             </div>
           )}
 
@@ -471,7 +468,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                 variant="success"
                 onClick={handleShowAddModal}
                 title="Thêm sản phẩm mới"
-                className="w-100 d-flex align-items-center justify-content-center fw-medium"
+                className="btn-compact w-100"
               >
                 <span className="me-1">➕</span>
                 Thêm SP

@@ -69,7 +69,7 @@ const ImportPage: React.FC = () => {
 
 
   return (
-    <Container fluid className="py-4">
+    <Container fluid className="py-4 import-page">
       <Row>
         <Col>
           {/* Breadcrumb */}
@@ -82,7 +82,7 @@ const ImportPage: React.FC = () => {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <div>
               <h2 className="mb-1">
-                <i className="fas fa-arrow-down text-primary me-2"></i>
+                <span className="text-primary me-2">📦</span>
                 Quản lý nhập hàng
               </h2>
               <p className="text-muted mb-0">
@@ -99,7 +99,7 @@ const ImportPage: React.FC = () => {
           >
             <Tab eventKey="batches" title={
               <span>
-                <i className="fas fa-boxes me-2"></i>
+                <span className="me-2">📋</span>
                 Danh sách lô hàng
               </span>
             }>
@@ -110,11 +110,11 @@ const ImportPage: React.FC = () => {
               />
             </Tab>
 
-            <Tab 
-              eventKey="products" 
+            <Tab
+              eventKey="products"
               title={
                 <span>
-                  <i className="fas fa-mobile-alt me-2"></i>
+                  <span className="me-2">📱</span>
                   Sản phẩm trong lô
                   {selectedBatch && (
                     <span className="badge bg-primary ms-2">

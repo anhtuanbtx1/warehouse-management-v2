@@ -50,6 +50,7 @@
     "react-sweetalert2": "^0.5.2",
     "react-text-mask-legacy": "^5.5.3",
     "react-toastify": "^10.0.5",
+    "recharts": "^2.15.3",
     "sass": "^1.77.8",
     "simplebar-react": "^3.2.6",
     "swiper": "^11.1.11",

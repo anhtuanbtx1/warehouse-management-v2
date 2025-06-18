@@ -97,7 +97,12 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN');
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
   };
 
   const getStatusBadge = (status: string) => {
@@ -134,10 +139,10 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
 
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">Danh sách lô hàng</h5>
+          <h5 className="mb-0 fs-4">📦 Danh sách lô hàng</h5>
           {onCreateBatch && (
-            <Button variant="primary" onClick={onCreateBatch}>
-              <i className="fas fa-plus me-2"></i>
+            <Button variant="primary" onClick={onCreateBatch} className="btn-compact">
+              <span className="me-1">➕</span>
               Tạo lô hàng mới
             </Button>
           )}
@@ -150,6 +155,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
             <Form.Select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
+              className="fs-6"
             >
               <option value="">Tất cả danh mục</option>
               {categories.map(category => (
@@ -163,6 +169,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
             <Form.Select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
+              className="fs-6"
             >
               <option value="">Tất cả trạng thái</option>
               <option value="ACTIVE">Đang hoạt động</option>
@@ -176,6 +183,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
               placeholder="Từ ngày"
+              className="fs-6"
             />
           </div>
           <div className="col-md-2">
@@ -184,12 +192,13 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
               placeholder="Đến ngày"
+              className="fs-6"
             />
           </div>
           <div className="col-md-3">
-            <div className="d-flex gap-2">
-              <Button variant="outline-primary" onClick={handleFilter}>
-                <i className="fas fa-search me-1"></i>
+            <div className="d-flex btn-group-compact">
+              <Button variant="outline-primary" onClick={handleFilter} className="btn-compact">
+                <span className="me-1">🔍</span>
                 Lọc
               </Button>
               <Button variant="outline-secondary" onClick={() => {
@@ -198,8 +207,8 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
                 setFromDate('');
                 setToDate('');
                 fetchBatches(1);
-              }}>
-                <i className="fas fa-redo me-1"></i>
+              }} className="btn-compact">
+                <span className="me-1">🔄</span>
                 Đặt lại
               </Button>
             </div>
@@ -215,20 +224,20 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
           </div>
         ) : (
           <>
-            <Table responsive striped hover>
+            <Table responsive striped hover className="fs-6">
               <thead>
                 <tr>
-                  <th>Mã lô hàng</th>
-                  <th>Ngày nhập</th>
-                  <th>Danh mục</th>
-                  <th>SL nhập</th>
-                  <th>SL bán</th>
-                  <th>SL tồn</th>
-                  <th>Giá trị nhập</th>
-                  <th>Giá trị bán</th>
-                  <th>Lãi/Lỗ</th>
-                  <th>Trạng thái</th>
-                  <th style={{ minWidth: '180px' }}>Thao tác</th>
+                  <th className="fs-6 fw-bold">Mã lô hàng</th>
+                  <th className="fs-6 fw-bold">Ngày nhập</th>
+                  <th className="fs-6 fw-bold">Danh mục</th>
+                  <th className="fs-6 fw-bold">SL nhập</th>
+                  <th className="fs-6 fw-bold">SL bán</th>
+                  <th className="fs-6 fw-bold">SL tồn</th>
+                  <th className="fs-6 fw-bold">Giá trị nhập</th>
+                  <th className="fs-6 fw-bold">Giá trị bán</th>
+                  <th className="fs-6 fw-bold">Lãi/Lỗ</th>
+                  <th className="fs-6 fw-bold">Trạng thái</th>
+                  <th className="fs-6 fw-bold" style={{ minWidth: '160px' }}>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -274,28 +283,24 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
                       </td>
                       <td>{getStatusBadge(batch.Status)}</td>
                       <td>
-                        <div className="action-buttons d-flex gap-1" style={{ minWidth: '180px' }}>
+                        <div className="d-flex btn-group-compact" style={{ minWidth: '160px' }}>
                           {onViewDetails && (
                             <Button
                               variant="primary"
-                              size="sm"
                               onClick={() => onViewDetails(batch)}
-                              className="flex-fill d-flex align-items-center justify-content-center"
-                              style={{ fontSize: '0.8rem', padding: '0.375rem 0.5rem' }}
+                              className="btn-compact flex-fill"
                             >
-                              <i className="fas fa-eye me-1"></i>
-                              <span>Chi tiết</span>
+                              <span className="me-1">👁️</span>
+                              Chi tiết
                             </Button>
                           )}
                           <Button
                             variant="outline-info"
-                            size="sm"
                             title="Chỉnh sửa lô hàng"
-                            className="flex-fill d-flex align-items-center justify-content-center"
-                            style={{ fontSize: '0.8rem', padding: '0.375rem 0.5rem' }}
+                            className="btn-compact flex-fill"
                           >
-                            <i className="fas fa-edit me-1"></i>
-                            <span>Sửa</span>
+                            <span className="me-1">✏️</span>
+                            Sửa
                           </Button>
                         </div>
                       </td>
