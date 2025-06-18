@@ -1,0 +1,285 @@
+/* Invoice Print Styles */
+
+/* General print styles */
+@media print {
+  /* Hide everything except the invoice */
+  body * {
+    visibility: hidden;
+  }
+  
+  #invoice-content,
+  #invoice-content * {
+    visibility: visible;
+  }
+  
+  /* Position the invoice content */
+  #invoice-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+    margin: 0;
+    background: white;
+  }
+  
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+  
+  /* Typography for print */
+  body {
+    font-family: 'Times New Roman', serif;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #000;
+  }
+  
+  /* Headers */
+  h1, h2, h3, h4, h5, h6 {
+    color: #000 !important;
+    margin-bottom: 10px;
+  }
+  
+  h2 {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  h4 {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  h6 {
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  /* Remove Bootstrap colors for print */
+  .text-primary,
+  .text-success,
+  .text-danger,
+  .text-warning,
+  .text-info,
+  .text-muted {
+    color: #000 !important;
+  }
+  
+  /* Borders and backgrounds */
+  .border {
+    border: 1px solid #000 !important;
+  }
+  
+  .border-bottom {
+    border-bottom: 1px solid #000 !important;
+  }
+  
+  .border-top {
+    border-top: 1px solid #000 !important;
+  }
+  
+  .bg-light {
+    background-color: #f8f9fa !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  
+  /* Table styles */
+  .table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  .table th,
+  .table td {
+    border: 1px solid #000 !important;
+    padding: 8px;
+    font-size: 11px;
+  }
+  
+  .table thead th {
+    background-color: #f8f9fa !important;
+    font-weight: bold;
+    text-align: center;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  
+  /* Font styles */
+  .font-monospace {
+    font-family: 'Courier New', monospace;
+  }
+  
+  .fw-bold,
+  .font-weight-bold,
+  strong {
+    font-weight: bold;
+  }
+  
+  /* Text alignment */
+  .text-center {
+    text-align: center;
+  }
+  
+  .text-end {
+    text-align: right;
+  }
+  
+  /* Spacing */
+  .mb-0 { margin-bottom: 0 !important; }
+  .mb-1 { margin-bottom: 5px !important; }
+  .mb-2 { margin-bottom: 10px !important; }
+  .mb-3 { margin-bottom: 15px !important; }
+  .mb-4 { margin-bottom: 20px !important; }
+  
+  .mt-3 { margin-top: 15px !important; }
+  .mt-4 { margin-top: 20px !important; }
+  
+  .p-2 { padding: 10px !important; }
+  .p-3 { padding: 15px !important; }
+  .p-4 { padding: 20px !important; }
+  
+  .pb-3 { padding-bottom: 15px !important; }
+  .pt-3 { padding-top: 15px !important; }
+  
+  /* Layout */
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -7.5px;
+  }
+  
+  .col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding: 0 7.5px;
+  }
+  
+  .col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+    padding: 0 7.5px;
+  }
+  
+  .col-md-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 0 7.5px;
+  }
+  
+  /* Flexbox utilities */
+  .d-flex {
+    display: flex;
+  }
+  
+  .justify-content-between {
+    justify-content: space-between;
+  }
+  
+  .h-100 {
+    height: auto;
+  }
+  
+  /* Font sizes */
+  .fs-5 {
+    font-size: 16px;
+  }
+  
+  .h5 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .small {
+    font-size: 10px;
+  }
+  
+  /* Icons - replace with text */
+  .fas::before,
+  .fa::before {
+    content: '';
+  }
+  
+  .fas.fa-store::before { content: '🏪 '; }
+  .fas.fa-file-invoice::before { content: '📄 '; }
+  .fas.fa-user::before { content: '👤 '; }
+  .fas.fa-mobile-alt::before { content: '📱 '; }
+  .fas.fa-chart-line::before { content: '📈 '; }
+  .fas.fa-calculator::before { content: '🧮 '; }
+  .fas.fa-map-marker-alt::before { content: '📍 '; }
+  .fas.fa-phone::before { content: '📞 '; }
+  .fas.fa-envelope::before { content: '✉️ '; }
+  
+  /* Hide elements that shouldn't print */
+  .d-print-none,
+  .modal-header,
+  .modal-footer,
+  button,
+  .btn {
+    display: none !important;
+  }
+  
+  /* Ensure proper page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+  
+  .no-break {
+    page-break-inside: avoid;
+  }
+  
+  /* Company header styling */
+  .invoice-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #000;
+  }
+  
+  .invoice-header h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .invoice-header h4 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    text-decoration: underline;
+  }
+  
+  /* Invoice summary box */
+  .invoice-summary {
+    background-color: #f0f0f0 !important;
+    border: 2px solid #000 !important;
+    padding: 15px !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  
+  .invoice-summary .total-amount {
+    font-size: 18px !important;
+    font-weight: bold !important;
+    text-decoration: underline;
+  }
+}
+
+/* Screen styles for preview */
+@media screen {
+  .invoice-preview {
+    max-width: 210mm;
+    margin: 0 auto;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  .invoice-preview #invoice-content {
+    padding: 20mm;
+  }
+}

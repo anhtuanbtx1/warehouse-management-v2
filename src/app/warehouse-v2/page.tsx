@@ -242,11 +242,9 @@ const WarehouseV2Dashboard: React.FC = () => {
         <div>
           <h2 className="mb-1">
             <i className="fas fa-tachometer-alt text-primary me-2"></i>
-            Dashboard Quản lý Kho V2
+            Trang chủ
           </h2>
-          <p className="text-muted mb-0">
-            Tổng quan hệ thống quản lý điện thoại theo IMEI
-          </p>
+       
         </div>
         <div>
           <Button variant="outline-primary" onClick={fetchDashboardData}>

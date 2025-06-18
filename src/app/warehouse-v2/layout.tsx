@@ -23,98 +23,97 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
       {/* Navigation */}
       <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm">
         <Container fluid>
-          <Navbar.Brand as={Link} href="/warehouse-v2">
-            <i className="fas fa-mobile-alt me-2"></i>
-            Warehouse V2
-            <small className="ms-2 text-muted">Phone Management</small>
+          <Navbar.Brand as={Link} href="/warehouse-v2" className="fw-bold">
+            <span className="me-2">📱</span>
+            <span className="fs-5">Hệ thống Quản lý Kho TT</span>
           </Navbar.Brand>
           
           <Navbar.Toggle aria-controls="warehouse-navbar" />
           
           <Navbar.Collapse id="warehouse-navbar">
             <Nav className="me-auto">
-              <Nav.Link 
-                as={Link} 
-                href="/warehouse-v2" 
-                className={isActive('/warehouse-v2')}
+              <Nav.Link
+                as={Link}
+                href="/warehouse-v2"
+                className={`${isActive('/warehouse-v2')} px-3 py-2 fw-medium`}
               >
-                <i className="fas fa-tachometer-alt me-1"></i>
-                Dashboard
+                <span className="me-2">📊</span>
+                <span>Dashboard</span>
               </Nav.Link>
-              
-              <Nav.Link 
-                as={Link} 
-                href="/warehouse-v2/import" 
-                className={isActive('/warehouse-v2/import')}
+
+              <Nav.Link
+                as={Link}
+                href="/warehouse-v2/import"
+                className={`${isActive('/warehouse-v2/import')} px-3 py-2 fw-medium`}
               >
-                <i className="fas fa-arrow-down me-1"></i>
-                Nhập hàng
+                <span className="me-2">📦</span>
+                <span>Nhập hàng</span>
               </Nav.Link>
-              
-              <Nav.Link 
-                as={Link} 
-                href="/warehouse-v2/sales" 
-                className={isActive('/warehouse-v2/sales')}
+
+              <Nav.Link
+                as={Link}
+                href="/warehouse-v2/sales"
+                className={`${isActive('/warehouse-v2/sales')} px-3 py-2 fw-medium`}
               >
-                <i className="fas fa-shopping-cart me-1"></i>
-                Bán hàng
+                <span className="me-2">🛒</span>
+                <span>Bán hàng</span>
               </Nav.Link>
-              
-              <Nav.Link 
-                as={Link} 
-                href="/warehouse-v2/inventory" 
-                className={isActive('/warehouse-v2/inventory')}
+
+              <Nav.Link
+                as={Link}
+                href="/warehouse-v2/inventory"
+                className={`${isActive('/warehouse-v2/inventory')} px-3 py-2 fw-medium`}
               >
-                <i className="fas fa-warehouse me-1"></i>
-                Tồn kho
+                <span className="me-2">🏪</span>
+                <span>Tồn kho</span>
               </Nav.Link>
             </Nav>
             
             <Nav>
               <Dropdown align="end">
-                <Dropdown.Toggle variant="outline-light" size="sm">
-                  <i className="fas fa-cog me-1"></i>
-                  Cài đặt
+                <Dropdown.Toggle variant="primary" className="px-3 py-2" bsPrefix="btn" data-bs-toggle="dropdown">
+                  <span className="me-2">⚙️</span>
+                  <span className="fw-medium">Cài đặt</span>
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item href="#categories">
-                    <i className="fas fa-tags me-2"></i>
-                    Danh mục sản phẩm
+                  <Dropdown.Item href="#categories" className="py-2">
+                    <span className="me-3">🏷️</span>
+                    <span className="fw-medium">Danh mục sản phẩm</span>
                   </Dropdown.Item>
-                  <Dropdown.Item href="#users">
-                    <i className="fas fa-users me-2"></i>
-                    Quản lý người dùng
+                  <Dropdown.Item href="#users" className="py-2">
+                    <span className="me-3">👥</span>
+                    <span className="fw-medium">Quản lý người dùng</span>
                   </Dropdown.Item>
                   <Dropdown.Divider />
-                  <Dropdown.Item href="#backup">
-                    <i className="fas fa-download me-2"></i>
-                    Sao lưu dữ liệu
+                  <Dropdown.Item href="#backup" className="py-2">
+                    <span className="me-3">💾</span>
+                    <span className="fw-medium">Sao lưu dữ liệu</span>
                   </Dropdown.Item>
-                  <Dropdown.Item href="#reports">
-                    <i className="fas fa-file-export me-2"></i>
-                    Xuất báo cáo
+                  <Dropdown.Item href="#reports" className="py-2">
+                    <span className="me-3">📊</span>
+                    <span className="fw-medium">Xuất báo cáo</span>
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
               
-              <Dropdown align="end" className="ms-2">
-                <Dropdown.Toggle variant="outline-light" size="sm">
-                  <i className="fas fa-user me-1"></i>
-                  Admin
+              <Dropdown align="end" className="ms-3">
+                <Dropdown.Toggle variant="success" className="px-3 py-2" bsPrefix="btn" data-bs-toggle="dropdown">
+                  <span className="me-2">👤</span>
+                  <span className="fw-medium">Quản trị viên</span>
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item href="#profile">
-                    <i className="fas fa-user-edit me-2"></i>
-                    Thông tin cá nhân
+                  <Dropdown.Item href="#profile" className="py-2">
+                    <span className="me-3">✏️</span>
+                    <span className="fw-medium">Thông tin cá nhân</span>
                   </Dropdown.Item>
-                  <Dropdown.Item href="#change-password">
-                    <i className="fas fa-key me-2"></i>
-                    Đổi mật khẩu
+                  <Dropdown.Item href="#change-password" className="py-2">
+                    <span className="me-3">🔑</span>
+                    <span className="fw-medium">Đổi mật khẩu</span>
                   </Dropdown.Item>
                   <Dropdown.Divider />
-                  <Dropdown.Item href="#logout" className="text-danger">
-                    <i className="fas fa-sign-out-alt me-2"></i>
-                    Đăng xuất
+                  <Dropdown.Item href="#logout" className="text-danger py-2">
+                    <span className="me-3">🚪</span>
+                    <span className="fw-medium">Đăng xuất</span>
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
@@ -158,14 +157,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
         </Container>
       </footer>
 
-      {/* FontAwesome CDN */}
-      <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-        crossOrigin="anonymous"
-        referrerPolicy="no-referrer"
-      />
+
 
       {/* Custom Styles */}
       <style jsx global>{`
@@ -317,16 +309,280 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
           font-variant: normal !important;
           text-rendering: auto !important;
           line-height: 1 !important;
+          -webkit-font-smoothing: antialiased !important;
+          -moz-osx-font-smoothing: grayscale !important;
+        }
+
+        /* Specific FontAwesome classes */
+        .fa-cog:before { content: "\f013"; }
+        .fa-user:before { content: "\f007"; }
+        .fa-mobile-alt:before { content: "\f3cd"; }
+        .fa-tachometer-alt:before { content: "\f3fd"; }
+        .fa-arrow-down:before { content: "\f063"; }
+        .fa-shopping-cart:before { content: "\f07a"; }
+        .fa-warehouse:before { content: "\f494"; }
+        .fa-tags:before { content: "\f02c"; }
+        .fa-users:before { content: "\f0c0"; }
+        .fa-download:before { content: "\f019"; }
+        .fa-file-export:before { content: "\f56e"; }
+        .fa-user-edit:before { content: "\f4ff"; }
+        .fa-key:before { content: "\f084"; }
+        .fa-sign-out-alt:before { content: "\f2f5"; }
+        .fa-code:before { content: "\f121"; }
+        .fa-database:before { content: "\f1c0"; }
+        .fa-react:before { content: "\f41b"; }
+
+        /* Navigation Links Styling */
+        .navbar-nav .nav-link {
+          font-size: 1rem !important;
+          font-weight: 500 !important;
+          transition: all 0.3s ease !important;
+          margin: 0 0.25rem !important;
         }
 
         .navbar-nav .nav-link.active {
-          background-color: rgba(255, 255, 255, 0.1);
-          border-radius: 0.375rem;
+          background-color: rgba(255, 255, 255, 0.15) !important;
+          border-radius: 0.5rem !important;
+          color: #fff !important;
         }
 
         .navbar-nav .nav-link:hover {
-          background-color: rgba(255, 255, 255, 0.05);
-          border-radius: 0.375rem;
+          background-color: rgba(255, 255, 255, 0.1) !important;
+          border-radius: 0.5rem !important;
+          transform: translateY(-1px);
+        }
+
+        .navbar-nav .nav-link span {
+          font-size: 1rem !important;
+        }
+
+        .navbar-brand {
+          font-size: 1.25rem !important;
+          font-weight: 700 !important;
+        }
+
+        /* Header Dropdown Buttons Styling */
+        .navbar .dropdown-toggle {
+          font-size: 1rem !important;
+          font-weight: 500 !important;
+          transition: all 0.3s ease !important;
+          border-radius: 0.5rem !important;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .navbar .dropdown-toggle:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .navbar .dropdown-toggle:focus {
+          box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+        }
+
+        /* Primary button (Cài đặt) */
+        .navbar .btn-primary {
+          background-color: #0d6efd !important;
+          border-color: #0d6efd !important;
+          color: white !important;
+        }
+
+        .navbar .btn-primary:hover {
+          background-color: #0b5ed7 !important;
+          border-color: #0a58ca !important;
+        }
+
+        /* Success button (Quản trị viên) */
+        .navbar .btn-success {
+          background-color: #198754 !important;
+          border-color: #198754 !important;
+          color: white !important;
+        }
+
+        .navbar .btn-success:hover {
+          background-color: #157347 !important;
+          border-color: #146c43 !important;
+        }
+
+        .navbar .dropdown-toggle span {
+          font-size: 1rem !important;
+        }
+
+        .navbar .dropdown-toggle .fw-medium {
+          font-weight: 600 !important;
+        }
+
+        /* Dropdown Menu Styling */
+        .navbar .dropdown-menu {
+          border: none !important;
+          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+          border-radius: 0.5rem !important;
+          padding: 0.5rem !important;
+          min-width: 200px !important;
+        }
+
+        .navbar .dropdown-item {
+          font-size: 0.95rem !important;
+          padding: 0.5rem 1rem !important;
+          border-radius: 0.375rem !important;
+          transition: all 0.2s ease !important;
+        }
+
+        .navbar .dropdown-item:hover {
+          background-color: #f8f9fa !important;
+          transform: translateX(2px);
+        }
+
+        .navbar .dropdown-item .fw-medium {
+          font-weight: 500 !important;
+        }
+
+        .navbar .dropdown-item span:first-child {
+          font-size: 1.1rem !important;
+        }
+
+        /* Hide dropdown caret/arrow */
+        .navbar .dropdown-toggle::after {
+          display: none !important;
+        }
+
+        .navbar .dropdown-toggle::before {
+          display: none !important;
+        }
+
+        /* Sell Product Modal Styling */
+        .sell-product-modal .modal-dialog {
+          max-width: 900px !important;
+        }
+
+        .sell-product-modal .modal-header {
+          padding: 1.5rem 2rem !important;
+          background: linear-gradient(135deg, #28a745, #20c997) !important;
+          color: white !important;
+          border-bottom: none !important;
+        }
+
+        .sell-product-modal .modal-header .btn-close {
+          filter: invert(1) !important;
+        }
+
+        .sell-product-modal .modal-body {
+          padding: 2rem !important;
+          font-size: 1.1rem !important;
+        }
+
+        .sell-product-modal .modal-footer {
+          padding: 1.5rem 2rem !important;
+          background-color: #f8f9fa !important;
+          border-top: 1px solid #dee2e6 !important;
+        }
+
+        .sell-product-modal .card {
+          border: none !important;
+          box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1) !important;
+          border-radius: 0.75rem !important;
+        }
+
+        .sell-product-modal .card-header {
+          background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+          border-bottom: 1px solid #dee2e6 !important;
+          border-radius: 0.75rem 0.75rem 0 0 !important;
+        }
+
+        .sell-product-modal .form-control,
+        .sell-product-modal .form-select {
+          border-radius: 0.5rem !important;
+          border: 2px solid #e9ecef !important;
+          transition: all 0.3s ease !important;
+        }
+
+        .sell-product-modal .form-control:focus,
+        .sell-product-modal .form-select:focus {
+          border-color: #28a745 !important;
+          box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25) !important;
+        }
+
+        .sell-product-modal .btn {
+          border-radius: 0.5rem !important;
+          font-weight: 600 !important;
+          transition: all 0.3s ease !important;
+        }
+
+        .sell-product-modal .btn:hover {
+          transform: translateY(-1px) !important;
+          box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Reset Button Styling for Sales Page */
+        .warehouse-v2 .btn-outline-primary {
+          border-width: 2px !important;
+          font-weight: 600 !important;
+          transition: all 0.3s ease !important;
+        }
+
+        .warehouse-v2 .btn-outline-primary:hover {
+          background-color: #0d6efd !important;
+          border-color: #0d6efd !important;
+          color: white !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 0.25rem 0.5rem rgba(13, 110, 253, 0.25) !important;
+        }
+
+        .warehouse-v2 .btn-outline-primary:focus {
+          box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+        }
+
+        /* Action buttons with emoji styling */
+        .warehouse-v2 .btn-group-sm .btn {
+          min-width: 40px !important;
+          height: 32px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          border-radius: 0.375rem !important;
+          transition: all 0.2s ease !important;
+        }
+
+        .warehouse-v2 .btn-group-sm .btn:hover {
+          transform: scale(1.05) !important;
+        }
+
+        .warehouse-v2 .btn-group-sm .btn span {
+          font-size: 14px !important;
+        }
+
+        /* Breadcrumb Styling Fix */
+        .warehouse-v2 .breadcrumb {
+          background-color: transparent !important;
+          padding: 0.75rem 0 !important;
+          margin-bottom: 1rem !important;
+          font-size: 1rem !important;
+        }
+
+        .warehouse-v2 .breadcrumb-item {
+          color: #6c757d !important;
+          font-weight: 500 !important;
+        }
+
+        .warehouse-v2 .breadcrumb-item a {
+          color: #0d6efd !important;
+          text-decoration: none !important;
+          transition: color 0.3s ease !important;
+        }
+
+        .warehouse-v2 .breadcrumb-item a:hover {
+          color: #0b5ed7 !important;
+          text-decoration: underline !important;
+        }
+
+        .warehouse-v2 .breadcrumb-item.active {
+          color: #495057 !important;
+          font-weight: 600 !important;
+        }
+
+        .warehouse-v2 .breadcrumb-item + .breadcrumb-item::before {
+          content: "/" !important;
+          color: #6c757d !important;
+          font-weight: normal !important;
         }
         
         .min-vh-100 {

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Breadcrumb, Tabs, Tab, Card, Table, Badge } from 'react-bootstrap';
 import ProductListV2 from '@/components/warehouse-v2/ProductListV2';
 import SellProductForm from '@/components/warehouse-v2/SellProductForm';
+import InvoicePrint from '@/components/warehouse-v2/InvoicePrint';
 
 interface ProductV2 {
   ProductID: number;
@@ -46,6 +47,10 @@ const SalesPage: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState('available');
   const [recentSales, setRecentSales] = useState<SalesInvoice[]>([]);
+
+  // Invoice states
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<any>(null);
 
   const handleSellProduct = (product: ProductV2) => {
     setSelectedProduct(product);
@@ -108,6 +113,39 @@ const SalesPage: React.FC = () => {
     }
   };
 
+  const handlePrintInvoice = (sale: SalesInvoice) => {
+    // Use available data from the sales list to create invoice
+    // Estimate import price based on typical profit margins (20-30%)
+    const estimatedImportPrice = Math.round((sale.ProductSalePrice || sale.FinalAmount) * 0.75);
+
+    const invoice = {
+      invoiceNumber: sale.InvoiceNumber,
+      saleDate: sale.SaleDate,
+      product: {
+        ProductID: 0,
+        ProductName: sale.ProductName || 'Sản phẩm',
+        IMEI: sale.IMEI || '',
+        ImportPrice: estimatedImportPrice,
+        SalePrice: sale.ProductSalePrice || sale.FinalAmount,
+        CategoryName: sale.ProductName?.includes('iPhone 16') ? 'iPhone 16' :
+                     sale.ProductName?.includes('iPhone 15') ? 'iPhone 15' :
+                     sale.ProductName?.includes('iPhone 14') ? 'iPhone 14' : 'iPhone',
+        BatchCode: `LOT${sale.InvoiceNumber.replace('HD', '')}`
+      },
+      customerInfo: sale.CustomerName ? {
+        name: sale.CustomerName,
+        phone: sale.CustomerPhone,
+        address: ''
+      } : undefined,
+      profit: (sale.ProductSalePrice || sale.FinalAmount) - estimatedImportPrice,
+      profitMargin: estimatedImportPrice ?
+        (((sale.ProductSalePrice || sale.FinalAmount) - estimatedImportPrice) / estimatedImportPrice) * 100 : 0
+    };
+
+    setInvoiceData(invoice);
+    setShowInvoice(true);
+  };
+
   return (
     <Container fluid className="py-4">
       <Row>
@@ -147,6 +185,10 @@ const SalesPage: React.FC = () => {
                 key={refreshKey}
                 availableOnly={true}
                 onSellProduct={handleSellProduct}
+                showAddButton={false}
+                hideCategoryFilter={true}
+                hideColumns={['salePrice', 'profit', 'saleDate']}
+                hideResetButton={true}
               />
             </Tab>
 
@@ -166,7 +208,7 @@ const SalesPage: React.FC = () => {
                 <Card.Body>
                   {recentSales.length === 0 ? (
                     <div className="text-center py-4 text-muted">
-                      <i className="fas fa-receipt fa-3x mb-3"></i>
+                      <span className="fa-3x mb-3">🧾</span>
                       <div>Chưa có giao dịch nào</div>
                     </div>
                   ) : (
@@ -179,7 +221,6 @@ const SalesPage: React.FC = () => {
                           <th>IMEI</th>
                           <th>Khách hàng</th>
                           <th>Giá bán</th>
-                          <th>Thanh toán</th>
                           <th>Trạng thái</th>
                           <th>Thao tác</th>
                         </tr>
@@ -214,25 +255,17 @@ const SalesPage: React.FC = () => {
                                 {formatCurrency(sale.ProductSalePrice || sale.FinalAmount)}
                               </span>
                             </td>
-                            <td>{getPaymentMethodBadge(sale.PaymentMethod)}</td>
                             <td>
                               <Badge bg="success">Hoàn thành</Badge>
                             </td>
                             <td>
-                              <div className="btn-group btn-group-sm">
-                                <button
-                                  className="btn btn-outline-primary btn-sm"
-                                  title="In hóa đơn"
-                                >
-                                  <i className="fas fa-print"></i>
-                                </button>
-                                <button
-                                  className="btn btn-outline-info btn-sm"
-                                  title="Xem chi tiết"
-                                >
-                                  <i className="fas fa-eye"></i>
-                                </button>
-                              </div>
+                              <button
+                                className="btn btn-outline-primary btn-sm"
+                                title="In hóa đơn"
+                                onClick={() => handlePrintInvoice(sale)}
+                              >
+                                <span>🖨️</span>
+                              </button>
                             </td>
                           </tr>
                         ))}
@@ -304,6 +337,13 @@ const SalesPage: React.FC = () => {
             onHide={handleCloseSellForm}
             onSuccess={handleSellSuccess}
             product={selectedProduct}
+          />
+
+          {/* Invoice Print Modal */}
+          <InvoicePrint
+            show={showInvoice}
+            onHide={() => setShowInvoice(false)}
+            invoiceData={invoiceData}
           />
         </Col>
       </Row>

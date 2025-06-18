@@ -29,13 +29,21 @@ interface ProductListV2Props {
   availableOnly?: boolean;
   batchId?: number;
   onProductCountChange?: () => void;
+  showAddButton?: boolean; // Điều khiển hiển thị nút thêm sản phẩm
+  hideCategoryFilter?: boolean; // Ẩn tìm kiếm theo danh mục
+  hideColumns?: string[]; // Ẩn các cột cụ thể
+  hideResetButton?: boolean; // Ẩn button đặt lại
 }
 
 const ProductListV2: React.FC<ProductListV2Props> = ({
   onSellProduct,
   availableOnly = false,
   batchId,
-  onProductCountChange
+  onProductCountChange,
+  showAddButton = true, // Mặc định hiển thị nút thêm
+  hideCategoryFilter = false, // Mặc định hiển thị filter danh mục
+  hideColumns = [], // Mặc định không ẩn cột nào
+  hideResetButton = false // Mặc định hiển thị button đặt lại
 }) => {
   const { showSuccess, showError } = useToast();
   const [products, setProducts] = useState<ProductV2[]>([]);
@@ -47,11 +55,25 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
   const [categoryFilter, setCategoryFilter] = useState('');
   const [categories, setCategories] = useState<any[]>([]);
 
-  // Add product modal states
+  // Add product modal states (chỉ khi showAddButton = true)
   const [showAddModal, setShowAddModal] = useState(false);
   const [addProductLoading, setAddProductLoading] = useState(false);
   const [addProductError, setAddProductError] = useState('');
   const [newProduct, setNewProduct] = useState({
+    ProductName: '',
+    IMEI: '',
+    ImportPrice: '',
+    Notes: ''
+  });
+
+
+
+  // Edit product modal states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editProductLoading, setEditProductLoading] = useState(false);
+  const [editProductError, setEditProductError] = useState('');
+  const [editingProduct, setEditingProduct] = useState<ProductV2 | null>(null);
+  const [editProduct, setEditProduct] = useState({
     ProductName: '',
     IMEI: '',
     ImportPrice: '',
@@ -188,6 +210,87 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
     setShowAddModal(true);
   };
 
+
+
+  const handleShowEditModal = (product: ProductV2) => {
+    setEditingProduct(product);
+    setEditProduct({
+      ProductName: product.ProductName,
+      IMEI: product.IMEI,
+      ImportPrice: product.ImportPrice.toString(),
+      Notes: product.Notes || ''
+    });
+    setEditProductError('');
+    setShowEditModal(true);
+  };
+
+  const handleEditProduct = async () => {
+    if (!editingProduct) return;
+
+    try {
+      setEditProductLoading(true);
+      setEditProductError('');
+
+      // Validation
+      if (!editProduct.ProductName || !editProduct.IMEI || !editProduct.ImportPrice) {
+        setEditProductError('Vui lòng điền đầy đủ thông tin bắt buộc');
+        return;
+      }
+
+      if (isNaN(parseFloat(editProduct.ImportPrice)) || parseFloat(editProduct.ImportPrice) <= 0) {
+        setEditProductError('Giá nhập phải là số dương');
+        return;
+      }
+
+      const response = await fetch(`/api/products-v2/${editingProduct.ProductID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ProductName: editProduct.ProductName,
+          IMEI: editProduct.IMEI,
+          ImportPrice: parseFloat(editProduct.ImportPrice),
+          Notes: editProduct.Notes
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Reset form
+        setEditingProduct(null);
+        setEditProduct({
+          ProductName: '',
+          IMEI: '',
+          ImportPrice: '',
+          Notes: ''
+        });
+        setShowEditModal(false);
+
+        // Refresh product list
+        fetchProducts(currentPage);
+
+        // Show success toast
+        showSuccess(
+          'Cập nhật sản phẩm thành công!',
+          `Đã cập nhật "${editProduct.ProductName}"`
+        );
+      } else {
+        const errorMsg = result.error || 'Có lỗi xảy ra khi cập nhật sản phẩm';
+        setEditProductError(errorMsg);
+        showError('Lỗi cập nhật sản phẩm', errorMsg);
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+      const errorMsg = 'Lỗi kết nối. Vui lòng thử lại.';
+      setEditProductError(errorMsg);
+      showError('Lỗi kết nối', errorMsg);
+    } finally {
+      setEditProductLoading(false);
+    }
+  };
+
   const handlePageChange = (page: number) => {
     fetchProducts(page);
   };
@@ -197,6 +300,18 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
       style: 'currency',
       currency: 'VND'
     }).format(amount);
+  };
+
+  // Format number with thousand separators (100000 -> 100.000)
+  const formatNumber = (value: string | number) => {
+    if (!value) return '';
+    const numStr = value.toString().replace(/\D/g, ''); // Remove non-digits
+    return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  // Parse formatted number back to plain number (100.000 -> 100000)
+  const parseFormattedNumber = (value: string) => {
+    return value.replace(/\./g, '');
   };
 
   const formatDate = (dateString?: string) => {
@@ -244,19 +359,24 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
       <Card.Body>
         {/* Search and Filter */}
         <div className="row mb-3">
-          <div className="col-md-4">
+          <div className={
+            hideCategoryFilter && hideResetButton ? "col-md-6" :
+            hideCategoryFilter ? "col-md-6" :
+            hideResetButton ? "col-md-7" : "col-md-4"
+          }>
             <InputGroup>
               <Form.Control
                 type="text"
                 placeholder="Tìm kiếm theo tên hoặc IMEI..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
               <Button
                 variant="primary"
                 onClick={handleSearch}
                 title="Tìm kiếm"
+                className="px-3"
                 style={{
                   backgroundColor: '#0d6efd',
                   borderColor: '#0d6efd',
@@ -264,7 +384,6 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  minWidth: '50px',
                   fontWeight: 'bold',
                   fontSize: '16px'
                 }}
@@ -273,12 +392,17 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
               </Button>
             </InputGroup>
           </div>
-          
+
           {!availableOnly && (
-            <div className="col-md-3">
+            <div className={
+              hideCategoryFilter && hideResetButton ? "col-md-6" :
+              hideCategoryFilter ? "col-md-4" :
+              hideResetButton ? "col-md-5" : "col-md-3"
+            }>
               <Form.Select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
+                className="fs-6"
               >
                 <option value="">Tất cả trạng thái</option>
                 <option value="IN_STOCK">Còn hàng</option>
@@ -288,25 +412,28 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
               </Form.Select>
             </div>
           )}
-          
-          <div className="col-md-3">
-            <Form.Select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-            >
-              <option value="">Tất cả danh mục</option>
-              {categories.map(category => (
-                <option key={category.CategoryID} value={category.CategoryID}>
-                  {category.CategoryName}
-                </option>
-              ))}
-            </Form.Select>
-          </div>
-          
-          <div className="col-md-2">
-            <div className="d-flex gap-2">
+
+          {!hideCategoryFilter && (
+            <div className="col-md-3">
+              <Form.Select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="fs-6"
+              >
+                <option value="">Tất cả danh mục</option>
+                {categories.map(category => (
+                  <option key={category.CategoryID} value={category.CategoryID}>
+                    {category.CategoryName}
+                  </option>
+                ))}
+              </Form.Select>
+            </div>
+          )}
+
+          {!hideResetButton && (
+            <div className="col-md-2">
               <Button
-                variant="outline-secondary"
+                variant="outline-primary"
                 onClick={() => {
                   setSearchTerm('');
                   setStatusFilter('');
@@ -314,24 +441,43 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                   fetchProducts(1);
                 }}
                 title="Đặt lại bộ lọc"
-                className="d-flex align-items-center"
-                style={{ flex: '1' }}
+                className="w-100 d-flex align-items-center justify-content-center fw-medium"
+                style={{
+                  borderColor: '#0d6efd',
+                  color: '#0d6efd',
+                  transition: 'all 0.3s ease'
+                }}
               >
                 <span className="me-2">🔄</span>
                 Đặt lại
               </Button>
+              {showAddButton && (
+                <Button
+                  variant="success"
+                  onClick={handleShowAddModal}
+                  title="Thêm sản phẩm mới"
+                  className="mt-2 w-100 d-flex align-items-center justify-content-center fw-medium"
+                >
+                  <span className="me-1">➕</span>
+                  Thêm SP
+                </Button>
+              )}
+            </div>
+          )}
+
+          {hideResetButton && showAddButton && (
+            <div className="col-md-2">
               <Button
                 variant="success"
                 onClick={handleShowAddModal}
                 title="Thêm sản phẩm mới"
-                className="d-flex align-items-center"
-                style={{ whiteSpace: 'nowrap' }}
+                className="w-100 d-flex align-items-center justify-content-center fw-medium"
               >
                 <span className="me-1">➕</span>
                 Thêm SP
               </Button>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Products Table */}
@@ -351,17 +497,17 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                   <th>Danh mục</th>
                   <th>Lô hàng</th>
                   <th>Giá nhập</th>
-                  <th>Giá bán</th>
-                  <th>Lãi/Lỗ</th>
+                  {!hideColumns.includes('salePrice') && <th>Giá bán</th>}
+                  {!hideColumns.includes('profit') && <th>Lãi/Lỗ</th>}
                   <th>Trạng thái</th>
-                  <th>Ngày bán</th>
+                  {!hideColumns.includes('saleDate') && <th>Ngày bán</th>}
                   <th>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
                 {products.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center py-4">
+                    <td colSpan={hideColumns.length === 3 ? 7 : 10} className="text-center py-4">
                       {availableOnly ? 'Không có sản phẩm nào có thể bán' : 'Không có dữ liệu'}
                     </td>
                   </tr>
@@ -393,37 +539,54 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                         </small>
                       </td>
                       <td>{formatCurrency(product.ImportPrice)}</td>
-                      <td>
-                        {product.SalePrice > 0 ? (
-                          <span className="text-success">
-                            {formatCurrency(product.SalePrice)}
+                      {!hideColumns.includes('salePrice') && (
+                        <td>
+                          {product.SalePrice > 0 ? (
+                            <span className="text-success">
+                              {formatCurrency(product.SalePrice)}
+                            </span>
+                          ) : (
+                            <span className="text-muted">Chưa bán</span>
+                          )}
+                        </td>
+                      )}
+                      {!hideColumns.includes('profit') && (
+                        <td>
+                          <span className={getProfitColor(getProfit(product))}>
+                            {getProfit(product) !== 0 ? formatCurrency(getProfit(product)) : '-'}
                           </span>
-                        ) : (
-                          <span className="text-muted">Chưa bán</span>
-                        )}
-                      </td>
-                      <td>
-                        <span className={getProfitColor(getProfit(product))}>
-                          {getProfit(product) !== 0 ? formatCurrency(getProfit(product)) : '-'}
-                        </span>
-                      </td>
+                        </td>
+                      )}
                       <td>{getStatusBadge(product.Status)}</td>
-                      <td>
-                        {product.SoldDate ? (
-                          <div>
-                            <small>{formatDate(product.SoldDate)}</small>
-                            {product.InvoiceNumber && (
-                              <div className="text-muted">
-                                <small>HĐ: {product.InvoiceNumber}</small>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-muted">-</span>
-                        )}
-                      </td>
+                      {!hideColumns.includes('saleDate') && (
+                        <td>
+                          {product.SoldDate ? (
+                            <div>
+                              <small>{formatDate(product.SoldDate)}</small>
+                              {product.InvoiceNumber && (
+                                <div className="text-muted">
+                                  <small>HĐ: {product.InvoiceNumber}</small>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted">-</span>
+                          )}
+                        </td>
+                      )}
                       <td>
                         <div className="btn-group btn-group-sm">
+                          {product.Status === 'IN_STOCK' && (
+                            <Button
+                              variant="outline-warning"
+                              size="sm"
+                              onClick={() => handleShowEditModal(product)}
+                              title="Chỉnh sửa sản phẩm"
+                              className="me-1"
+                            >
+                              <span>✏️</span>
+                            </Button>
+                          )}
                           {product.Status === 'IN_STOCK' && onSellProduct && (
                             <Button
                               variant="outline-success"
@@ -431,7 +594,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                               onClick={() => onSellProduct(product)}
                               title="Bán sản phẩm"
                             >
-                              <i className="fas fa-shopping-cart"></i>
+                              <span>🛒</span>
                             </Button>
                           )}
                           {product.InvoiceNumber && (
@@ -440,7 +603,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                               size="sm"
                               title="Xem hóa đơn"
                             >
-                              <i className="fas fa-receipt"></i>
+                              <span>🧾</span>
                             </Button>
                           )}
                         </div>
@@ -479,19 +642,144 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
         )}
       </Card.Body>
 
-      {/* Add Product Modal */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} size="lg">
+      {/* Add Product Modal - chỉ hiển thị khi showAddButton = true */}
+      {showAddButton && (
+        <Modal show={showAddModal} onHide={() => setShowAddModal(false)} size="lg">
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <span className="me-2">➕</span>
+              Thêm sản phẩm vào lô
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {addProductError && (
+              <Alert variant="danger">
+                <i className="fas fa-exclamation-triangle me-2"></i>
+                {addProductError}
+              </Alert>
+            )}
+
+            <Form>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Tên sản phẩm *</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newProduct.ProductName}
+                      onChange={(e) => setNewProduct({...newProduct, ProductName: e.target.value})}
+                      placeholder="Nhập tên sản phẩm"
+                      disabled={addProductLoading}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>IMEI *</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newProduct.IMEI}
+                      onChange={(e) => setNewProduct({...newProduct, IMEI: e.target.value})}
+                      placeholder="Nhập mã IMEI"
+                      disabled={addProductLoading}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Giá nhập *</Form.Label>
+                    <InputGroup>
+                      <Form.Control
+                        type="text"
+                        value={formatNumber(newProduct.ImportPrice)}
+                        onChange={(e) => {
+                          const rawValue = parseFormattedNumber(e.target.value);
+                          setNewProduct({...newProduct, ImportPrice: rawValue});
+                        }}
+                        placeholder="Nhập giá nhập (VD: 100.000)"
+                        disabled={addProductLoading}
+                      />
+                      <InputGroup.Text>VNĐ</InputGroup.Text>
+                    </InputGroup>
+                    <Form.Text className="text-muted">
+                      Nhập số tiền, hệ thống sẽ tự động thêm dấu phân cách
+                    </Form.Text>
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Ghi chú</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newProduct.Notes}
+                      onChange={(e) => setNewProduct({...newProduct, Notes: e.target.value})}
+                      placeholder="Ghi chú (tùy chọn)"
+                      disabled={addProductLoading}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Form>
+
+            <div className="bg-light p-3 rounded mt-3">
+              <h6 className="mb-2">
+                <i className="fas fa-info-circle me-2"></i>
+                Thông tin lô hàng:
+              </h6>
+              <div className="row">
+                <div className="col-md-6">
+                  <small className="text-muted">Batch ID: <strong>{batchId}</strong></small>
+                </div>
+                <div className="col-md-6">
+                  <small className="text-muted">Sản phẩm sẽ được thêm vào lô này</small>
+                </div>
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowAddModal(false)}
+              disabled={addProductLoading}
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="success"
+              onClick={handleAddProduct}
+              disabled={addProductLoading || !newProduct.ProductName || !newProduct.IMEI || !newProduct.ImportPrice}
+            >
+              {addProductLoading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Đang thêm...
+                </>
+              ) : (
+                <>
+                  <span className="me-2">➕</span>
+                  Thêm sản phẩm
+                </>
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+
+      {/* Edit Product Modal */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>
-            <span className="me-2">➕</span>
-            Thêm sản phẩm vào lô
+            <span className="me-2">✏️</span>
+            Chỉnh sửa sản phẩm
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {addProductError && (
+          {editProductError && (
             <Alert variant="danger">
               <i className="fas fa-exclamation-triangle me-2"></i>
-              {addProductError}
+              {editProductError}
             </Alert>
           )}
 
@@ -502,10 +790,10 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                   <Form.Label>Tên sản phẩm *</Form.Label>
                   <Form.Control
                     type="text"
-                    value={newProduct.ProductName}
-                    onChange={(e) => setNewProduct({...newProduct, ProductName: e.target.value})}
+                    value={editProduct.ProductName}
+                    onChange={(e) => setEditProduct({...editProduct, ProductName: e.target.value})}
                     placeholder="Nhập tên sản phẩm"
-                    disabled={addProductLoading}
+                    disabled={editProductLoading}
                   />
                 </Form.Group>
               </Col>
@@ -514,10 +802,10 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                   <Form.Label>IMEI *</Form.Label>
                   <Form.Control
                     type="text"
-                    value={newProduct.IMEI}
-                    onChange={(e) => setNewProduct({...newProduct, IMEI: e.target.value})}
+                    value={editProduct.IMEI}
+                    onChange={(e) => setEditProduct({...editProduct, IMEI: e.target.value})}
                     placeholder="Nhập mã IMEI"
-                    disabled={addProductLoading}
+                    disabled={editProductLoading}
                   />
                 </Form.Group>
               </Col>
@@ -528,16 +816,20 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                   <Form.Label>Giá nhập *</Form.Label>
                   <InputGroup>
                     <Form.Control
-                      type="number"
-                      value={newProduct.ImportPrice}
-                      onChange={(e) => setNewProduct({...newProduct, ImportPrice: e.target.value})}
-                      placeholder="Nhập giá nhập"
-                      min="0"
-                      step="1000"
-                      disabled={addProductLoading}
+                      type="text"
+                      value={formatNumber(editProduct.ImportPrice)}
+                      onChange={(e) => {
+                        const rawValue = parseFormattedNumber(e.target.value);
+                        setEditProduct({...editProduct, ImportPrice: rawValue});
+                      }}
+                      placeholder="Nhập giá nhập (VD: 100.000)"
+                      disabled={editProductLoading}
                     />
                     <InputGroup.Text>VNĐ</InputGroup.Text>
                   </InputGroup>
+                  <Form.Text className="text-muted">
+                    Nhập số tiền, hệ thống sẽ tự động thêm dấu phân cách
+                  </Form.Text>
                 </Form.Group>
               </Col>
               <Col md={6}>
@@ -545,53 +837,61 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                   <Form.Label>Ghi chú</Form.Label>
                   <Form.Control
                     type="text"
-                    value={newProduct.Notes}
-                    onChange={(e) => setNewProduct({...newProduct, Notes: e.target.value})}
+                    value={editProduct.Notes}
+                    onChange={(e) => setEditProduct({...editProduct, Notes: e.target.value})}
                     placeholder="Ghi chú (tùy chọn)"
-                    disabled={addProductLoading}
+                    disabled={editProductLoading}
                   />
                 </Form.Group>
               </Col>
             </Row>
           </Form>
 
-          <div className="bg-light p-3 rounded mt-3">
-            <h6 className="mb-2">
-              <i className="fas fa-info-circle me-2"></i>
-              Thông tin lô hàng:
-            </h6>
-            <div className="row">
-              <div className="col-md-6">
-                <small className="text-muted">Batch ID: <strong>{batchId}</strong></small>
-              </div>
-              <div className="col-md-6">
-                <small className="text-muted">Sản phẩm sẽ được thêm vào lô này</small>
+          {editingProduct && (
+            <div className="bg-light p-3 rounded mt-3">
+              <h6 className="mb-2">
+                <i className="fas fa-info-circle me-2"></i>
+                Thông tin sản phẩm hiện tại:
+              </h6>
+              <div className="row">
+                <div className="col-md-6">
+                  <small className="text-muted">Product ID: <strong>{editingProduct.ProductID}</strong></small>
+                </div>
+                <div className="col-md-6">
+                  <small className="text-muted">Trạng thái: <strong className="text-success">IN_STOCK</strong></small>
+                </div>
+                <div className="col-md-6">
+                  <small className="text-muted">Lô hàng: <strong>{editingProduct.BatchCode}</strong></small>
+                </div>
+                <div className="col-md-6">
+                  <small className="text-muted">Danh mục: <strong>{editingProduct.CategoryName}</strong></small>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </Modal.Body>
         <Modal.Footer>
           <Button
             variant="secondary"
-            onClick={() => setShowAddModal(false)}
-            disabled={addProductLoading}
+            onClick={() => setShowEditModal(false)}
+            disabled={editProductLoading}
           >
             Hủy
           </Button>
           <Button
-            variant="success"
-            onClick={handleAddProduct}
-            disabled={addProductLoading || !newProduct.ProductName || !newProduct.IMEI || !newProduct.ImportPrice}
+            variant="warning"
+            onClick={handleEditProduct}
+            disabled={editProductLoading || !editProduct.ProductName || !editProduct.IMEI || !editProduct.ImportPrice}
           >
-            {addProductLoading ? (
+            {editProductLoading ? (
               <>
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Đang thêm...
+                Đang cập nhật...
               </>
             ) : (
               <>
-                <span className="me-2">➕</span>
-                Thêm sản phẩm
+                <span className="me-2">✏️</span>
+                Cập nhật sản phẩm
               </>
             )}
           </Button>

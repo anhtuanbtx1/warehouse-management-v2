@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Modal, Form, Button, Row, Col, Alert, Card } from 'react-bootstrap';
 import { useToast } from '@/contexts/ToastContext';
+import InvoicePrint from './InvoicePrint';
 
 interface ProductV2 {
   ProductID: number;
@@ -39,6 +40,10 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [validated, setValidated] = useState(false);
+
+  // Invoice states
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<any>(null);
 
   React.useEffect(() => {
     if (show && product) {
@@ -94,6 +99,21 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
           'Bán hàng thành công!',
           `Đã bán "${product?.ProductName}" thành công`
         );
+
+        // Prepare invoice data
+        const invoice = {
+          invoiceNumber: result.data.InvoiceNumber || `INV${Date.now()}`,
+          saleDate: new Date().toISOString(),
+          product: {
+            ...product,
+            SalePrice: formData.SalePrice
+          },
+          profit: calculateProfit(),
+          profitMargin: getProfitPercentage()
+        };
+
+        setInvoiceData(invoice);
+        setShowInvoice(true);
         onSuccess();
         onHide();
       } else {
@@ -116,6 +136,18 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
       style: 'currency',
       currency: 'VND'
     }).format(amount);
+  };
+
+  // Format number with thousand separators (100000 -> 100.000)
+  const formatNumber = (value: string | number) => {
+    if (!value) return '';
+    const numStr = value.toString().replace(/\D/g, ''); // Remove non-digits
+    return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  // Parse formatted number back to plain number (100.000 -> 100000)
+  const parseFormattedNumber = (value: string) => {
+    return value.replace(/\./g, '');
   };
 
   const calculateProfit = () => {
@@ -142,13 +174,14 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
   if (!product) return null;
 
   return (
-    <Modal show={show} onHide={onHide} size="lg">
-      <Modal.Header closeButton>
-        <Modal.Title>
-          <i className="fas fa-shopping-cart me-2 text-success"></i>
-          Bán sản phẩm
-        </Modal.Title>
-      </Modal.Header>
+    <>
+      <Modal show={show} onHide={onHide} size="lg" className="sell-product-modal">
+        <Modal.Header closeButton>
+          <Modal.Title className="fs-4">
+            <span className="me-2">🛒</span>
+            Bán sản phẩm
+          </Modal.Title>
+        </Modal.Header>
 
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Modal.Body>
@@ -157,39 +190,39 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
           {/* Product Information */}
           <Card className="mb-4">
             <Card.Header>
-              <h6 className="mb-0">
-                <i className="fas fa-mobile-alt me-2"></i>
+              <h5 className="mb-0 fs-5">
+                <span className="me-2">📱</span>
                 Thông tin sản phẩm
-              </h6>
+              </h5>
             </Card.Header>
-            <Card.Body>
+            <Card.Body className="fs-5">
               <Row>
                 <Col md={6}>
-                  <div className="mb-2">
-                    <strong>Tên sản phẩm:</strong>
-                    <div className="text-primary">{product.ProductName}</div>
+                  <div className="mb-3">
+                    <strong className="fs-5">Tên sản phẩm:</strong>
+                    <div className="text-primary fs-5 fw-medium">{product.ProductName}</div>
                   </div>
-                  <div className="mb-2">
-                    <strong>IMEI:</strong>
-                    <div><code>{product.IMEI}</code></div>
+                  <div className="mb-3">
+                    <strong className="fs-5">IMEI:</strong>
+                    <div className="fs-5"><code className="fs-5">{product.IMEI}</code></div>
                   </div>
                 </Col>
                 <Col md={6}>
-                  <div className="mb-2">
-                    <strong>Danh mục:</strong>
-                    <div className="text-info">{product.CategoryName}</div>
+                  <div className="mb-3">
+                    <strong className="fs-5">Danh mục:</strong>
+                    <div className="text-info fs-5 fw-medium">{product.CategoryName}</div>
                   </div>
-                  <div className="mb-2">
-                    <strong>Lô hàng:</strong>
-                    <div><code>{product.BatchCode}</code></div>
+                  <div className="mb-3">
+                    <strong className="fs-5">Lô hàng:</strong>
+                    <div className="fs-5"><code className="fs-5">{product.BatchCode}</code></div>
                   </div>
                 </Col>
               </Row>
               <Row>
                 <Col md={12}>
-                  <div className="bg-light p-2 rounded">
-                    <strong>Giá nhập:</strong>
-                    <span className="text-warning ms-2 fw-bold">
+                  <div className="bg-light p-3 rounded">
+                    <strong className="fs-4">Giá nhập:</strong>
+                    <span className="text-warning ms-2 fw-bold fs-4">
                       {formatCurrency(product.ImportPrice)}
                     </span>
                   </div>
@@ -201,40 +234,43 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
           {/* Sale Information */}
           <Row>
             <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>
+              <Form.Group className="mb-4">
+                <Form.Label className="fs-5 fw-medium">
                   Giá bán (VNĐ) <span className="text-danger">*</span>
                 </Form.Label>
                 <Form.Control
-                  type="number"
-                  min="1"
-                  step="1000"
-                  value={formData.SalePrice === 0 ? '' : formData.SalePrice}
+                  type="text"
+                  className="fs-4 py-3"
+                  value={formData.SalePrice === 0 ? '' : formatNumber(formData.SalePrice)}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    const numValue = parseFloat(value);
+                    const rawValue = parseFormattedNumber(e.target.value);
+                    const numValue = parseFloat(rawValue);
                     handleInputChange('SalePrice', isNaN(numValue) ? 0 : numValue);
                   }}
                   required
-                  placeholder="Nhập giá bán"
+                  placeholder="Nhập giá bán (VD: 25.000.000)"
                   autoFocus
                 />
-                <Form.Control.Feedback type="invalid">
+                <Form.Control.Feedback type="invalid" className="fs-6">
                   Giá bán phải lớn hơn 0
                 </Form.Control.Feedback>
+                <Form.Text className="text-muted fs-6">
+                  Nhập số tiền, hệ thống sẽ tự động thêm dấu phân cách
+                </Form.Text>
               </Form.Group>
             </Col>
 
             <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Phương thức thanh toán</Form.Label>
+              <Form.Group className="mb-4">
+                <Form.Label className="fs-5 fw-medium">Phương thức thanh toán</Form.Label>
                 <Form.Select
+                  className="fs-5 py-3"
                   value={formData.PaymentMethod}
                   onChange={(e) => handleInputChange('PaymentMethod', e.target.value)}
                 >
-                  <option value="CASH">Tiền mặt</option>
-                  <option value="CARD">Thẻ</option>
-                  <option value="TRANSFER">Chuyển khoản</option>
+                  <option value="CASH">💵 Tiền mặt</option>
+                  <option value="CARD">💳 Thẻ</option>
+                  <option value="TRANSFER">🏦 Chuyển khoản</option>
                 </Form.Select>
               </Form.Group>
             </Col>
@@ -246,38 +282,38 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
           {formData.SalePrice > 0 && (
             <Card className="border-success">
               <Card.Header className="bg-light">
-                <h6 className="mb-0">
-                  <i className="fas fa-calculator me-2"></i>
+                <h5 className="mb-0 fs-4">
+                  <span className="me-2">🧮</span>
                   Tính toán lãi/lỗ
-                </h6>
+                </h5>
               </Card.Header>
-              <Card.Body>
+              <Card.Body className="py-4">
                 <Row>
                   <Col md={4}>
                     <div className="text-center">
-                      <div className="text-muted">Giá nhập</div>
-                      <div className="h5 text-warning">
+                      <div className="text-muted fs-5 mb-2">Giá nhập</div>
+                      <div className="h3 text-warning fw-bold">
                         {formatCurrency(product.ImportPrice)}
                       </div>
                     </div>
                   </Col>
                   <Col md={4}>
                     <div className="text-center">
-                      <div className="text-muted">Giá bán</div>
-                      <div className="h5 text-primary">
+                      <div className="text-muted fs-5 mb-2">Giá bán</div>
+                      <div className="h3 text-primary fw-bold">
                         {formatCurrency(formData.SalePrice)}
                       </div>
                     </div>
                   </Col>
                   <Col md={4}>
                     <div className="text-center">
-                      <div className="text-muted">Lãi/Lỗ</div>
-                      <div className={`h5 ${getProfitColor()}`}>
+                      <div className="text-muted fs-5 mb-2">Lãi/Lỗ</div>
+                      <div className={`h3 fw-bold ${getProfitColor()}`}>
                         {formatCurrency(calculateProfit())}
                       </div>
-                      <small className={getProfitColor()}>
+                      <div className={`fs-5 ${getProfitColor()}`}>
                         ({getProfitPercentage().toFixed(1)}%)
-                      </small>
+                      </div>
                     </div>
                   </Col>
                 </Row>
@@ -285,21 +321,22 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
             </Card>
           )}
 
-          <Alert variant="info" className="mt-3 mb-0">
-            <i className="fas fa-info-circle me-2"></i>
+          <Alert variant="info" className="mt-4 mb-0 fs-5">
+            <span className="me-2">ℹ️</span>
             <strong>Lưu ý:</strong> Sau khi bán, hệ thống sẽ tự động tạo hóa đơn và cập nhật trạng thái sản phẩm thành "Đã bán".
           </Alert>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onHide} disabled={loading}>
-            <i className="fas fa-times me-1"></i>
+        <Modal.Footer className="py-3">
+          <Button variant="secondary" onClick={onHide} disabled={loading} className="fs-5 px-4 py-2">
+            <span className="me-2">❌</span>
             Hủy
           </Button>
           <Button
             variant="success"
             type="submit"
             disabled={loading || !formData.SalePrice || formData.SalePrice <= 0}
+            className="fs-5 px-4 py-2"
           >
             {loading ? (
               <>
@@ -308,7 +345,7 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
               </>
             ) : (
               <>
-                <i className="fas fa-shopping-cart me-1"></i>
+                <span className="me-2">🛒</span>
                 Bán & In hóa đơn
               </>
             )}
@@ -316,6 +353,14 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
         </Modal.Footer>
       </Form>
     </Modal>
+
+    {/* Invoice Print Modal */}
+    <InvoicePrint
+      show={showInvoice}
+      onHide={() => setShowInvoice(false)}
+      invoiceData={invoiceData}
+    />
+  </>
   );
 };
 
