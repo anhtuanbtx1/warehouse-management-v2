@@ -110,16 +110,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get batch info to get CategoryID
+    // Get batch info to get CategoryID and check TotalQuantity limit
     const batchInfo = await executeQuery(
-      'SELECT CategoryID FROM CRM_ImportBatches WHERE BatchID = @batchId',
+      'SELECT CategoryID, TotalQuantity FROM CRM_ImportBatches WHERE BatchID = @batchId',
       { batchId: body.BatchID }
     );
 
     if (batchInfo.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Batch not found' },
+        { success: false, error: 'Lô hàng không tồn tại' },
         { status: 404 }
+      );
+    }
+
+    // Check current product count in this batch
+    const currentProductCount = await executeQuery(
+      'SELECT COUNT(*) as productCount FROM CRM_Products WHERE BatchID = @batchId',
+      { batchId: body.BatchID }
+    );
+
+    const currentCount = currentProductCount[0]?.productCount || 0;
+    const maxQuantity = batchInfo[0].TotalQuantity;
+
+    // Check if adding this product would exceed the planned quantity
+    if (currentCount >= maxQuantity) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Không thể thêm sản phẩm. Lô hàng đã đạt giới hạn ${maxQuantity} sản phẩm (hiện tại: ${currentCount})`
+        },
+        { status: 400 }
       );
     }
 
@@ -144,11 +164,10 @@ export async function POST(request: NextRequest) {
 
     const result = await executeQuery(insertQuery, params);
 
-    // Update batch total quantity and value
+    // Update batch total import value only (don't change TotalQuantity as it's planned quantity)
     await executeQuery(`
       UPDATE CRM_ImportBatches
-      SET TotalQuantity = TotalQuantity + 1,
-          TotalImportValue = TotalImportValue + @importPrice,
+      SET TotalImportValue = TotalImportValue + @importPrice,
           UpdatedAt = GETDATE()
       WHERE BatchID = @batchId
     `, { batchId: body.BatchID, importPrice: body.ImportPrice });
