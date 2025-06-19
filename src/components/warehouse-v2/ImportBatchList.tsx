@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Form, InputGroup, Badge, Pagination, Modal } from 'react-bootstrap';
+import * as XLSX from 'xlsx';
 
 interface ImportBatch {
   BatchID: number;
@@ -119,6 +120,82 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
     });
   };
 
+  // Function to export Excel
+  const exportToExcel = async () => {
+    try {
+      // Fetch all batches without pagination for export
+      const params = new URLSearchParams({
+        page: '1',
+        limit: '1000', // Get all records
+        ...(categoryFilter && { categoryId: categoryFilter }),
+        ...(statusFilter && { status: statusFilter }),
+        ...(fromDate && { fromDate }),
+        ...(toDate && { toDate })
+      });
+
+      const response = await fetch(`/api/import-batches?${params}`);
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const exportData = result.data.data.map((batch: ImportBatch, index: number) => ({
+          'STT': index + 1,
+          'Mã lô hàng': batch.BatchCode,
+          'Ngày nhập': formatDate(batch.ImportDate),
+          'Danh mục': batch.CategoryName,
+          'Tổng số lượng': batch.TotalQuantity,
+          'Đã bán': batch.TotalSoldQuantity,
+          'Còn lại': batch.RemainingQuantity,
+          'Giá trị nhập': batch.TotalImportValue,
+          'Giá trị bán': batch.TotalSoldValue,
+          'Lãi/Lỗ': batch.ProfitLoss,
+          'Trạng thái': batch.Status,
+          'Ghi chú': batch.Notes || '',
+          'Người tạo': batch.CreatedBy,
+          'Ngày tạo': formatDate(batch.CreatedAt)
+        }));
+
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(exportData);
+
+        // Set column widths
+        const colWidths = [
+          { wch: 5 },   // STT
+          { wch: 15 },  // Mã lô hàng
+          { wch: 12 },  // Ngày nhập
+          { wch: 15 },  // Danh mục
+          { wch: 10 },  // Tổng số lượng
+          { wch: 8 },   // Đã bán
+          { wch: 8 },   // Còn lại
+          { wch: 15 },  // Giá trị nhập
+          { wch: 15 },  // Giá trị bán
+          { wch: 12 },  // Lãi/Lỗ
+          { wch: 12 },  // Trạng thái
+          { wch: 20 },  // Ghi chú
+          { wch: 12 },  // Người tạo
+          { wch: 12 }   // Ngày tạo
+        ];
+        ws['!cols'] = colWidths;
+
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Danh sách lô hàng');
+
+        // Generate filename with current date
+        const currentDate = new Date().toLocaleDateString('vi-VN').replace(/\//g, '-');
+        const filename = `Danh_sach_lo_hang_${currentDate}.xlsx`;
+
+        // Save file
+        XLSX.writeFile(wb, filename);
+
+        // Show success message
+        alert('Xuất Excel thành công!');
+      }
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      alert('Có lỗi xảy ra khi xuất Excel!');
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ACTIVE':
@@ -154,12 +231,23 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0 fs-4">📦 Danh sách lô hàng</h5>
-          {onCreateBatch && (
-            <Button variant="primary" onClick={onCreateBatch} className="btn-compact">
-              <span className="me-1">➕</span>
-              Tạo lô hàng mới
+          <div className="d-flex gap-2">
+            <Button
+              variant="success"
+              onClick={exportToExcel}
+              className="btn-compact"
+              title="Xuất danh sách lô hàng ra Excel"
+            >
+              <span className="me-1">📊</span>
+              Xuất Excel
             </Button>
-          )}
+            {onCreateBatch && (
+              <Button variant="primary" onClick={onCreateBatch} className="btn-compact">
+                <span className="me-1">➕</span>
+                Tạo lô hàng mới
+              </Button>
+            )}
+          </div>
         </Card.Header>
       
       <Card.Body>
