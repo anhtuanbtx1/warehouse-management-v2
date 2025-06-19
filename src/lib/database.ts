@@ -26,9 +26,11 @@ let pool: sql.ConnectionPool | null = null;
 let connecting = false;
 
 export async function getConnection(): Promise<sql.ConnectionPool> {
-  // Skip database connection during build time
-  if (process.env.NODE_ENV === 'production' && process.env.SKIP_DB_CONNECTION === 'true') {
-    throw new Error('Database connection skipped during build time');
+  // Create mock connection during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+    console.log('Using mock database connection during build time');
+    // Return a mock connection that won't be used
+    return {} as sql.ConnectionPool;
   }
 
   // If pool exists and is connected, return it
@@ -95,6 +97,12 @@ export async function executeQuery<T = any>(
   params?: { [key: string]: any }
 ): Promise<T[]> {
   try {
+    // Return empty array during build time
+    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+      console.log('Database query skipped during build time');
+      return [] as T[];
+    }
+
     const connection = await getConnection();
     const request = connection.request();
 
@@ -118,6 +126,12 @@ export async function executeProcedure<T = any>(
   params?: { [key: string]: any }
 ): Promise<T[]> {
   try {
+    // Return empty array during build time
+    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === 'preview') {
+      console.log('Database procedure skipped during build time');
+      return [] as T[];
+    }
+
     const connection = await getConnection();
     const request = connection.request();
 
