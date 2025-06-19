@@ -5,7 +5,6 @@
     }
   },
   "env": {
-    "TZ": "Asia/Ho_Chi_Minh",
     "NODE_ENV": "production"
   },
   "buildCommand": "npm run build",
