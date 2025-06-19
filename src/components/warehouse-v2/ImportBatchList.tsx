@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Form, Badge, Pagination, Modal } from 'react-bootstrap';
 import * as XLSX from 'xlsx';
+import { useToast } from '@/contexts/ToastContext';
 
 interface ImportBatch {
   BatchID: number;
@@ -36,9 +37,8 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
   onViewInvoice, 
   onEditBatch 
 }) => {
-  // Temporary toast replacement
-  const showSuccess = (title: string, message: string) => alert(`${title}: ${message}`);
-  const showError = (title: string, message: string) => alert(`${title}: ${message}`);
+  // Toast notifications using existing system
+  const { showSuccess, showError } = useToast();
 
   const [batches, setBatches] = useState<ImportBatch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -241,7 +241,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
     setEditForm({
       CategoryID: batch.CategoryID?.toString() || '',
       TotalQuantity: batch.TotalQuantity.toString(),
-      ImportPrice: batch.ImportPrice?.toString() || '',
+      ImportPrice: batch.TotalImportValue?.toString() || '',
       Notes: batch.Notes || ''
     });
     setShowEditModal(true);
@@ -662,7 +662,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
                     <span className="input-group-text">VNĐ</span>
                   </div>
                   <small className="text-muted">
-                    Hiện tại: {formatCurrency(editingBatch.ImportPrice || 0)}
+                    Hiện tại: {formatCurrency(editingBatch.TotalImportValue || 0)}
                   </small>
                 </div>
               </div>

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Container, Row, Col, Breadcrumb, Tabs, Tab } from 'react-bootstrap';
-import ImportBatchList from '@/components/warehouse-v2/ImportBatchListNew';
+import ImportBatchList from '@/components/warehouse-v2/ImportBatchList';
 import CreateBatchForm from '@/components/warehouse-v2/CreateBatchForm';
 import ProductListV2 from '@/components/warehouse-v2/ProductListV2';
 import ImportInvoicePrint from '@/components/warehouse-v2/ImportInvoicePrint';
