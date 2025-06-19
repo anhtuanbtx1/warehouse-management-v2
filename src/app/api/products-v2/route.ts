@@ -44,6 +44,8 @@ export async function GET(request: NextRequest) {
     const batchCode = searchParams.get('batchCode'); // Filter theo batch code
     const search = searchParams.get('search'); // Tìm theo tên hoặc IMEI
     const availableOnly = searchParams.get('availableOnly') === 'true'; // Chỉ lấy sản phẩm còn hàng
+    const fromDate = searchParams.get('fromDate'); // Filter từ ngày
+    const toDate = searchParams.get('toDate'); // Filter đến ngày
     
     const offset = (page - 1) * limit;
     
@@ -99,6 +101,17 @@ export async function GET(request: NextRequest) {
     if (search) {
       whereClause += ' AND (p.ProductName LIKE @search OR p.IMEI LIKE @search)';
       params.search = `%${search}%`;
+    }
+
+    // Filter theo ngày bán (chỉ áp dụng cho sản phẩm đã bán)
+    if (fromDate && status === 'SOLD') {
+      whereClause += ' AND p.SoldDate >= @fromDate';
+      params.fromDate = fromDate;
+    }
+
+    if (toDate && status === 'SOLD') {
+      whereClause += ' AND p.SoldDate <= @toDate';
+      params.toDate = toDate + ' 23:59:59'; // Include full day
     }
     
     // Đếm tổng số records
