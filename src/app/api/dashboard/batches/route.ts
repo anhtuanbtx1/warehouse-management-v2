@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/database';
 
+export const dynamic = 'force-dynamic';
+
 interface BatchSummary {
   batchId: number;
   batchCode: string;

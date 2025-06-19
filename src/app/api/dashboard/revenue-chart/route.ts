@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/database';
 import { ApiResponse } from '@/types/warehouse';
 
+export const dynamic = 'force-dynamic';
+
 interface RevenueChartData {
   date: string;
   revenue: number;

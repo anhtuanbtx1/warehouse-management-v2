@@ -8,8 +8,8 @@ const config: sql.config = {
   port: parseInt(process.env.DB_PORT || '1433'),
   database: process.env.DB_NAME || 'zen50558_ManagementStore',
   options: {
-    encrypt: false,  // Disable TLS encryption for IP-based connection
-    trustServerCertificate: true,
+    encrypt: process.env.DB_ENCRYPT === 'true',  // Use environment variable
+    trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
     enableArithAbort: true,
     requestTimeout: 15000,  // Reduced from 30s
     connectTimeout: 10000  // Fixed: was connectionTimeout, should be connectTimeout
@@ -53,12 +53,33 @@ export async function getConnection(): Promise<sql.ConnectionPool> {
       }
     }
 
+    // Log connection attempt
+    console.log('Attempting database connection with config:', {
+      server: config.server,
+      port: config.port,
+      database: config.database,
+      user: config.user,
+      encrypt: config.options?.encrypt,
+      trustServerCertificate: config.options?.trustServerCertificate
+    });
+
     // Create new pool
     pool = new sql.ConnectionPool(config);
     await pool.connect();
-    console.log('Database connection established');
+    console.log('Database connection established successfully');
 
     return pool;
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    console.error('Connection config used:', {
+      server: config.server,
+      port: config.port,
+      database: config.database,
+      user: config.user,
+      encrypt: config.options?.encrypt,
+      trustServerCertificate: config.options?.trustServerCertificate
+    });
+    throw error;
   } finally {
     connecting = false;
   }

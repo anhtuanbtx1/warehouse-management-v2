@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeProcedure, executeQuery } from '@/lib/database';
 import { ApiResponse } from '@/types/warehouse';
 
+export const dynamic = 'force-dynamic';
+
 // Interface cho Inventory Report V2
 interface InventoryReportV2 {
   BatchCode: string;

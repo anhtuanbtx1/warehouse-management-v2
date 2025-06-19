@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         SUM(CASE WHEN p.Status = 'SOLD' THEN 1 ELSE 0 END) as SoldCount
       FROM CRM_ImportBatches ib
       LEFT JOIN CRM_Products p ON ib.BatchID = p.BatchID
-      GROUP BY p.BatchID, ib.BatchCode, ib.TotalQuantity
+      GROUP BY p.BatchID, ib.BatchCode, ib.TotalQuantity, ib.ImportDate
       ORDER BY ib.ImportDate DESC
     `);
     

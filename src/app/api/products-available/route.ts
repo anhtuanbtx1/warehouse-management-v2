@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/database';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/products-available - Get available products for sale
 export async function GET(request: NextRequest) {
   try {
