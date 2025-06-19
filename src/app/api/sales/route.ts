@@ -308,35 +308,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/sales/[invoiceId] - Lấy chi tiết hóa đơn
-export async function getInvoiceDetails(invoiceId: number) {
-  try {
-    const query = `
-      SELECT
-        i.InvoiceID,
-        i.InvoiceNumber,
-        i.SaleDate,
-        i.TotalAmount,
-        i.FinalAmount,
-        d.ProductName,
-        d.IMEI,
-        d.SalePrice as ProductSalePrice,
-        d.Quantity,
-        d.TotalPrice
-      FROM CRM_SalesInvoices i
-      LEFT JOIN CRM_SalesInvoiceDetails d ON i.InvoiceID = d.InvoiceID
-      WHERE i.InvoiceID = @invoiceId
-    `;
-    
-    const result = await executeQuery<SalesInvoice>(query, { invoiceId });
-    
-    if (result.length === 0) {
-      return null;
-    }
-    
-    return result[0];
-  } catch (error) {
-    console.error('Error fetching invoice details:', error);
-    throw error;
-  }
-}
+

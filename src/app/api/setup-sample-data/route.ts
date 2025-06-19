@@ -87,8 +87,8 @@ export async function POST(request: NextRequest) {
     
     // Get category IDs
     const categories = await executeQuery(`SELECT CategoryID, CategoryName FROM CRM_Categories`);
-    const categoryMap = {};
-    categories.forEach(cat => {
+    const categoryMap: { [key: string]: number } = {};
+    categories.forEach((cat: any) => {
       categoryMap[cat.CategoryName] = cat.CategoryID;
     });
     

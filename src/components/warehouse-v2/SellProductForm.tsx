@@ -323,7 +323,7 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
 
           <Alert variant="info" className="mt-4 mb-0 fs-5">
             <span className="me-2">ℹ️</span>
-            <strong>Lưu ý:</strong> Sau khi bán, hệ thống sẽ tự động tạo hóa đơn và cập nhật trạng thái sản phẩm thành "Đã bán".
+            <strong>Lưu ý:</strong> Sau khi bán, hệ thống sẽ tự động tạo hóa đơn và cập nhật trạng thái sản phẩm thành &quot;Đã bán&quot;.
           </Alert>
         </Modal.Body>
 

@@ -116,7 +116,7 @@ const TestInvoicePage = () => {
             <h6><i className="fas fa-info-circle me-2"></i>Hướng dẫn test:</h6>
             <ol>
               <li>Click vào một trong hai nút trên để mở modal hóa đơn</li>
-              <li>Trong modal, click nút "In hóa đơn" để mở chế độ in</li>
+              <li>Trong modal, click nút &quot;In hóa đơn&quot; để mở chế độ in</li>
               <li>Trong chế độ in, bạn có thể:
                 <ul>
                   <li>Xem preview hóa đơn</li>

@@ -1,6 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
+  swcMinify: false,
+
+  // Disable telemetry to avoid trace file issues
+  experimental: {
+    instrumentationHook: false,
+  },
+
+
+
+
 
   // Redirect root to warehouse-v2
   async redirects() {
@@ -8,7 +18,7 @@ const nextConfig = {
       {
         source: '/',
         destination: '/warehouse-v2',
-        permanent: false, // Use 307 temporary redirect
+        permanent: false,
       },
     ];
   },

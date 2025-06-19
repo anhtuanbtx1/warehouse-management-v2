@@ -51,9 +51,10 @@ export async function POST(request: NextRequest) {
         UpdatedAt DATETIME2 DEFAULT GETDATE()
       )`);
     }
-      
-      // Products table
-      `CREATE TABLE CRM_Products (
+
+    // Check and create Products table if not exists
+    if (!existingTables.find(t => t.TABLE_NAME === 'CRM_Products')) {
+      createTablesQueries.push(`CREATE TABLE CRM_Products (
         ProductID INT IDENTITY(1,1) PRIMARY KEY,
         BatchID INT FOREIGN KEY REFERENCES CRM_ImportBatches(BatchID),
         CategoryID INT FOREIGN KEY REFERENCES CRM_Categories(CategoryID),
@@ -68,10 +69,12 @@ export async function POST(request: NextRequest) {
         Notes NVARCHAR(500),
         CreatedAt DATETIME2 DEFAULT GETDATE(),
         UpdatedAt DATETIME2 DEFAULT GETDATE()
-      )`,
-      
-      // Customers table
-      `CREATE TABLE CRM_Customers (
+      )`);
+    }
+
+    // Check and create Customers table if not exists
+    if (!existingTables.find(t => t.TABLE_NAME === 'CRM_Customers')) {
+      createTablesQueries.push(`CREATE TABLE CRM_Customers (
         CustomerID INT IDENTITY(1,1) PRIMARY KEY,
         CustomerName NVARCHAR(200) NOT NULL,
         Phone NVARCHAR(20),
@@ -79,10 +82,12 @@ export async function POST(request: NextRequest) {
         Address NVARCHAR(500),
         IsActive BIT DEFAULT 1,
         CreatedAt DATETIME2 DEFAULT GETDATE()
-      )`,
-      
-      // Sales Invoices table
-      `CREATE TABLE CRM_SalesInvoices (
+      )`);
+    }
+
+    // Check and create Sales Invoices table if not exists
+    if (!existingTables.find(t => t.TABLE_NAME === 'CRM_SalesInvoices')) {
+      createTablesQueries.push(`CREATE TABLE CRM_SalesInvoices (
         InvoiceID INT IDENTITY(1,1) PRIMARY KEY,
         InvoiceNumber NVARCHAR(50) UNIQUE NOT NULL,
         CustomerID INT FOREIGN KEY REFERENCES CRM_Customers(CustomerID) NULL,
@@ -98,10 +103,12 @@ export async function POST(request: NextRequest) {
         Notes NVARCHAR(500),
         CreatedBy NVARCHAR(100),
         CreatedAt DATETIME2 DEFAULT GETDATE()
-      )`,
-      
-      // Sales Invoice Details table
-      `CREATE TABLE CRM_SalesInvoiceDetails (
+      )`);
+    }
+
+    // Check and create Sales Invoice Details table if not exists
+    if (!existingTables.find(t => t.TABLE_NAME === 'CRM_SalesInvoiceDetails')) {
+      createTablesQueries.push(`CREATE TABLE CRM_SalesInvoiceDetails (
         InvoiceDetailID INT IDENTITY(1,1) PRIMARY KEY,
         InvoiceID INT FOREIGN KEY REFERENCES CRM_SalesInvoices(InvoiceID),
         ProductID INT FOREIGN KEY REFERENCES CRM_Products(ProductID),
@@ -110,10 +117,12 @@ export async function POST(request: NextRequest) {
         SalePrice DECIMAL(18,2) NOT NULL,
         Quantity INT DEFAULT 1,
         TotalPrice DECIMAL(18,2) NOT NULL
-      )`,
-      
-      // Users table
-      `CREATE TABLE CRM_Users (
+      )`);
+    }
+
+    // Check and create Users table if not exists
+    if (!existingTables.find(t => t.TABLE_NAME === 'CRM_Users')) {
+      createTablesQueries.push(`CREATE TABLE CRM_Users (
         UserID INT IDENTITY(1,1) PRIMARY KEY,
         Username NVARCHAR(50) UNIQUE NOT NULL,
         Email NVARCHAR(100) UNIQUE NOT NULL,
@@ -124,17 +133,19 @@ export async function POST(request: NextRequest) {
         LastLogin DATETIME2,
         CreatedAt DATETIME2 DEFAULT GETDATE(),
         UpdatedAt DATETIME2 DEFAULT GETDATE()
-      )`,
-      
-      // System Settings table
-      `CREATE TABLE CRM_SystemSettings (
+      )`);
+    }
+
+    // Check and create System Settings table if not exists
+    if (!existingTables.find(t => t.TABLE_NAME === 'CRM_SystemSettings')) {
+      createTablesQueries.push(`CREATE TABLE CRM_SystemSettings (
         SettingID INT IDENTITY(1,1) PRIMARY KEY,
         SettingKey NVARCHAR(100) UNIQUE NOT NULL,
         SettingValue NVARCHAR(1000),
         Description NVARCHAR(500),
         UpdatedAt DATETIME2 DEFAULT GETDATE()
-      )`
-    ];
+      )`);
+    }
     
     // Execute table creation queries
     for (let i = 0; i < createTablesQueries.length; i++) {

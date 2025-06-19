@@ -179,7 +179,7 @@ export async function GET(
       );
     }
 
-    const pool = await connectToDatabase();
+    const pool = await getConnection();
 
     const result = await pool.request()
       .input('ProductID', sql.Int, productId)
@@ -243,7 +243,7 @@ export async function DELETE(
       );
     }
 
-    const pool = await connectToDatabase();
+    const pool = await getConnection();
 
     // Check if product exists and is IN_STOCK
     const checkResult = await pool.request()

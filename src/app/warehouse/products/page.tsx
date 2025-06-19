@@ -54,7 +54,6 @@ const ProductsPage: React.FC = () => {
           {/* Product List */}
           <ProductList
             key={refreshKey}
-            onAdd={handleAddProduct}
             onEdit={handleEditProduct}
           />
 

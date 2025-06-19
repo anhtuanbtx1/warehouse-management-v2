@@ -5,6 +5,7 @@ import { Navbar, Nav, Container, Dropdown } from 'react-bootstrap';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ToastProvider } from '@/contexts/ToastContext';
+import AuthGuard from '@/components/warehouse-v2/AuthGuard';
 
 interface WarehouseV2LayoutProps {
   children: React.ReactNode;
@@ -12,16 +13,25 @@ interface WarehouseV2LayoutProps {
 
 const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
   const pathname = usePathname();
+  const isLoginPage = pathname === '/warehouse-v2/login';
 
   const isActive = (path: string) => {
     return pathname === path ? 'active' : '';
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('warehouse_auth_token');
+    localStorage.removeItem('warehouse_user');
+    window.location.href = '/warehouse-v2/login';
+  };
+
   return (
-    <ToastProvider>
-      <div className="warehouse-v2 min-vh-100 bg-light">
-      {/* Navigation */}
-      <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm">
+    <AuthGuard>
+      <ToastProvider>
+        <div className="warehouse-v2 min-vh-100 bg-light">
+        {/* Navigation - Hide on login page */}
+        {!isLoginPage && (
+          <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm">
         <Container fluid>
           <Navbar.Brand as={Link} href="/warehouse-v2" className="fw-bold">
             <span className="me-2">📱</span>
@@ -111,7 +121,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
                     <span className="fw-medium">Đổi mật khẩu</span>
                   </Dropdown.Item>
                   <Dropdown.Divider />
-                  <Dropdown.Item href="#logout" className="text-danger py-2">
+                  <Dropdown.Item onClick={handleLogout} className="text-danger py-2">
                     <span className="me-3">🚪</span>
                     <span className="fw-medium">Đăng xuất</span>
                   </Dropdown.Item>
@@ -120,33 +130,36 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
             </Nav>
           </Navbar.Collapse>
         </Container>
-      </Navbar>
+          </Navbar>
+        )}
 
-      {/* Main Content */}
-      <main className="flex-grow-1">
-        {children}
-      </main>
+        {/* Main Content */}
+        <main className={`flex-grow-1 ${isLoginPage ? 'login-page' : ''}`}>
+          {children}
+        </main>
 
-      {/* Footer */}
-      <footer className="bg-dark text-light py-3 mt-auto">
-        <Container fluid>
-          <div className="row align-items-center">
-            <div className="col-md-6">
-              <small>
-                © 2024 Hệ thống Quản lý Kho thiết kế bởi AT
-                <span className="text-muted ms-2">
-                  Quản lý điện thoại theo IMEI
-                </span>
-              </small>
-            </div>
-            <div className="col-md-6 text-end">
-              <small className="text-muted">
-                Phiên bản 1.0.0
-              </small>
-            </div>
-          </div>
-        </Container>
-      </footer>
+        {/* Footer - Hide on login page */}
+        {!isLoginPage && (
+          <footer className="bg-dark text-light py-3 mt-auto">
+            <Container fluid>
+              <div className="row align-items-center">
+                <div className="col-md-6">
+                  <small>
+                    © 2025 Hệ thống Quản lý Kho thiết kế bởi AT
+                    <span className="text-muted ms-2">
+                      Quản lý điện thoại theo IMEI
+                    </span>
+                  </small>
+                </div>
+                <div className="col-md-6 text-end">
+                  <small className="text-muted">
+                    Phiên bản 1.0.0
+                  </small>
+                </div>
+              </div>
+            </Container>
+          </footer>
+        )}
 
 
 
@@ -789,8 +802,9 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
           }
         }
       `}</style>
-      </div>
-    </ToastProvider>
+        </div>
+      </ToastProvider>
+    </AuthGuard>
   );
 };
 

@@ -34,3 +34,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# deployment files
+warehouse-v2-deploy/
+warehouse-v2-deploy.zip
+warehouse-v2-deploy.rar
+deploy-package/
+*.ps1
+*.bat
+deploy.sh

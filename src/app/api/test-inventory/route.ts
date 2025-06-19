@@ -47,7 +47,8 @@ export async function GET(request: NextRequest) {
       availableProducts: directCounts[0]?.availableProducts || 0,
       soldProducts: directCounts[0]?.soldProducts || 0,
       totalProducts: directCounts[0]?.totalProducts || 0,
-      totalImportValue: batchTotals.reduce((sum, batch) => sum + (batch.TotalImportValue || 0), 0)
+      totalImportValue: batchTotals.reduce((sum, batch) => sum + (batch.TotalImportValue || 0), 0),
+      totalStock: 0
     };
 
     // 5. Calculate stock (Tồn kho = Nhập - Bán)

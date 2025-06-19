@@ -132,7 +132,7 @@ const TestSalesInvoicePage = () => {
         <Card.Body>
           <Alert variant="info">
             <i className="fas fa-info-circle me-2"></i>
-            <strong>Hướng dẫn:</strong> Click vào nút "In hóa đơn" trong cột "Thao tác" để xem và in hóa đơn cho giao dịch đó.
+            <strong>Hướng dẫn:</strong> Click vào nút &quot;In hóa đơn&quot; trong cột &quot;Thao tác&quot; để xem và in hóa đơn cho giao dịch đó.
           </Alert>
 
           {recentSales.length === 0 ? (
