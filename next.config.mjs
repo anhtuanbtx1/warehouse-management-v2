@@ -8,6 +8,11 @@ const nextConfig = {
     instrumentationHook: false,
   },
 
+  // Environment variables for build
+  env: {
+    SKIP_DB_CONNECTION: process.env.NODE_ENV === 'production' ? 'true' : 'false',
+  },
+
 
 
 
