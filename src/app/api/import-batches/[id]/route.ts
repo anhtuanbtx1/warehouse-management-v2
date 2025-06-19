@@ -126,6 +126,11 @@ export async function PUT(
       }, { status: 400 });
     }
 
+    // Calculate ImportPrice per unit from TotalImportValue
+    const totalImportValue = parseFloat(ImportPrice); // This is actually TotalImportValue from frontend
+    const totalQuantity = parseInt(TotalQuantity);
+    const importPricePerUnit = totalImportValue / totalQuantity;
+
     // Check if batch exists
     const existingBatch = await executeQuery(`
       SELECT BatchID, TotalQuantity 
@@ -162,26 +167,28 @@ export async function PUT(
       SET
         CategoryID = @CategoryID,
         TotalQuantity = @TotalQuantity,
-        ImportPrice = @ImportPrice,
+        TotalImportValue = @TotalImportValue,
+        ImportPrice = @ImportPricePerUnit,
         Notes = @Notes,
         UpdatedAt = GETDATE()
       WHERE BatchID = @batchId
     `, {
       batchId,
       CategoryID: parseInt(CategoryID),
-      TotalQuantity: parseInt(TotalQuantity),
-      ImportPrice: parseFloat(ImportPrice),
+      TotalQuantity: totalQuantity,
+      TotalImportValue: totalImportValue,
+      ImportPricePerUnit: importPricePerUnit,
       Notes: Notes || null
     });
 
     // Update ImportPrice for all products in this batch
     await executeQuery(`
       UPDATE CRM_Products
-      SET ImportPrice = @ImportPrice
+      SET ImportPrice = @ImportPricePerUnit
       WHERE BatchID = @batchId
     `, {
       batchId,
-      ImportPrice: parseFloat(ImportPrice)
+      ImportPricePerUnit: importPricePerUnit
     });
 
     // Get updated batch data

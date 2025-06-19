@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Button, Form, InputGroup, Badge, Pagination, Modal } from 'react-bootstrap';
+import { Card, Table, Button, Form, Badge, Pagination, Modal } from 'react-bootstrap';
 import * as XLSX from 'xlsx';
-import { useToast } from '@/contexts/ToastContext';
 
 interface ImportBatch {
   BatchID: number;
@@ -31,12 +30,21 @@ interface ImportBatchListProps {
   onEditBatch?: (batch: ImportBatch) => void;
 }
 
-const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onViewDetails, onViewInvoice, onEditBatch }) => {
-  const { showSuccess, showError } = useToast();
+const ImportBatchList: React.FC<ImportBatchListProps> = ({ 
+  onCreateBatch, 
+  onViewDetails, 
+  onViewInvoice, 
+  onEditBatch 
+}) => {
+  // Temporary toast replacement
+  const showSuccess = (title: string, message: string) => alert(`${title}: ${message}`);
+  const showError = (title: string, message: string) => alert(`${title}: ${message}`);
+
   const [batches, setBatches] = useState<ImportBatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  
   // Set default date range to 1 month (Vietnam timezone)
   const getDefaultDateRange = () => {
     const vietnamDate = new Date(new Date().getTime() + (7 * 60 * 60 * 1000));
@@ -239,6 +247,28 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
     setShowEditModal(true);
   };
 
+  // Format number with thousand separators
+  const formatNumber = (value: string) => {
+    if (!value) return '';
+    const numStr = value.replace(/\D/g, ''); // Remove non-digits
+    return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  const parseFormattedNumber = (value: string) => {
+    return value.replace(/\./g, '');
+  };
+
+  // Format currency for VND
+  const formatCurrencyInput = (value: string) => {
+    if (!value) return '';
+    const numStr = value.replace(/\D/g, ''); // Remove non-digits
+    return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  const parseCurrencyInput = (value: string) => {
+    return value.replace(/\./g, '');
+  };
+
   const handleSaveEdit = async () => {
     if (!editingBatch) return;
 
@@ -310,41 +340,8 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
     });
   };
 
-  // Format number with thousand separators
-  const formatNumber = (value: string) => {
-    if (!value) return '';
-    const numStr = value.replace(/\D/g, ''); // Remove non-digits
-    return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  };
-
-  const parseFormattedNumber = (value: string) => {
-    return value.replace(/\./g, '');
-  };
-
-  // Format currency for VND
-  const formatCurrencyInput = (value: string) => {
-    if (!value) return '';
-    const numStr = value.replace(/\D/g, ''); // Remove non-digits
-    return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  };
-
-  const parseCurrencyInput = (value: string) => {
-    return value.replace(/\./g, '');
-  };
-
   return (
     <>
-      <style jsx>{`
-        .action-buttons .btn {
-          font-size: 0.875rem;
-          font-weight: 500;
-          white-space: nowrap;
-        }
-        .action-buttons .btn i {
-          font-size: 0.875rem;
-        }
-      `}</style>
-
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0 fs-4">📦 Danh sách lô hàng</h5>
@@ -368,375 +365,375 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
         </Card.Header>
 
         <Card.Body>
-        {/* Filters */}
-        <div className="row mb-3">
-          <div className="col-md-3">
-            <Form.Select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="fs-6"
-            >
-              <option value="">Tất cả danh mục</option>
-              {categories.map(category => (
-                <option key={category.CategoryID} value={category.CategoryID}>
-                  {category.CategoryName}
-                </option>
-              ))}
-            </Form.Select>
-          </div>
-          <div className="col-md-2">
-            <Form.Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="fs-6"
-            >
-              <option value="">Tất cả trạng thái</option>
-              <option value="ACTIVE">Đang hoạt động</option>
-              <option value="COMPLETED">Hoàn thành</option>
-              <option value="CANCELLED">Đã hủy</option>
-            </Form.Select>
-          </div>
-          <div className="col-md-2">
-            <Form.Control
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              placeholder="Từ ngày"
-              className="fs-6"
-            />
-          </div>
-          <div className="col-md-2">
-            <Form.Control
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              placeholder="Đến ngày"
-              className="fs-6"
-            />
-          </div>
-          <div className="col-md-3">
-            <Button variant="outline-primary" onClick={handleFilter} className="btn-compact">
-              <span className="me-1">🔍</span>
-              Lọc
-            </Button>
-          </div>
-        </div>
-
-        {/* Batches Table */}
-        {loading ? (
-          <div className="text-center py-4">
-            <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
+          {/* Filters */}
+          <div className="row mb-3">
+            <div className="col-md-3">
+              <Form.Select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="fs-6"
+              >
+                <option value="">Tất cả danh mục</option>
+                {categories.map(category => (
+                  <option key={category.CategoryID} value={category.CategoryID}>
+                    {category.CategoryName}
+                  </option>
+                ))}
+              </Form.Select>
+            </div>
+            <div className="col-md-2">
+              <Form.Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="fs-6"
+              >
+                <option value="">Tất cả trạng thái</option>
+                <option value="ACTIVE">Đang hoạt động</option>
+                <option value="COMPLETED">Hoàn thành</option>
+                <option value="CANCELLED">Đã hủy</option>
+              </Form.Select>
+            </div>
+            <div className="col-md-2">
+              <Form.Control
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                placeholder="Từ ngày"
+                className="fs-6"
+              />
+            </div>
+            <div className="col-md-2">
+              <Form.Control
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                placeholder="Đến ngày"
+                className="fs-6"
+              />
+            </div>
+            <div className="col-md-3">
+              <Button variant="outline-primary" onClick={handleFilter} className="btn-compact">
+                <span className="me-1">🔍</span>
+                Lọc
+              </Button>
             </div>
           </div>
-        ) : (
-          <>
-            <Table responsive striped hover className="fs-6">
-              <thead>
-                <tr>
-                  <th className="fs-6 fw-bold">Mã lô hàng</th>
-                  <th className="fs-6 fw-bold">Ngày nhập</th>
-                  <th className="fs-6 fw-bold">Danh mục</th>
-                  <th className="fs-6 fw-bold">SL nhập</th>
-                  <th className="fs-6 fw-bold">SL bán</th>
-                  <th className="fs-6 fw-bold">SL tồn</th>
-                  <th className="fs-6 fw-bold">Giá trị nhập</th>
-                  <th className="fs-6 fw-bold">Giá trị bán</th>
-                  <th className="fs-6 fw-bold">Lãi/Lỗ</th>
-                  <th className="fs-6 fw-bold">Trạng thái</th>
-                  <th className="fs-6 fw-bold" style={{ minWidth: '200px' }}>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {batches.length === 0 ? (
+
+          {/* Batches Table */}
+          {loading ? (
+            <div className="text-center py-4">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          ) : (
+            <>
+              <Table responsive striped hover className="fs-6">
+                <thead>
                   <tr>
-                    <td colSpan={11} className="text-center py-4">
-                      Không có dữ liệu
-                    </td>
+                    <th className="fs-6 fw-bold">Mã lô hàng</th>
+                    <th className="fs-6 fw-bold">Ngày nhập</th>
+                    <th className="fs-6 fw-bold">Danh mục</th>
+                    <th className="fs-6 fw-bold">SL nhập</th>
+                    <th className="fs-6 fw-bold">SL bán</th>
+                    <th className="fs-6 fw-bold">SL tồn</th>
+                    <th className="fs-6 fw-bold">Giá trị nhập</th>
+                    <th className="fs-6 fw-bold">Giá trị bán</th>
+                    <th className="fs-6 fw-bold">Lãi/Lỗ</th>
+                    <th className="fs-6 fw-bold">Trạng thái</th>
+                    <th className="fs-6 fw-bold" style={{ minWidth: '200px' }}>Thao tác</th>
                   </tr>
-                ) : (
-                  batches.map(batch => (
-                    <tr key={batch.BatchID}>
-                      <td>
-                        <code className="text-primary">{batch.BatchCode}</code>
-                      </td>
-                      <td>{formatDate(batch.ImportDate)}</td>
-                      <td>
-                        <Badge bg="info" className="me-1">
-                          {batch.CategoryName}
-                        </Badge>
-                      </td>
-                      <td>
-                        <span className="fw-bold">{batch.TotalQuantity}</span>
-                      </td>
-                      <td>
-                        <span className="text-success">{batch.TotalSoldQuantity}</span>
-                      </td>
-                      <td>
-                        <span className="text-warning">{batch.RemainingQuantity}</span>
-                      </td>
-                      <td>
-                        <small>{formatCurrency(batch.TotalImportValue)}</small>
-                      </td>
-                      <td>
-                        <small className="text-success">
-                          {formatCurrency(batch.TotalSoldValue)}
-                        </small>
-                      </td>
-                      <td>
-                        <span className={getProfitLossColor(batch.ProfitLoss)}>
-                          <small>{formatCurrency(batch.ProfitLoss)}</small>
-                        </span>
-                      </td>
-                      <td>{getStatusBadge(batch.Status)}</td>
-                      <td>
-                        <div className="d-flex btn-group-compact gap-1" style={{ minWidth: '200px' }}>
-                          {onViewDetails && (
-                            <Button
-                              variant="primary"
-                              onClick={() => onViewDetails(batch)}
-                              className="btn-compact flex-fill"
-                              title="Xem chi tiết lô hàng"
-                            >
-                              <span className="me-1">👁️</span>
-                              Chi tiết
-                            </Button>
-                          )}
-                          {onViewInvoice && (
-                            <Button
-                              variant="outline-success"
-                              onClick={() => onViewInvoice(batch)}
-                              className="btn-compact flex-fill"
-                              title="Xem hóa đơn nhập hàng"
-                            >
-                              <span className="me-1">🧾</span>
-                              Hóa đơn
-                            </Button>
-                          )}
-                          <Button
-                            variant="outline-info"
-                            onClick={() => handleEditBatch(batch)}
-                            title="Chỉnh sửa lô hàng"
-                            className="btn-compact flex-fill"
-                          >
-                            <span className="me-1">✏️</span>
-                            Sửa
-                          </Button>
-                        </div>
+                </thead>
+                <tbody>
+                  {batches.length === 0 ? (
+                    <tr>
+                      <td colSpan={11} className="text-center py-4">
+                        Không có dữ liệu
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </Table>
+                  ) : (
+                    batches.map(batch => (
+                      <tr key={batch.BatchID}>
+                        <td>
+                          <code className="text-primary">{batch.BatchCode}</code>
+                        </td>
+                        <td>{formatDate(batch.ImportDate)}</td>
+                        <td>
+                          <Badge bg="info" className="me-1">
+                            {batch.CategoryName}
+                          </Badge>
+                        </td>
+                        <td>
+                          <span className="fw-bold">{batch.TotalQuantity}</span>
+                        </td>
+                        <td>
+                          <span className="text-success">{batch.TotalSoldQuantity}</span>
+                        </td>
+                        <td>
+                          <span className="text-warning">{batch.RemainingQuantity}</span>
+                        </td>
+                        <td>
+                          <small>{formatCurrency(batch.TotalImportValue)}</small>
+                        </td>
+                        <td>
+                          <small className="text-success">
+                            {formatCurrency(batch.TotalSoldValue)}
+                          </small>
+                        </td>
+                        <td>
+                          <span className={getProfitLossColor(batch.ProfitLoss)}>
+                            <small>{formatCurrency(batch.ProfitLoss)}</small>
+                          </span>
+                        </td>
+                        <td>{getStatusBadge(batch.Status)}</td>
+                        <td>
+                          <div className="d-flex btn-group-compact gap-1" style={{ minWidth: '200px' }}>
+                            {onViewDetails && (
+                              <Button
+                                variant="primary"
+                                onClick={() => onViewDetails(batch)}
+                                className="btn-compact flex-fill"
+                                title="Xem chi tiết lô hàng"
+                              >
+                                <span className="me-1">👁️</span>
+                                Chi tiết
+                              </Button>
+                            )}
+                            {onViewInvoice && (
+                              <Button
+                                variant="outline-success"
+                                onClick={() => onViewInvoice(batch)}
+                                className="btn-compact flex-fill"
+                                title="Xem hóa đơn nhập hàng"
+                              >
+                                <span className="me-1">🧾</span>
+                                Hóa đơn
+                              </Button>
+                            )}
+                            <Button
+                              variant="outline-info"
+                              onClick={() => handleEditBatch(batch)}
+                              title="Chỉnh sửa lô hàng"
+                              className="btn-compact flex-fill"
+                            >
+                              <span className="me-1">✏️</span>
+                              Sửa
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </Table>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="d-flex justify-content-center">
-                <Pagination>
-                  <Pagination.Prev
-                    disabled={currentPage === 1}
-                    onClick={() => handlePageChange(currentPage - 1)}
-                  />
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <Pagination.Item
-                      key={page}
-                      active={page === currentPage}
-                      onClick={() => handlePageChange(page)}
-                    >
-                      {page}
-                    </Pagination.Item>
-                  ))}
-                  <Pagination.Next
-                    disabled={currentPage === totalPages}
-                    onClick={() => handlePageChange(currentPage + 1)}
-                  />
-                </Pagination>
-              </div>
-            )}
-          </>
-        )}
-      </Card.Body>
-    </Card>
-
-    {/* Edit Batch Modal */}
-    <Modal show={showEditModal} onHide={handleCloseEditModal} size="lg">
-      <Modal.Header closeButton>
-        <Modal.Title>
-          <span className="me-2">✏️</span>
-          Chỉnh sửa lô hàng
-          {editingBatch && (
-            <small className="text-muted ms-2">({editingBatch.BatchCode})</small>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="d-flex justify-content-center">
+                  <Pagination>
+                    <Pagination.Prev
+                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(currentPage - 1)}
+                    />
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <Pagination.Item
+                        key={page}
+                        active={page === currentPage}
+                        onClick={() => handlePageChange(page)}
+                      >
+                        {page}
+                      </Pagination.Item>
+                    ))}
+                    <Pagination.Next
+                      disabled={currentPage === totalPages}
+                      onClick={() => handlePageChange(currentPage + 1)}
+                    />
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        {editingBatch && (
-          <div className="row">
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label className="form-label fw-bold">
-                  Mã lô hàng <span className="text-muted">(không thể sửa)</span>
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={editingBatch.BatchCode}
-                  disabled
-                  style={{ backgroundColor: '#f8f9fa' }}
-                />
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label className="form-label fw-bold">
-                  Ngày nhập <span className="text-muted">(không thể sửa)</span>
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formatDate(editingBatch.ImportDate)}
-                  disabled
-                  style={{ backgroundColor: '#f8f9fa' }}
-                />
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label className="form-label fw-bold">
-                  Danh mục <span className="text-danger">*</span>
-                </label>
-                <select
-                  className="form-select"
-                  value={editForm.CategoryID}
-                  onChange={(e) => setEditForm({...editForm, CategoryID: e.target.value})}
-                  style={{ fontSize: '1.1rem' }}
-                >
-                  <option value="">Chọn danh mục</option>
-                  {categories.map(category => (
-                    <option key={category.CategoryID} value={category.CategoryID}>
-                      {category.CategoryName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label className="form-label fw-bold">
-                  Tổng số lượng <span className="text-danger">*</span>
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formatNumber(editForm.TotalQuantity)}
-                  onChange={(e) => setEditForm({
-                    ...editForm,
-                    TotalQuantity: parseFormattedNumber(e.target.value)
-                  })}
-                  placeholder="Nhập tổng số lượng"
-                  style={{ fontSize: '1.1rem' }}
-                />
-                <small className="text-muted">
-                  Hiện tại: {editingBatch.TotalQuantity} sản phẩm
-                </small>
-              </div>
-            </div>
-          </div>
+        </Card.Body>
+      </Card>
 
-          <div className="row">
-            <div className="col-md-12">
-              <div className="mb-3">
-                <label className="form-label fw-bold">
-                  Giá nhập <span className="text-danger">*</span>
-                </label>
-                <div className="input-group">
+      {/* Edit Batch Modal */}
+      <Modal show={showEditModal} onHide={handleCloseEditModal} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <span className="me-2">✏️</span>
+            Chỉnh sửa lô hàng
+            {editingBatch && (
+              <small className="text-muted ms-2">({editingBatch.BatchCode})</small>
+            )}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {editingBatch && (
+            <div className="row">
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label fw-bold">
+                    Mã lô hàng <span className="text-muted">(không thể sửa)</span>
+                  </label>
                   <input
                     type="text"
                     className="form-control"
-                    value={formatCurrencyInput(editForm.ImportPrice)}
+                    value={editingBatch.BatchCode}
+                    disabled
+                    style={{ backgroundColor: '#f8f9fa' }}
+                  />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label fw-bold">
+                    Ngày nhập <span className="text-muted">(không thể sửa)</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={formatDate(editingBatch.ImportDate)}
+                    disabled
+                    style={{ backgroundColor: '#f8f9fa' }}
+                  />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label fw-bold">
+                    Danh mục <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    className="form-select"
+                    value={editForm.CategoryID}
+                    onChange={(e) => setEditForm({...editForm, CategoryID: e.target.value})}
+                    style={{ fontSize: '1.1rem' }}
+                  >
+                    <option value="">Chọn danh mục</option>
+                    {categories.map(category => (
+                      <option key={category.CategoryID} value={category.CategoryID}>
+                        {category.CategoryName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label fw-bold">
+                    Tổng số lượng <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={formatNumber(editForm.TotalQuantity)}
                     onChange={(e) => setEditForm({
                       ...editForm,
-                      ImportPrice: parseCurrencyInput(e.target.value)
+                      TotalQuantity: parseFormattedNumber(e.target.value)
                     })}
-                    placeholder="Nhập giá nhập"
+                    placeholder="Nhập tổng số lượng"
                     style={{ fontSize: '1.1rem' }}
                   />
-                  <span className="input-group-text">VNĐ</span>
+                  <small className="text-muted">
+                    Hiện tại: {editingBatch.TotalQuantity} sản phẩm
+                  </small>
                 </div>
-                <small className="text-muted">
-                  Hiện tại: {formatCurrency(editingBatch.ImportPrice || 0)}
-                </small>
               </div>
             </div>
 
-            <div className="col-12">
-              <div className="mb-3">
-                <label className="form-label fw-bold">Ghi chú</label>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={editForm.Notes}
-                  onChange={(e) => setEditForm({...editForm, Notes: e.target.value})}
-                  placeholder="Nhập ghi chú cho lô hàng..."
-                  style={{ fontSize: '1.1rem' }}
-                />
+            <div className="row">
+              <div className="col-md-12">
+                <div className="mb-3">
+                  <label className="form-label fw-bold">
+                    Giá nhập <span className="text-danger">*</span>
+                  </label>
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formatCurrencyInput(editForm.ImportPrice)}
+                      onChange={(e) => setEditForm({
+                        ...editForm,
+                        ImportPrice: parseCurrencyInput(e.target.value)
+                      })}
+                      placeholder="Nhập giá nhập"
+                      style={{ fontSize: '1.1rem' }}
+                    />
+                    <span className="input-group-text">VNĐ</span>
+                  </div>
+                  <small className="text-muted">
+                    Hiện tại: {formatCurrency(editingBatch.ImportPrice || 0)}
+                  </small>
+                </div>
               </div>
-            </div>
 
-            {/* Current Stats */}
-            <div className="col-12">
-              <div className="bg-light p-3 rounded">
-                <h6 className="fw-bold mb-2">📊 Thống kê hiện tại:</h6>
-                <div className="row">
-                  <div className="col-md-3">
-                    <small className="text-muted">Tổng nhập:</small>
-                    <div className="fw-bold">{editingBatch.TotalQuantity}</div>
-                  </div>
-                  <div className="col-md-3">
-                    <small className="text-muted">Đã bán:</small>
-                    <div className="fw-bold text-success">{editingBatch.TotalSoldQuantity}</div>
-                  </div>
-                  <div className="col-md-3">
-                    <small className="text-muted">Còn lại:</small>
-                    <div className="fw-bold text-warning">{editingBatch.RemainingQuantity}</div>
-                  </div>
-                  <div className="col-md-3">
-                    <small className="text-muted">Lãi/Lỗ:</small>
-                    <div className={`fw-bold ${getProfitLossColor(editingBatch.ProfitLoss)}`}>
-                      {formatCurrency(editingBatch.ProfitLoss)}
+              <div className="col-12">
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Ghi chú</label>
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    value={editForm.Notes}
+                    onChange={(e) => setEditForm({...editForm, Notes: e.target.value})}
+                    placeholder="Nhập ghi chú cho lô hàng..."
+                    style={{ fontSize: '1.1rem' }}
+                  />
+                </div>
+              </div>
+
+              {/* Current Stats */}
+              <div className="col-12">
+                <div className="bg-light p-3 rounded">
+                  <h6 className="fw-bold mb-2">📊 Thống kê hiện tại:</h6>
+                  <div className="row">
+                    <div className="col-md-3">
+                      <small className="text-muted">Tổng nhập:</small>
+                      <div className="fw-bold">{editingBatch.TotalQuantity}</div>
+                    </div>
+                    <div className="col-md-3">
+                      <small className="text-muted">Đã bán:</small>
+                      <div className="fw-bold text-success">{editingBatch.TotalSoldQuantity}</div>
+                    </div>
+                    <div className="col-md-3">
+                      <small className="text-muted">Còn lại:</small>
+                      <div className="fw-bold text-warning">{editingBatch.RemainingQuantity}</div>
+                    </div>
+                    <div className="col-md-3">
+                      <small className="text-muted">Lãi/Lỗ:</small>
+                      <div className={`fw-bold ${getProfitLossColor(editingBatch.ProfitLoss)}`}>
+                        {formatCurrency(editingBatch.ProfitLoss)}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleCloseEditModal}>
-          <span className="me-1">❌</span>
-          Hủy
-        </Button>
-        <Button
-          variant="primary"
-          onClick={handleSaveEdit}
-          disabled={editLoading}
-        >
-          {editLoading ? (
-            <>
-              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              Đang lưu...
-            </>
-          ) : (
-            <>
-              <span className="me-1">💾</span>
-              Lưu thay đổi
-            </>
           )}
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseEditModal}>
+            <span className="me-1">❌</span>
+            Hủy
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSaveEdit}
+            disabled={editLoading}
+          >
+            {editLoading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Đang lưu...
+              </>
+            ) : (
+              <>
+                <span className="me-1">💾</span>
+                Lưu thay đổi
+              </>
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };
