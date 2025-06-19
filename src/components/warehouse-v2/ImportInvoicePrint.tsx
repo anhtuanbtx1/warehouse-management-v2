@@ -86,24 +86,7 @@ const ImportInvoicePrint: React.FC<ImportInvoicePrintProps> = ({ show, onHide, b
                 <strong>Ngày tạo:</strong> {formatDate(batchData.CreatedAt)}
               </p>
             </Col>
-            <Col md={6}>
-              <h6 className="text-primary mb-3">
-                <i className="fas fa-building me-2"></i>
-                Thông tin công ty
-              </h6>
-              <p className="mb-2">
-                <strong>Công ty:</strong> Warehouse Management System
-              </p>
-              <p className="mb-2">
-                <strong>Địa chỉ:</strong> Việt Nam
-              </p>
-              <p className="mb-2">
-                <strong>Điện thoại:</strong> +84 xxx xxx xxx
-              </p>
-              <p className="mb-0">
-                <strong>Email:</strong> info@warehouse.com
-              </p>
-            </Col>
+          
           </Row>
 
           {/* Import Details */}
@@ -195,7 +178,7 @@ const ImportInvoicePrint: React.FC<ImportInvoicePrintProps> = ({ show, onHide, b
           {/* Footer */}
           <div className="text-center mt-4 pt-3 border-top">
             <p className="text-muted mb-1">
-              <small>Hóa đơn được tạo tự động bởi Warehouse Management System</small>
+              <small>Hóa đơn được tạo tự động</small>
             </p>
             <p className="text-muted mb-0">
               <small>Ngày in: {new Date().toLocaleDateString('vi-VN')} - {new Date().toLocaleTimeString('vi-VN')}</small>
