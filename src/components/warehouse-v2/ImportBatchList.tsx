@@ -148,9 +148,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
           'Giá trị nhập': batch.TotalImportValue,
           'Giá trị bán': batch.TotalSoldValue,
           'Lãi/Lỗ': batch.ProfitLoss,
-          'Trạng thái': batch.Status,
           'Ghi chú': batch.Notes || '',
-          'Người tạo': batch.CreatedBy,
           'Ngày tạo': formatDate(batch.CreatedAt)
         }));
 
@@ -164,15 +162,13 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
           { wch: 15 },  // Mã lô hàng
           { wch: 12 },  // Ngày nhập
           { wch: 15 },  // Danh mục
-          { wch: 10 },  // Tổng số lượng
-          { wch: 8 },   // Đã bán
-          { wch: 8 },   // Còn lại
-          { wch: 15 },  // Giá trị nhập
-          { wch: 15 },  // Giá trị bán
-          { wch: 12 },  // Lãi/Lỗ
-          { wch: 12 },  // Trạng thái
-          { wch: 20 },  // Ghi chú
-          { wch: 12 },  // Người tạo
+          { wch: 12 },  // Tổng số lượng
+          { wch: 10 },  // Đã bán
+          { wch: 10 },  // Còn lại
+          { wch: 18 },  // Giá trị nhập
+          { wch: 18 },  // Giá trị bán
+          { wch: 15 },  // Lãi/Lỗ
+          { wch: 25 },  // Ghi chú
           { wch: 12 }   // Ngày tạo
         ];
         ws['!cols'] = colWidths;
@@ -233,12 +229,12 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
           <h5 className="mb-0 fs-4">📦 Danh sách lô hàng</h5>
           <div className="d-flex gap-2">
             <Button
-              variant="success"
+              variant="outline-success"
               onClick={exportToExcel}
               className="btn-compact"
               title="Xuất danh sách lô hàng ra Excel"
             >
-              <span className="me-1">📊</span>
+              <span className="me-1">📄</span>
               Xuất Excel
             </Button>
             {onCreateBatch && (
