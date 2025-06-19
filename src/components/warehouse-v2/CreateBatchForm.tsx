@@ -19,6 +19,7 @@ interface CreateBatchData {
   CategoryID: number;
   ImportDate: string;
   TotalQuantity: number;
+  ImportPrice: number;
   TotalImportValue: number;
   Notes?: string;
 }
@@ -28,6 +29,7 @@ const CreateBatchForm: React.FC<CreateBatchFormProps> = ({ show, onHide, onSucce
     CategoryID: 0,
     ImportDate: new Date().toISOString().split('T')[0], // Today's date
     TotalQuantity: 0,
+    ImportPrice: 0,
     TotalImportValue: 0,
     Notes: ''
   });
@@ -36,6 +38,7 @@ const CreateBatchForm: React.FC<CreateBatchFormProps> = ({ show, onHide, onSucce
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [validated, setValidated] = useState(false);
+  const [formattedImportPrice, setFormattedImportPrice] = useState('');
   const [formattedImportValue, setFormattedImportValue] = useState('');
 
   useEffect(() => {
@@ -46,9 +49,11 @@ const CreateBatchForm: React.FC<CreateBatchFormProps> = ({ show, onHide, onSucce
         CategoryID: 0,
         ImportDate: new Date().toISOString().split('T')[0],
         TotalQuantity: 0,
+        ImportPrice: 0,
         TotalImportValue: 0,
         Notes: ''
       });
+      setFormattedImportPrice('');
       setFormattedImportValue('');
       setValidated(false);
       setError('');

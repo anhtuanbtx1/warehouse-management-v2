@@ -27,9 +27,10 @@ interface ImportBatchListProps {
   onCreateBatch?: () => void;
   onViewDetails?: (batch: ImportBatch) => void;
   onViewInvoice?: (batch: ImportBatch) => void;
+  onEditBatch?: (batch: ImportBatch) => void;
 }
 
-const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onViewDetails, onViewInvoice }) => {
+const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onViewDetails, onViewInvoice, onEditBatch }) => {
   const { showSuccess, showError } = useToast();
   const [batches, setBatches] = useState<ImportBatch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +55,17 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
   const [fromDate, setFromDate] = useState(defaultDates.fromDate);
   const [toDate, setToDate] = useState(defaultDates.toDate);
   const [categories, setCategories] = useState<any[]>([]);
+
+  // Edit batch modal states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingBatch, setEditingBatch] = useState<ImportBatch | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editForm, setEditForm] = useState({
+    CategoryID: '',
+    TotalQuantity: '',
+    ImportPrice: '',
+    Notes: ''
+  });
 
   const fetchBatches = async (page: number = 1) => {
     try {
@@ -212,6 +224,111 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
     if (profitLoss > 0) return 'text-success';
     if (profitLoss < 0) return 'text-danger';
     return 'text-muted';
+  };
+
+  // Handle edit batch
+  const handleEditBatch = (batch: ImportBatch) => {
+    setEditingBatch(batch);
+    setEditForm({
+      CategoryID: batch.CategoryID?.toString() || '',
+      TotalQuantity: batch.TotalQuantity.toString(),
+      ImportPrice: batch.ImportPrice?.toString() || '',
+      Notes: batch.Notes || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingBatch) return;
+
+    try {
+      setEditLoading(true);
+
+      // Validation
+      if (!editForm.CategoryID || !editForm.TotalQuantity || !editForm.ImportPrice) {
+        showError('Lỗi validation', 'Vui lòng điền đầy đủ thông tin bắt buộc');
+        return;
+      }
+
+      const totalQuantity = parseInt(parseFormattedNumber(editForm.TotalQuantity));
+      if (isNaN(totalQuantity) || totalQuantity <= 0) {
+        showError('Lỗi validation', 'Tổng số lượng phải là số dương');
+        return;
+      }
+
+      const importPrice = parseFloat(parseFormattedNumber(editForm.ImportPrice));
+      if (isNaN(importPrice) || importPrice <= 0) {
+        showError('Lỗi validation', 'Giá nhập phải là số dương');
+        return;
+      }
+
+      const response = await fetch(`/api/import-batches/${editingBatch.BatchID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          CategoryID: parseInt(editForm.CategoryID),
+          TotalQuantity: totalQuantity,
+          ImportPrice: importPrice,
+          Notes: editForm.Notes
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showSuccess('Cập nhật thành công!', 'Thông tin lô hàng đã được cập nhật');
+        setShowEditModal(false);
+        setEditingBatch(null);
+        fetchBatches(currentPage); // Refresh list
+
+        // Call parent callback if provided
+        if (onEditBatch) {
+          onEditBatch(editingBatch);
+        }
+      } else {
+        showError('Lỗi cập nhật', result.error || 'Có lỗi xảy ra khi cập nhật lô hàng');
+      }
+    } catch (error) {
+      console.error('Error updating batch:', error);
+      showError('Lỗi kết nối', 'Không thể kết nối đến server');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingBatch(null);
+    setEditForm({
+      CategoryID: '',
+      TotalQuantity: '',
+      ImportPrice: '',
+      Notes: ''
+    });
+  };
+
+  // Format number with thousand separators
+  const formatNumber = (value: string) => {
+    if (!value) return '';
+    const numStr = value.replace(/\D/g, ''); // Remove non-digits
+    return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  const parseFormattedNumber = (value: string) => {
+    return value.replace(/\./g, '');
+  };
+
+  // Format currency for VND
+  const formatCurrencyInput = (value: string) => {
+    if (!value) return '';
+    const numStr = value.replace(/\D/g, ''); // Remove non-digits
+    return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  const parseCurrencyInput = (value: string) => {
+    return value.replace(/\./g, '');
   };
 
   return (
@@ -397,6 +514,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
                           )}
                           <Button
                             variant="outline-info"
+                            onClick={() => handleEditBatch(batch)}
                             title="Chỉnh sửa lô hàng"
                             className="btn-compact flex-fill"
                           >
@@ -439,6 +557,185 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
         )}
       </Card.Body>
     </Card>
+
+    {/* Edit Batch Modal */}
+    <Modal show={showEditModal} onHide={handleCloseEditModal} size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>
+          <span className="me-2">✏️</span>
+          Chỉnh sửa lô hàng
+          {editingBatch && (
+            <small className="text-muted ms-2">({editingBatch.BatchCode})</small>
+          )}
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {editingBatch && (
+          <div className="row">
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="form-label fw-bold">
+                  Mã lô hàng <span className="text-muted">(không thể sửa)</span>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={editingBatch.BatchCode}
+                  disabled
+                  style={{ backgroundColor: '#f8f9fa' }}
+                />
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="form-label fw-bold">
+                  Ngày nhập <span className="text-muted">(không thể sửa)</span>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formatDate(editingBatch.ImportDate)}
+                  disabled
+                  style={{ backgroundColor: '#f8f9fa' }}
+                />
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="form-label fw-bold">
+                  Danh mục <span className="text-danger">*</span>
+                </label>
+                <select
+                  className="form-select"
+                  value={editForm.CategoryID}
+                  onChange={(e) => setEditForm({...editForm, CategoryID: e.target.value})}
+                  style={{ fontSize: '1.1rem' }}
+                >
+                  <option value="">Chọn danh mục</option>
+                  {categories.map(category => (
+                    <option key={category.CategoryID} value={category.CategoryID}>
+                      {category.CategoryName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="form-label fw-bold">
+                  Tổng số lượng <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formatNumber(editForm.TotalQuantity)}
+                  onChange={(e) => setEditForm({
+                    ...editForm,
+                    TotalQuantity: parseFormattedNumber(e.target.value)
+                  })}
+                  placeholder="Nhập tổng số lượng"
+                  style={{ fontSize: '1.1rem' }}
+                />
+                <small className="text-muted">
+                  Hiện tại: {editingBatch.TotalQuantity} sản phẩm
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-md-12">
+              <div className="mb-3">
+                <label className="form-label fw-bold">
+                  Giá nhập <span className="text-danger">*</span>
+                </label>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={formatCurrencyInput(editForm.ImportPrice)}
+                    onChange={(e) => setEditForm({
+                      ...editForm,
+                      ImportPrice: parseCurrencyInput(e.target.value)
+                    })}
+                    placeholder="Nhập giá nhập"
+                    style={{ fontSize: '1.1rem' }}
+                  />
+                  <span className="input-group-text">VNĐ</span>
+                </div>
+                <small className="text-muted">
+                  Hiện tại: {formatCurrency(editingBatch.ImportPrice || 0)}
+                </small>
+              </div>
+            </div>
+
+            <div className="col-12">
+              <div className="mb-3">
+                <label className="form-label fw-bold">Ghi chú</label>
+                <textarea
+                  className="form-control"
+                  rows={3}
+                  value={editForm.Notes}
+                  onChange={(e) => setEditForm({...editForm, Notes: e.target.value})}
+                  placeholder="Nhập ghi chú cho lô hàng..."
+                  style={{ fontSize: '1.1rem' }}
+                />
+              </div>
+            </div>
+
+            {/* Current Stats */}
+            <div className="col-12">
+              <div className="bg-light p-3 rounded">
+                <h6 className="fw-bold mb-2">📊 Thống kê hiện tại:</h6>
+                <div className="row">
+                  <div className="col-md-3">
+                    <small className="text-muted">Tổng nhập:</small>
+                    <div className="fw-bold">{editingBatch.TotalQuantity}</div>
+                  </div>
+                  <div className="col-md-3">
+                    <small className="text-muted">Đã bán:</small>
+                    <div className="fw-bold text-success">{editingBatch.TotalSoldQuantity}</div>
+                  </div>
+                  <div className="col-md-3">
+                    <small className="text-muted">Còn lại:</small>
+                    <div className="fw-bold text-warning">{editingBatch.RemainingQuantity}</div>
+                  </div>
+                  <div className="col-md-3">
+                    <small className="text-muted">Lãi/Lỗ:</small>
+                    <div className={`fw-bold ${getProfitLossColor(editingBatch.ProfitLoss)}`}>
+                      {formatCurrency(editingBatch.ProfitLoss)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleCloseEditModal}>
+          <span className="me-1">❌</span>
+          Hủy
+        </Button>
+        <Button
+          variant="primary"
+          onClick={handleSaveEdit}
+          disabled={editLoading}
+        >
+          {editLoading ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Đang lưu...
+            </>
+          ) : (
+            <>
+              <span className="me-1">💾</span>
+              Lưu thay đổi
+            </>
+          )}
+        </Button>
+      </Modal.Footer>
+    </Modal>
     </>
   );
 };

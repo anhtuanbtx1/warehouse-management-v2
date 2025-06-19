@@ -95,6 +95,16 @@ const ImportPage: React.FC = () => {
     setProductInvoiceData(null);
   };
 
+  const handleEditBatch = (batch: ImportBatch) => {
+    // Refresh the list after edit
+    setRefreshKey(prev => prev + 1);
+
+    // If this batch is currently selected, refresh its details
+    if (selectedBatch && selectedBatch.BatchID === batch.BatchID) {
+      fetchActualProductCount(selectedBatch.BatchID);
+    }
+  };
+
   const fetchActualProductCount = async (batchId: number) => {
     try {
       const response = await fetch(`/api/products-v2?batchId=${batchId}&limit=1000`);
@@ -153,6 +163,7 @@ const ImportPage: React.FC = () => {
                 onCreateBatch={handleCreateBatch}
                 onViewDetails={handleViewBatchDetails}
                 onViewInvoice={handleViewInvoice}
+                onEditBatch={handleEditBatch}
               />
             </Tab>
 

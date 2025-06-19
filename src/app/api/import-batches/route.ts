@@ -10,6 +10,7 @@ interface ImportBatch {
   CategoryID: number;
   CategoryName?: string;
   TotalQuantity: number;
+  ImportPrice?: number;
   TotalImportValue: number;
   TotalSoldQuantity: number;
   TotalSoldValue: number;
@@ -26,6 +27,7 @@ interface CreateImportBatchRequest {
   CategoryID: number;
   ImportDate: string;
   TotalQuantity: number;
+  ImportPrice?: number;
   TotalImportValue: number;
   Notes?: string;
 }
@@ -79,8 +81,23 @@ export async function GET(request: NextRequest) {
     
     // Lấy dữ liệu với phân trang
     const dataQuery = `
-      SELECT 
-        b.*,
+      SELECT
+        b.BatchID,
+        b.BatchCode,
+        b.ImportDate,
+        b.CategoryID,
+        b.TotalQuantity,
+        b.ImportPrice,
+        b.TotalImportValue,
+        b.TotalSoldQuantity,
+        b.TotalSoldValue,
+        b.RemainingQuantity,
+        b.ProfitLoss,
+        b.Status,
+        b.Notes,
+        b.CreatedBy,
+        b.CreatedAt,
+        b.UpdatedAt,
         c.CategoryName
       FROM CRM_ImportBatches b
       LEFT JOIN CRM_Categories c ON b.CategoryID = c.CategoryID
@@ -136,11 +153,15 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Calculate ImportPrice if not provided
+    const importPrice = body.ImportPrice || (body.TotalImportValue / body.TotalQuantity);
+
     // Tạo lô hàng bằng stored procedure
     const result = await executeProcedure<ImportBatch>('SP_CRM_CreateImportBatch', {
       CategoryID: body.CategoryID,
       ImportDate: body.ImportDate,
       TotalQuantity: body.TotalQuantity,
+      ImportPrice: importPrice,
       TotalImportValue: body.TotalImportValue,
       Notes: body.Notes || null,
       CreatedBy: 'system' // TODO: Get from auth
