@@ -17,7 +17,12 @@ const useLayoutContext = () => {
   return context
 }
 
-const getPreferredTheme = (): ThemeType => (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+const getPreferredTheme = (): ThemeType => {
+  if (typeof window !== 'undefined') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+  return 'light'
+}
 
 const LayoutProvider = ({ children }: ChildrenType) => {
   const queryParams = useQueryParams()

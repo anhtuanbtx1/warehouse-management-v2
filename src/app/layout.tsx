@@ -35,7 +35,7 @@ const splashScreenStyles = `
   justify-content: center;
   z-index: 9999;
   opacity: 1;
-  transition: all 15s linear;
+  transition: all 0.5s ease;
   overflow: hidden;
 }
 

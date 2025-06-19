@@ -21,6 +21,7 @@ interface ImportBatch {
   Notes?: string;
   CreatedBy: string;
   CreatedAt: string;
+  ImportPrice?: number;
 }
 
 interface ImportBatchListProps {
@@ -365,8 +366,8 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
             )}
           </div>
         </Card.Header>
-      
-      <Card.Body>
+
+        <Card.Body>
         {/* Filters */}
         <div className="row mb-3">
           <div className="col-md-3">

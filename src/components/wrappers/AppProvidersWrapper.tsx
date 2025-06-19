@@ -17,19 +17,23 @@ const AppProvidersWrapper = ({ children }: ChildrenType) => {
   }
 
   useEffect(() => {
-    if (document) {
+    if (typeof document !== 'undefined') {
+      // Remove splash screen after a short delay
+      const timer = setTimeout(() => {
+        document.querySelector('#splash-screen')?.classList.add('remove')
+      }, 500)
+
       const e = document.querySelector<HTMLDivElement>('#__next_splash')
       if (e?.hasChildNodes()) {
         document.querySelector('#splash-screen')?.classList.add('remove')
       }
-      e?.addEventListener('DOMNodeInserted', () => {
-        document.querySelector('#splash-screen')?.classList.add('remove')
-      })
-    }
 
-    document.addEventListener('visibilitychange', handleChangeTitle)
-    return () => {
-      document.removeEventListener('visibilitychange', handleChangeTitle)
+      document.addEventListener('visibilitychange', handleChangeTitle)
+
+      return () => {
+        clearTimeout(timer)
+        document.removeEventListener('visibilitychange', handleChangeTitle)
+      }
     }
   }, [])
 
