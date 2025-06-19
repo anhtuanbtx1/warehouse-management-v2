@@ -26,6 +26,11 @@ let pool: sql.ConnectionPool | null = null;
 let connecting = false;
 
 export async function getConnection(): Promise<sql.ConnectionPool> {
+  // Skip database connection during build time
+  if (process.env.NODE_ENV === 'production' && process.env.SKIP_DB_CONNECTION === 'true') {
+    throw new Error('Database connection skipped during build time');
+  }
+
   // If pool exists and is connected, return it
   if (pool && pool.connected) {
     return pool;

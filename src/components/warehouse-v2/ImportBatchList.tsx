@@ -569,79 +569,80 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
         </Modal.Header>
         <Modal.Body>
           {editingBatch && (
-            <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label fw-bold">
-                    Mã lô hàng <span className="text-muted">(không thể sửa)</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={editingBatch.BatchCode}
-                    disabled
-                    style={{ backgroundColor: '#f8f9fa' }}
-                  />
+            <>
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label className="form-label fw-bold">
+                      Mã lô hàng <span className="text-muted">(không thể sửa)</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={editingBatch.BatchCode}
+                      disabled
+                      style={{ backgroundColor: '#f8f9fa' }}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label className="form-label fw-bold">
+                      Ngày nhập <span className="text-muted">(không thể sửa)</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formatDate(editingBatch.ImportDate)}
+                      disabled
+                      style={{ backgroundColor: '#f8f9fa' }}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label className="form-label fw-bold">
+                      Danh mục <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-select"
+                      value={editForm.CategoryID}
+                      onChange={(e) => setEditForm({...editForm, CategoryID: e.target.value})}
+                      style={{ fontSize: '1.1rem' }}
+                    >
+                      <option value="">Chọn danh mục</option>
+                      {categories.map(category => (
+                        <option key={category.CategoryID} value={category.CategoryID}>
+                          {category.CategoryName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label className="form-label fw-bold">
+                      Tổng số lượng <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formatNumber(editForm.TotalQuantity)}
+                      onChange={(e) => setEditForm({
+                        ...editForm,
+                        TotalQuantity: parseFormattedNumber(e.target.value)
+                      })}
+                      placeholder="Nhập tổng số lượng"
+                      style={{ fontSize: '1.1rem' }}
+                    />
+                    <small className="text-muted">
+                      Hiện tại: {editingBatch.TotalQuantity} sản phẩm
+                    </small>
+                  </div>
                 </div>
               </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label fw-bold">
-                    Ngày nhập <span className="text-muted">(không thể sửa)</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={formatDate(editingBatch.ImportDate)}
-                    disabled
-                    style={{ backgroundColor: '#f8f9fa' }}
-                  />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label fw-bold">
-                    Danh mục <span className="text-danger">*</span>
-                  </label>
-                  <select
-                    className="form-select"
-                    value={editForm.CategoryID}
-                    onChange={(e) => setEditForm({...editForm, CategoryID: e.target.value})}
-                    style={{ fontSize: '1.1rem' }}
-                  >
-                    <option value="">Chọn danh mục</option>
-                    {categories.map(category => (
-                      <option key={category.CategoryID} value={category.CategoryID}>
-                        {category.CategoryName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label fw-bold">
-                    Tổng số lượng <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={formatNumber(editForm.TotalQuantity)}
-                    onChange={(e) => setEditForm({
-                      ...editForm,
-                      TotalQuantity: parseFormattedNumber(e.target.value)
-                    })}
-                    placeholder="Nhập tổng số lượng"
-                    style={{ fontSize: '1.1rem' }}
-                  />
-                  <small className="text-muted">
-                    Hiện tại: {editingBatch.TotalQuantity} sản phẩm
-                  </small>
-                </div>
-              </div>
-            </div>
 
-            <div className="row">
+              <div className="row">
               <div className="col-md-12">
                 <div className="mb-3">
                   <label className="form-label fw-bold">
@@ -708,6 +709,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
                 </div>
               </div>
             </div>
+            </>
           )}
         </Modal.Body>
         <Modal.Footer>
