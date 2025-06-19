@@ -12,7 +12,7 @@ const config: sql.config = {
     trustServerCertificate: true,
     enableArithAbort: true,
     requestTimeout: 15000,  // Reduced from 30s
-    connectionTimeout: 10000  // Reduced from 30s
+    connectTimeout: 10000  // Fixed: was connectionTimeout, should be connectTimeout
   },
   pool: {
     max: 5,  // Reduced from 10

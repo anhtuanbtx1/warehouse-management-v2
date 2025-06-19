@@ -43,3 +43,5 @@ deploy-package/
 *.ps1
 *.bat
 deploy.sh
+
+.vercel

@@ -1,0 +1,38 @@
+# Environment Variables for Vercel Deployment
+# Copy these to Vercel Dashboard -> Project Settings -> Environment Variables
+
+# Database Configuration
+DB_SERVER=112.78.2.70
+DB_PORT=1433
+DB_NAME=zen50558_ManagementStore
+DB_USER=zen50558_ManagementStore
+DB_PASSWORD=Passwordla@123
+DB_ENCRYPT=true
+DB_TRUST_SERVER_CERTIFICATE=true
+
+# Authentication Secrets (CHANGE THESE IN PRODUCTION!)
+NEXTAUTH_SECRET=warehouse_nextauth_secret_2024_change_this_in_production
+JWT_SECRET=warehouse_jwt_secret_2024_change_this_in_production
+
+# Application Configuration
+NODE_ENV=production
+APP_NAME=Warehouse Management System V2
+APP_VERSION=2.0.0
+
+# Company Information
+COMPANY_NAME=Cửa hàng điện thoại ABC
+COMPANY_ADDRESS=123 Đường Nguyễn Huệ, Quận 1, TP.HCM
+COMPANY_PHONE=0123456789
+COMPANY_EMAIL=info@phonestore.com
+
+# Performance Settings
+NEXT_TELEMETRY_DISABLED=1
+
+# Instructions:
+# 1. Go to Vercel Dashboard
+# 2. Select your project
+# 3. Go to Settings -> Environment Variables
+# 4. Add each variable above (one by one)
+# 5. Set Environment: Production
+# 6. Click "Save"
+# 7. Redeploy the project
