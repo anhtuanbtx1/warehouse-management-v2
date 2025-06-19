@@ -36,6 +36,7 @@ const CreateBatchForm: React.FC<CreateBatchFormProps> = ({ show, onHide, onSucce
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [validated, setValidated] = useState(false);
+  const [formattedImportValue, setFormattedImportValue] = useState('');
 
   useEffect(() => {
     if (show) {
@@ -48,6 +49,7 @@ const CreateBatchForm: React.FC<CreateBatchFormProps> = ({ show, onHide, onSucce
         TotalImportValue: 0,
         Notes: ''
       });
+      setFormattedImportValue('');
       setValidated(false);
       setError('');
     }
@@ -69,6 +71,18 @@ const CreateBatchForm: React.FC<CreateBatchFormProps> = ({ show, onHide, onSucce
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleImportValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    const rawValue = parseFormattedNumber(inputValue);
+    const formattedValue = formatNumber(rawValue);
+
+    setFormattedImportValue(formattedValue);
+    setFormData(prev => ({
+      ...prev,
+      TotalImportValue: parseInt(rawValue) || 0
     }));
   };
 
@@ -129,6 +143,18 @@ const CreateBatchForm: React.FC<CreateBatchFormProps> = ({ show, onHide, onSucce
       style: 'currency',
       currency: 'VND'
     }).format(amount);
+  };
+
+  // Format number with thousand separators (100000 -> 100.000)
+  const formatNumber = (value: string | number) => {
+    if (!value) return '';
+    const numStr = value.toString().replace(/\D/g, ''); // Remove non-digits
+    return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  // Parse formatted number back to plain number (100.000 -> 100000)
+  const parseFormattedNumber = (value: string) => {
+    return value.replace(/\./g, '');
   };
 
   return (
@@ -215,17 +241,18 @@ const CreateBatchForm: React.FC<CreateBatchFormProps> = ({ show, onHide, onSucce
                   Tổng giá trị nhập (VNĐ) <span className="text-danger">*</span>
                 </Form.Label>
                 <Form.Control
-                  type="number"
-                  min="1"
-                  step="1000"
-                  value={formData.TotalImportValue}
-                  onChange={(e) => handleInputChange('TotalImportValue', parseFloat(e.target.value) || 0)}
+                  type="text"
+                  value={formattedImportValue}
+                  onChange={handleImportValueChange}
                   required
-                  placeholder="Nhập tổng giá trị"
+                  placeholder="Nhập tổng giá trị (VD: 100.000.000)"
                 />
                 <Form.Control.Feedback type="invalid">
                   Giá trị nhập phải lớn hơn 0
                 </Form.Control.Feedback>
+                <Form.Text className="text-muted">
+                  Nhập số tiền, hệ thống sẽ tự động thêm dấu phân cách (VD: 100000000 → 100.000.000)
+                </Form.Text>
               </Form.Group>
             </Col>
           </Row>

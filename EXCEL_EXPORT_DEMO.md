@@ -4,12 +4,12 @@
 
 ### ✨ **Button "Xuất Excel"**
 - **Vị trí**: Header của danh sách lô hàng
-- **Màu sắc**: Xanh lá (success variant)
-- **Icon**: 📊
+- **Màu sắc**: Outline xanh lá (outline-success variant)
+- **Icon**: 📄 (file icon)
 - **Tooltip**: "Xuất danh sách lô hàng ra Excel"
 
 ### 📋 **Dữ Liệu Xuất**
-Tất cả thông tin lô hàng với các cột:
+Tất cả thông tin lô hàng với các cột (12 cột tối ưu):
 
 1. **STT** - Số thứ tự
 2. **Mã lô hàng** - BatchCode
@@ -21,10 +21,10 @@ Tất cả thông tin lô hàng với các cột:
 8. **Giá trị nhập** - TotalImportValue (số)
 9. **Giá trị bán** - TotalSoldValue (số)
 10. **Lãi/Lỗ** - ProfitLoss (số)
-11. **Trạng thái** - Status
-12. **Ghi chú** - Notes
-13. **Người tạo** - CreatedBy
-14. **Ngày tạo** - Định dạng dd/mm/yyyy
+11. **Ghi chú** - Notes
+12. **Ngày tạo** - Định dạng dd/mm/yyyy
+
+> **Đã bỏ**: Trạng thái, Người tạo (để tối ưu báo cáo)
 
 ## 🔧 Cách Sử Dụng
 
@@ -73,7 +73,7 @@ http://localhost:3000/warehouse-v2/import
 
 ### **After (Sau khi thêm)**
 ```
-[📦 Danh sách lô hàng]    [📊 Xuất Excel] [➕ Tạo lô hàng mới]
+[📦 Danh sách lô hàng]    [📄 Xuất Excel] [➕ Tạo lô hàng mới]
 ```
 
 ## 🔍 **Test Cases**

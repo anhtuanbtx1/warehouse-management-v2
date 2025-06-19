@@ -39,6 +39,8 @@ interface SalesInvoice {
   ProductName?: string;
   IMEI?: string;
   ProductSalePrice?: number;
+  ImportPrice?: number;
+  Profit?: number;
 }
 
 const SalesPage: React.FC = () => {
@@ -136,7 +138,6 @@ const SalesPage: React.FC = () => {
 
   const handlePrintInvoice = (sale: SalesInvoice) => {
     // Use available data from the sales list to create invoice
-    // Estimate import price based on typical profit margins (20-30%)
     const estimatedImportPrice = Math.round((sale.ProductSalePrice || sale.FinalAmount) * 0.75);
 
     const invoice = {
@@ -150,17 +151,37 @@ const SalesPage: React.FC = () => {
         SalePrice: sale.ProductSalePrice || sale.FinalAmount,
         CategoryName: sale.ProductName?.includes('iPhone 16') ? 'iPhone 16' :
                      sale.ProductName?.includes('iPhone 15') ? 'iPhone 15' :
-                     sale.ProductName?.includes('iPhone 14') ? 'iPhone 14' : 'iPhone',
-        BatchCode: `LOT${sale.InvoiceNumber.replace('HD', '')}`
+                     sale.ProductName?.includes('iPhone 14') ? 'iPhone 14' : 'iPhone'
       },
       customerInfo: sale.CustomerName ? {
         name: sale.CustomerName,
         phone: sale.CustomerPhone,
         address: ''
-      } : undefined,
-      profit: (sale.ProductSalePrice || sale.FinalAmount) - estimatedImportPrice,
-      profitMargin: estimatedImportPrice ?
-        (((sale.ProductSalePrice || sale.FinalAmount) - estimatedImportPrice) / estimatedImportPrice) * 100 : 0
+      } : undefined
+    };
+
+    setInvoiceData(invoice);
+    setShowInvoice(true);
+  };
+
+  const handlePrintInvoiceFromProduct = (product: any) => {
+    // Create invoice from product data
+    const invoice = {
+      invoiceNumber: product.InvoiceNumber || `HD${Date.now()}`,
+      saleDate: product.SoldDate || new Date().toISOString(),
+      product: {
+        ProductID: product.ProductID,
+        ProductName: product.ProductName,
+        IMEI: product.IMEI,
+        ImportPrice: product.ImportPrice,
+        SalePrice: product.SalePrice || product.ImportPrice * 1.2,
+        CategoryName: product.CategoryName
+      },
+      customerInfo: product.CustomerInfo ? {
+        name: product.CustomerInfo,
+        phone: '',
+        address: ''
+      } : undefined
     };
 
     setInvoiceData(invoice);
@@ -206,6 +227,7 @@ const SalesPage: React.FC = () => {
                 key={refreshKey}
                 availableOnly={true}
                 onSellProduct={handleSellProduct}
+                onPrintInvoice={handlePrintInvoiceFromProduct}
                 showAddButton={false}
                 hideCategoryFilter={true}
                 hideColumns={['salePrice', 'profit', 'saleDate']}
@@ -241,7 +263,9 @@ const SalesPage: React.FC = () => {
                           <th>Sản phẩm</th>
                           <th>IMEI</th>
                           <th>Khách hàng</th>
+                          <th>Giá nhập</th>
                           <th>Giá bán</th>
+                          <th>Lợi nhuận</th>
                           <th>Trạng thái</th>
                           <th>Thao tác</th>
                         </tr>
@@ -272,8 +296,21 @@ const SalesPage: React.FC = () => {
                               </div>
                             </td>
                             <td>
+                              <span className="text-info">
+                                {sale.ImportPrice ? formatCurrency(sale.ImportPrice) : '-'}
+                              </span>
+                            </td>
+                            <td>
                               <span className="text-success fw-bold">
                                 {formatCurrency(sale.ProductSalePrice || sale.FinalAmount)}
+                              </span>
+                            </td>
+                            <td>
+                              <span className={`fw-bold ${
+                                sale.Profit && sale.Profit > 0 ? 'text-success' :
+                                sale.Profit && sale.Profit < 0 ? 'text-danger' : 'text-muted'
+                              }`}>
+                                {sale.Profit ? formatCurrency(sale.Profit) : '-'}
                               </span>
                             </td>
                             <td>

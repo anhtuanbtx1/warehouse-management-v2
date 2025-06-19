@@ -22,6 +22,8 @@ interface SalesInvoice {
   ProductName?: string;
   IMEI?: string;
   SalePrice?: number;
+  ImportPrice?: number;
+  Profit?: number;
 }
 
 interface SellProductRequest {
@@ -78,13 +80,16 @@ export async function GET(request: NextRequest) {
     
     // Lấy dữ liệu với phân trang
     const dataQuery = `
-      SELECT 
+      SELECT
         i.*,
         d.ProductName,
         d.IMEI,
-        d.SalePrice as ProductSalePrice
+        d.SalePrice as ProductSalePrice,
+        p.ImportPrice,
+        (d.SalePrice - p.ImportPrice) as Profit
       FROM CRM_SalesInvoices i
       LEFT JOIN CRM_SalesInvoiceDetails d ON i.InvoiceID = d.InvoiceID
+      LEFT JOIN CRM_Products p ON d.ProductID = p.ProductID
       ${whereClause}
       ORDER BY i.SaleDate DESC, i.CreatedAt DESC
       OFFSET @offset ROWS

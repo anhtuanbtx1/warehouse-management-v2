@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Breadcrumb, Tabs, Tab } from 'react-bootstrap';
 import InventoryReportV2 from '@/components/warehouse-v2/InventoryReportV2';
 import ProductListV2 from '@/components/warehouse-v2/ProductListV2';
+import InvoicePrint from '@/components/warehouse-v2/InvoicePrint';
 
 interface InventoryBatch {
   BatchCode: string;
@@ -22,6 +23,8 @@ const InventoryPage: React.FC = () => {
   const [selectedBatch, setSelectedBatch] = useState<InventoryBatch | null>(null);
   const [activeTab, setActiveTab] = useState('inventory');
   const [actualProductCount, setActualProductCount] = useState<number>(0);
+  const [showProductInvoice, setShowProductInvoice] = useState(false);
+  const [productInvoiceData, setProductInvoiceData] = useState<any>(null);
 
   const handleViewBatchDetails = (batchCode: string) => {
     // Find batch info from API or create a mock batch object
@@ -58,6 +61,35 @@ const InventoryPage: React.FC = () => {
       console.error('Error fetching product count:', error);
       setActualProductCount(0);
     }
+  };
+
+  const handlePrintInvoiceFromProduct = (product: any) => {
+    // Create invoice from product data
+    const invoice = {
+      invoiceNumber: product.InvoiceNumber || `HD${Date.now()}`,
+      saleDate: product.SoldDate || new Date().toISOString(),
+      product: {
+        ProductID: product.ProductID,
+        ProductName: product.ProductName,
+        IMEI: product.IMEI,
+        ImportPrice: product.ImportPrice,
+        SalePrice: product.SalePrice || product.ImportPrice * 1.2,
+        CategoryName: product.CategoryName
+      },
+      customerInfo: product.CustomerInfo ? {
+        name: product.CustomerInfo,
+        phone: '',
+        address: ''
+      } : undefined
+    };
+
+    setProductInvoiceData(invoice);
+    setShowProductInvoice(true);
+  };
+
+  const handleCloseProductInvoice = () => {
+    setShowProductInvoice(false);
+    setProductInvoiceData(null);
   };
 
   return (
@@ -148,6 +180,7 @@ const InventoryPage: React.FC = () => {
                   <ProductListV2
                     batchCode={selectedBatch.BatchCode}
                     onProductCountChange={() => fetchActualProductCount(selectedBatch.BatchCode)}
+                    onPrintInvoice={handlePrintInvoiceFromProduct}
                     showAddButton={false}
                     hideCategoryFilter={true}
                     hideColumns={['actions']}
@@ -156,6 +189,13 @@ const InventoryPage: React.FC = () => {
               )}
             </Tab>
           </Tabs>
+
+          {/* Product Invoice Print Modal */}
+          <InvoicePrint
+            show={showProductInvoice}
+            onHide={handleCloseProductInvoice}
+            invoiceData={productInvoiceData}
+          />
         </Col>
       </Row>
     </Container>

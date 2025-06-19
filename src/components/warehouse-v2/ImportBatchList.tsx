@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Form, InputGroup, Badge, Pagination, Modal } from 'react-bootstrap';
 import * as XLSX from 'xlsx';
+import { useToast } from '@/contexts/ToastContext';
 
 interface ImportBatch {
   BatchID: number;
@@ -25,9 +26,11 @@ interface ImportBatch {
 interface ImportBatchListProps {
   onCreateBatch?: () => void;
   onViewDetails?: (batch: ImportBatch) => void;
+  onViewInvoice?: (batch: ImportBatch) => void;
 }
 
-const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onViewDetails }) => {
+const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onViewDetails, onViewInvoice }) => {
+  const { showSuccess, showError } = useToast();
   const [batches, setBatches] = useState<ImportBatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -183,12 +186,12 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
         // Save file
         XLSX.writeFile(wb, filename);
 
-        // Show success message
-        alert('Xuất Excel thành công!');
+        // Show success toast
+        showSuccess('Xuất Excel thành công!', `File ${filename} đã được tải xuống`);
       }
     } catch (error) {
       console.error('Error exporting to Excel:', error);
-      alert('Có lỗi xảy ra khi xuất Excel!');
+      showError('Có lỗi xảy ra khi xuất Excel!', 'Vui lòng thử lại sau');
     }
   };
 
@@ -323,7 +326,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
                   <th className="fs-6 fw-bold">Giá trị bán</th>
                   <th className="fs-6 fw-bold">Lãi/Lỗ</th>
                   <th className="fs-6 fw-bold">Trạng thái</th>
-                  <th className="fs-6 fw-bold" style={{ minWidth: '160px' }}>Thao tác</th>
+                  <th className="fs-6 fw-bold" style={{ minWidth: '200px' }}>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -369,15 +372,27 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({ onCreateBatch, onView
                       </td>
                       <td>{getStatusBadge(batch.Status)}</td>
                       <td>
-                        <div className="d-flex btn-group-compact" style={{ minWidth: '160px' }}>
+                        <div className="d-flex btn-group-compact gap-1" style={{ minWidth: '200px' }}>
                           {onViewDetails && (
                             <Button
                               variant="primary"
                               onClick={() => onViewDetails(batch)}
                               className="btn-compact flex-fill"
+                              title="Xem chi tiết lô hàng"
                             >
                               <span className="me-1">👁️</span>
                               Chi tiết
+                            </Button>
+                          )}
+                          {onViewInvoice && (
+                            <Button
+                              variant="outline-success"
+                              onClick={() => onViewInvoice(batch)}
+                              className="btn-compact flex-fill"
+                              title="Xem hóa đơn nhập hàng"
+                            >
+                              <span className="me-1">🧾</span>
+                              Hóa đơn
                             </Button>
                           )}
                           <Button

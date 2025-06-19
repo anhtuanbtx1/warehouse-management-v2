@@ -5,6 +5,8 @@ import { Container, Row, Col, Breadcrumb, Tabs, Tab } from 'react-bootstrap';
 import ImportBatchList from '@/components/warehouse-v2/ImportBatchList';
 import CreateBatchForm from '@/components/warehouse-v2/CreateBatchForm';
 import ProductListV2 from '@/components/warehouse-v2/ProductListV2';
+import ImportInvoicePrint from '@/components/warehouse-v2/ImportInvoicePrint';
+import InvoicePrint from '@/components/warehouse-v2/InvoicePrint';
 
 interface ImportBatch {
   BatchID: number;
@@ -30,6 +32,10 @@ const ImportPage: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState('batches');
   const [actualProductCount, setActualProductCount] = useState<number>(0);
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [invoiceBatch, setInvoiceBatch] = useState<ImportBatch | null>(null);
+  const [showProductInvoice, setShowProductInvoice] = useState(false);
+  const [productInvoiceData, setProductInvoiceData] = useState<any>(null);
 
   const handleCreateBatch = () => {
     setShowCreateForm(true);
@@ -48,6 +54,45 @@ const ImportPage: React.FC = () => {
     setSelectedBatch(batch);
     setActiveTab('products');
     fetchActualProductCount(batch.BatchID);
+  };
+
+  const handleViewInvoice = (batch: ImportBatch) => {
+    setInvoiceBatch(batch);
+    setShowInvoice(true);
+  };
+
+  const handleCloseInvoice = () => {
+    setShowInvoice(false);
+    setInvoiceBatch(null);
+  };
+
+  const handlePrintInvoiceFromProduct = (product: any) => {
+    // Create invoice from product data
+    const invoice = {
+      invoiceNumber: product.InvoiceNumber || `HD${Date.now()}`,
+      saleDate: product.SoldDate || new Date().toISOString(),
+      product: {
+        ProductID: product.ProductID,
+        ProductName: product.ProductName,
+        IMEI: product.IMEI,
+        ImportPrice: product.ImportPrice,
+        SalePrice: product.SalePrice || product.ImportPrice * 1.2,
+        CategoryName: product.CategoryName
+      },
+      customerInfo: product.CustomerInfo ? {
+        name: product.CustomerInfo,
+        phone: '',
+        address: ''
+      } : undefined
+    };
+
+    setProductInvoiceData(invoice);
+    setShowProductInvoice(true);
+  };
+
+  const handleCloseProductInvoice = () => {
+    setShowProductInvoice(false);
+    setProductInvoiceData(null);
   };
 
   const fetchActualProductCount = async (batchId: number) => {
@@ -107,6 +152,7 @@ const ImportPage: React.FC = () => {
                 key={refreshKey}
                 onCreateBatch={handleCreateBatch}
                 onViewDetails={handleViewBatchDetails}
+                onViewInvoice={handleViewInvoice}
               />
             </Tab>
 
@@ -162,6 +208,7 @@ const ImportPage: React.FC = () => {
                   <ProductListV2
                     batchId={selectedBatch.BatchID}
                     onProductCountChange={() => fetchActualProductCount(selectedBatch.BatchID)}
+                    onPrintInvoice={handlePrintInvoiceFromProduct}
                     batchInfo={{
                       totalQuantity: selectedBatch.TotalQuantity,
                       currentCount: actualProductCount
@@ -177,6 +224,20 @@ const ImportPage: React.FC = () => {
             show={showCreateForm}
             onHide={handleCloseCreateForm}
             onSuccess={handleCreateSuccess}
+          />
+
+          {/* Import Invoice Print Modal */}
+          <ImportInvoicePrint
+            show={showInvoice}
+            onHide={handleCloseInvoice}
+            batchData={invoiceBatch}
+          />
+
+          {/* Product Invoice Print Modal */}
+          <InvoicePrint
+            show={showProductInvoice}
+            onHide={handleCloseProductInvoice}
+            invoiceData={productInvoiceData}
           />
         </Col>
       </Row>

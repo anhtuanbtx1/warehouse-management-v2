@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Form, InputGroup, Badge, Pagination, Modal, Row, Col, Alert } from 'react-bootstrap';
 import { useToast } from '@/contexts/ToastContext';
+import * as XLSX from 'xlsx';
 
 interface ProductV2 {
   ProductID: number;
@@ -26,6 +27,7 @@ interface ProductV2 {
 
 interface ProductListV2Props {
   onSellProduct?: (product: ProductV2) => void;
+  onPrintInvoice?: (product: ProductV2) => void;
   availableOnly?: boolean;
   batchId?: number;
   batchCode?: string; // Thêm hỗ trợ filter theo batchCode
@@ -42,6 +44,7 @@ interface ProductListV2Props {
 
 const ProductListV2: React.FC<ProductListV2Props> = ({
   onSellProduct,
+  onPrintInvoice,
   availableOnly = false,
   batchId,
   batchCode,
@@ -331,6 +334,86 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
+  // Function to export Excel
+  const exportToExcel = async () => {
+    try {
+      // Fetch all products without pagination for export
+      const params = new URLSearchParams({
+        page: '1',
+        limit: '1000', // Get all records
+        ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter && { status: statusFilter }),
+        ...(categoryFilter && { categoryId: categoryFilter }),
+        ...(batchId && { batchId: batchId.toString() }),
+        ...(batchCode && { batchCode: batchCode }),
+        ...(availableOnly && { availableOnly: 'true' })
+      });
+
+      const response = await fetch(`/api/products-v2?${params}`);
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const exportData = result.data.data.map((product: ProductV2, index: number) => ({
+          'STT': index + 1,
+          'Tên sản phẩm': product.ProductName,
+          'IMEI': product.IMEI,
+          'Danh mục': product.CategoryName,
+          'Mã lô hàng': product.BatchCode,
+          'Ngày nhập': formatDate(product.ImportDate),
+          'Giá nhập': product.ImportPrice,
+          'Giá bán': product.SalePrice || 0,
+          'Lãi/Lỗ': getProfit(product),
+          'Trạng thái': product.Status === 'IN_STOCK' ? 'Còn hàng' :
+                      product.Status === 'SOLD' ? 'Đã bán' :
+                      product.Status === 'DAMAGED' ? 'Hỏng' : 'Trả lại',
+          'Thông tin khách hàng': product.CustomerInfo || '',
+          'Ngày bán': formatDate(product.SoldDate),
+          'Ghi chú': product.Notes || '',
+          'Ngày tạo': formatDate(product.CreatedAt)
+        }));
+
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(exportData);
+
+        // Set column widths
+        const colWidths = [
+          { wch: 5 },   // STT
+          { wch: 20 },  // Tên sản phẩm
+          { wch: 18 },  // IMEI
+          { wch: 15 },  // Danh mục
+          { wch: 15 },  // Mã lô hàng
+          { wch: 12 },  // Ngày nhập
+          { wch: 15 },  // Giá nhập
+          { wch: 15 },  // Giá bán
+          { wch: 12 },  // Lãi/Lỗ
+          { wch: 12 },  // Trạng thái
+          { wch: 20 },  // Thông tin khách hàng
+          { wch: 12 },  // Ngày bán
+          { wch: 25 },  // Ghi chú
+          { wch: 12 }   // Ngày tạo
+        ];
+        ws['!cols'] = colWidths;
+
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Danh sách sản phẩm');
+
+        // Generate filename with current date
+        const currentDate = new Date().toLocaleDateString('vi-VN').replace(/\//g, '-');
+        const filename = `Danh_sach_san_pham_${currentDate}.xlsx`;
+
+        // Save file
+        XLSX.writeFile(wb, filename);
+
+        // Show success toast
+        showSuccess('Xuất Excel thành công!', `File ${filename} đã được tải xuống`);
+      }
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      showError('Có lỗi xảy ra khi xuất Excel!', 'Vui lòng thử lại sau');
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'IN_STOCK':
@@ -361,7 +444,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
 
   return (
     <Card>
-      <Card.Header>
+      <Card.Header className="d-flex justify-content-between align-items-center">
         <h5 className="mb-0">
           <span className="me-2">📱</span>
           {availableOnly ? 'Sản phẩm có thể bán' : 'Danh sách sản phẩm'}
@@ -373,6 +456,17 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
             </span>
           )}
         </h5>
+        <div className="d-flex gap-2">
+          <Button
+            variant="outline-success"
+            onClick={exportToExcel}
+            className="btn-compact"
+            title="Xuất danh sách sản phẩm ra Excel"
+          >
+            <span className="me-1">📄</span>
+            Xuất Excel
+          </Button>
+        </div>
       </Card.Header>
       
       <Card.Body>
@@ -615,13 +709,14 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                               <span>🛒</span>
                             </Button>
                           )}
-                          {product.InvoiceNumber && (
+                          {product.InvoiceNumber && onPrintInvoice && (
                             <Button
                               variant="outline-info"
                               size="sm"
-                              title="Xem hóa đơn"
+                              onClick={() => onPrintInvoice(product)}
+                              title="In hóa đơn"
                             >
-                              <span>🧾</span>
+                              <span>🖨️</span>
                             </Button>
                           )}
                         </div>

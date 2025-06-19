@@ -11,7 +11,6 @@ interface Product {
   ImportPrice: number;
   SalePrice: number;
   CategoryName: string;
-  BatchCode: string;
 }
 
 interface InvoiceData {
@@ -23,8 +22,6 @@ interface InvoiceData {
     phone?: string;
     address?: string;
   };
-  profit: number;
-  profitMargin: number;
 }
 
 interface InvoicePrintProps {
@@ -127,7 +124,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ show, onHide, invoiceData }
           <div className="invoice-header text-center mb-4 border-bottom pb-3">
             <h2 className="text-primary mb-1">
               <i className="fas fa-store me-2"></i>
-              CỬA HÀNG ĐIỆN THOẠI ABC
+              CỬA HÀNG ĐIỆN THOẠI ZenStore
             </h2>
             <h4 className="text-muted mb-2">HÓA ĐƠN BÁN HÀNG</h4>
             <div className="company-info">
@@ -137,13 +134,13 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ show, onHide, invoiceData }
               </p>
               <p className="mb-1">
                 <i className="fas fa-phone me-1"></i>
-                <strong>Hotline:</strong> 0123.456.789 |
+                <strong>Hotline:</strong> 0777999908-0865508888 |
                 <i className="fas fa-envelope ms-2 me-1"></i>
-                <strong>Email:</strong> info@cuahang.com
+                <strong>Email:</strong> info@zenstores.com.vn
               </p>
               <p className="mb-0">
                 <strong>MST:</strong> 0123456789 |
-                <strong>Website:</strong> www.cuahang.com
+                <strong>Website:</strong> www.zenstores.com.vn
               </p>
             </div>
           </div>
@@ -205,7 +202,6 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ show, onHide, invoiceData }
                   <th>Tên sản phẩm</th>
                   <th>IMEI</th>
                   <th>Loại</th>
-                  <th>Lô hàng</th>
                   <th className="text-end">Đơn giá</th>
                   <th className="text-center">SL</th>
                   <th className="text-end">Thành tiền</th>
@@ -217,7 +213,6 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ show, onHide, invoiceData }
                   <td>{invoiceData.product.ProductName}</td>
                   <td className="font-monospace">{invoiceData.product.IMEI}</td>
                   <td>{invoiceData.product.CategoryName}</td>
-                  <td className="font-monospace">{invoiceData.product.BatchCode}</td>
                   <td className="text-end">{formatCurrency(invoiceData.product.SalePrice)}</td>
                   <td className="text-center">1</td>
                   <td className="text-end fw-bold">{formatCurrency(invoiceData.product.SalePrice)}</td>
@@ -228,27 +223,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ show, onHide, invoiceData }
 
           {/* Summary */}
           <Row className="mb-4">
-            <Col md={6}>
-              <div className="border rounded p-3">
-                <h6 className="text-primary mb-3">
-                  <i className="fas fa-chart-line me-2"></i>
-                  Thông tin lợi nhuận
-                </h6>
-                <p className="mb-2">
-                  <strong>Giá nhập:</strong> {formatCurrency(invoiceData.product.ImportPrice)}
-                </p>
-                <p className="mb-2">
-                  <strong>Giá bán:</strong> {formatCurrency(invoiceData.product.SalePrice)}
-                </p>
-                <p className="mb-2 text-success">
-                  <strong>Lợi nhuận:</strong> {formatCurrency(invoiceData.profit)}
-                </p>
-                <p className="mb-0 text-info">
-                  <strong>Tỷ suất LN:</strong> {invoiceData.profitMargin.toFixed(1)}%
-                </p>
-              </div>
-            </Col>
-            <Col md={6}>
+            <Col md={12}>
               <div className="invoice-summary border rounded p-3 bg-light">
                 <h6 className="text-primary mb-3">
                   <i className="fas fa-calculator me-2"></i>
@@ -310,7 +285,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ show, onHide, invoiceData }
               <p className="mb-2 text-muted">
                 ✅ Sản phẩm được bảo hành theo chính sách của nhà sản xuất<br/>
                 ✅ Quý khách vui lòng kiểm tra kỹ sản phẩm trước khi nhận hàng<br/>
-                ✅ Mọi thắc mắc xin liên hệ hotline: 0123.456.789
+                ✅ Mọi thắc mắc xin liên hệ hotline: 0777999908-0865508888
               </p>
               <p className="mb-0 text-muted small">
                 📅 Hóa đơn được in lúc: {formatDate(new Date().toISOString())}
