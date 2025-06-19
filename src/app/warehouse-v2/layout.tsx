@@ -81,32 +81,6 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
             
             <Nav>
               <Dropdown align="end">
-                <Dropdown.Toggle variant="primary" className="px-3 py-2" bsPrefix="btn" data-bs-toggle="dropdown">
-                  <span className="me-2">⚙️</span>
-                  <span className="fw-medium">Cài đặt</span>
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item href="#categories" className="py-2">
-                    <span className="me-3">🏷️</span>
-                    <span className="fw-medium">Danh mục sản phẩm</span>
-                  </Dropdown.Item>
-                  <Dropdown.Item href="#users" className="py-2">
-                    <span className="me-3">👥</span>
-                    <span className="fw-medium">Quản lý người dùng</span>
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item href="#backup" className="py-2">
-                    <span className="me-3">💾</span>
-                    <span className="fw-medium">Sao lưu dữ liệu</span>
-                  </Dropdown.Item>
-                  <Dropdown.Item href="#reports" className="py-2">
-                    <span className="me-3">📊</span>
-                    <span className="fw-medium">Xuất báo cáo</span>
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-              
-              <Dropdown align="end" className="ms-3">
                 <Dropdown.Toggle variant="success" className="px-3 py-2" bsPrefix="btn" data-bs-toggle="dropdown">
                   <span className="me-2">👤</span>
                   <span className="fw-medium">Quản trị viên</span>
@@ -383,17 +357,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
           box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
         }
 
-        /* Primary button (Cài đặt) */
-        .navbar .btn-primary {
-          background-color: #0d6efd !important;
-          border-color: #0d6efd !important;
-          color: white !important;
-        }
-
-        .navbar .btn-primary:hover {
-          background-color: #0b5ed7 !important;
-          border-color: #0a58ca !important;
-        }
+        /* Removed primary button styling as settings button was removed */
 
         /* Success button (Quản trị viên) */
         .navbar .btn-success {
