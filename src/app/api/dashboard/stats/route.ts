@@ -29,31 +29,44 @@ interface DashboardStats {
 
 export async function GET(request: NextRequest) {
   try {
-    // Get Vietnam timezone date (UTC+7)
-    const vietnamDate = new Date(new Date().getTime() + (7 * 60 * 60 * 1000));
+    // Get Vietnam timezone date using proper timezone handling
+    const now = new Date();
+    const vietnamDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
     const today = vietnamDate.toISOString().split('T')[0];
     const thisYear = vietnamDate.getFullYear();
     const thisMonth = vietnamDate.getMonth() + 1; // JavaScript months are 0-based
 
-    console.log('Dashboard Stats - Vietnam Date params:', {
-      today,
+    // Also get UTC date for comparison
+    const utcToday = now.toISOString().split('T')[0];
+
+    console.log('Dashboard Stats - Timezone Debug:', {
+      serverTime: now.toISOString(),
+      utcToday,
+      vietnamToday: today,
       thisYear,
       thisMonth,
-      vietnamDateTime: vietnamDate.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
+      vietnamDateTime: vietnamDate.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
+      environment: process.env.NODE_ENV || 'development'
     });
 
     // Revenue statistics - Today vs Yesterday
+    // Use both Vietnam date and UTC date for comparison in production
     const revenueStats = await executeQuery(`
       SELECT
-        -- Doanh thu hôm nay
+        -- Doanh thu hôm nay (Vietnam timezone)
         ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @today THEN SalePrice ELSE 0 END), 0) as todayRevenue,
+        -- Doanh thu hôm nay (UTC timezone) - for Vercel comparison
+        ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @utcToday THEN SalePrice ELSE 0 END), 0) as todayRevenueUTC,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = @thisMonth THEN SalePrice ELSE 0 END), 0) as monthRevenue,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear THEN SalePrice ELSE 0 END), 0) as yearRevenue,
         -- Doanh thu hôm qua để tính growth
-        ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = DATEADD(day, -1, @today) THEN SalePrice ELSE 0 END), 0) as yesterdayRevenue
+        ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = DATEADD(day, -1, @today) THEN SalePrice ELSE 0 END), 0) as yesterdayRevenue,
+        -- Debug: Count records for today
+        COUNT(CASE WHEN CAST(SoldDate AS DATE) = @today THEN 1 END) as todayCount,
+        COUNT(CASE WHEN CAST(SoldDate AS DATE) = @utcToday THEN 1 END) as todayCountUTC
       FROM CRM_Products
       WHERE Status = 'SOLD' AND SoldDate IS NOT NULL
-    `, { today, thisMonth, thisYear });
+    `, { today, utcToday, thisMonth, thisYear });
 
     // Profit Statistics
     const profitStats = await executeQuery(`
@@ -100,9 +113,24 @@ export async function GET(request: NextRequest) {
     const inventory = inventoryStats[0];
     const sales = salesStats[0];
 
+    // Debug logging for production
+    console.log('Dashboard Stats - Revenue Debug:', {
+      environment: process.env.NODE_ENV,
+      todayVietnam: today,
+      todayUTC: utcToday,
+      todayRevenue: revenue.todayRevenue,
+      todayRevenueUTC: revenue.todayRevenueUTC,
+      todayCount: revenue.todayCount,
+      todayCountUTC: revenue.todayCountUTC,
+      salesTodayCount: sales.todayCount
+    });
+
+    // Use Vietnam timezone revenue for display, but log both for debugging
+    const finalTodayRevenue = revenue.todayRevenue || 0;
+
     // Calculate growth rate
     const growthRate = revenue.yesterdayRevenue > 0
-      ? ((revenue.todayRevenue - revenue.yesterdayRevenue) / revenue.yesterdayRevenue * 100)
+      ? ((finalTodayRevenue - revenue.yesterdayRevenue) / revenue.yesterdayRevenue * 100)
       : 0;
 
     // Calculate profit margin
@@ -118,7 +146,7 @@ export async function GET(request: NextRequest) {
 
     const stats: DashboardStats = {
       revenue: {
-        today: revenue.todayRevenue || 0,
+        today: finalTodayRevenue,
         thisMonth: revenue.monthRevenue || 0,
         thisYear: revenue.yearRevenue || 0,
         growth: Math.round(growthRate * 100) / 100
@@ -142,10 +170,28 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    return NextResponse.json({
+    // Add debug info for production troubleshooting
+    const response = {
       success: true,
-      data: stats
-    });
+      data: stats,
+      ...(process.env.NODE_ENV !== 'production' && {
+        debug: {
+          timezone: {
+            server: now.toISOString(),
+            vietnam: today,
+            utc: utcToday
+          },
+          revenue: {
+            vietnamTz: revenue.todayRevenue,
+            utcTz: revenue.todayRevenueUTC,
+            countVietnam: revenue.todayCount,
+            countUTC: revenue.todayCountUTC
+          }
+        }
+      })
+    };
+
+    return NextResponse.json(response);
 
   } catch (error) {
     console.error('Dashboard stats error:', error);

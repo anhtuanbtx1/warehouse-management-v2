@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "TZ": "Asia/Ho_Chi_Minh"
+  },
+  "regions": ["sin1"],
+  "crons": []
+}
