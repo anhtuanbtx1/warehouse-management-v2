@@ -256,7 +256,7 @@ const ReportsPage: React.FC = () => {
         <Col>
           {/* Breadcrumb */}
           <Breadcrumb className="mb-3">
-            <Breadcrumb.Item href="/warehouse-v2">Warehouse</Breadcrumb.Item>
+            <Breadcrumb.Item href="/warehouse-v2">Trang chủ</Breadcrumb.Item>
             <Breadcrumb.Item active>Báo cáo bán hàng</Breadcrumb.Item>
           </Breadcrumb>
 
@@ -401,7 +401,7 @@ const ReportsPage: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <span className="me-1">📊</span>
+                      <span className="me-1">📄</span>
                       Xuất Excel
                     </>
                   )}
