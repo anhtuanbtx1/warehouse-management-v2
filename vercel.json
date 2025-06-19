@@ -5,8 +5,12 @@
     }
   },
   "env": {
-    "TZ": "Asia/Ho_Chi_Minh"
+    "TZ": "Asia/Ho_Chi_Minh",
+    "NODE_ENV": "production"
   },
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install --legacy-peer-deps",
   "regions": ["sin1"],
   "crons": []
 }
