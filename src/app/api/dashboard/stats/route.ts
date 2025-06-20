@@ -48,26 +48,25 @@ export async function GET(request: NextRequest) {
       note: 'Using Vietnam timezone utilities for consistent date handling'
     });
 
-    // Revenue statistics - Using Vietnam timezone dates
-    // Database stores Vietnam time (+7), so we query with Vietnam dates
+    // Revenue statistics - Database stores Vietnam time, use direct date comparison
     const revenueStats = await executeQuery(`
       SELECT
-        -- Doanh thu hôm nay (Vietnam timezone - database stores +7 time)
+        -- Doanh thu hôm nay (database stores Vietnam time)
         ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @today THEN SalePrice ELSE 0 END), 0) as todayRevenue,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = @thisMonth THEN SalePrice ELSE 0 END), 0) as monthRevenue,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear THEN SalePrice ELSE 0 END), 0) as yearRevenue,
-        -- Doanh thu hôm qua để tính growth (using Vietnam yesterday)
+        -- Doanh thu hôm qua để tính growth
         ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @yesterday THEN SalePrice ELSE 0 END), 0) as yesterdayRevenue,
-        -- Debug: Count records for today
+        -- Count records for today
         COUNT(CASE WHEN CAST(SoldDate AS DATE) = @today THEN 1 END) as todayCount
       FROM CRM_Products
       WHERE Status = 'SOLD' AND SoldDate IS NOT NULL
     `, { today, yesterday, thisMonth, thisYear });
 
-    // Profit Statistics
+    // Profit Statistics - Use direct date comparison (database stores Vietnam time)
     const profitStats = await executeQuery(`
       SELECT
-        -- Lợi nhuận hôm nay
+        -- Lợi nhuận hôm nay (direct comparison - database stores Vietnam time)
         ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @today THEN (SalePrice - ImportPrice) ELSE 0 END), 0) as todayProfit,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = @thisMonth THEN (SalePrice - ImportPrice) ELSE 0 END), 0) as monthProfit,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear THEN (SalePrice - ImportPrice) ELSE 0 END), 0) as yearProfit,
@@ -93,16 +92,16 @@ export async function GET(request: NextRequest) {
       FROM CRM_ImportBatches ib
     `);
 
-    // Sales Count Statistics
+    // Sales Count Statistics - Use direct date comparison (database stores Vietnam time)
     const salesStats = await executeQuery(`
       SELECT
-        -- Số đơn hôm nay
+        -- Số đơn hôm nay (direct comparison - database stores Vietnam time)
         COUNT(CASE WHEN CAST(SoldDate AS DATE) = @today THEN 1 END) as todayCount,
-        COUNT(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = MONTH(GETDATE()) THEN 1 END) as monthCount,
+        COUNT(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = @thisMonth THEN 1 END) as monthCount,
         ISNULL(AVG(CASE WHEN Status = 'SOLD' THEN SalePrice END), 0) as avgOrderValue
       FROM CRM_Products
       WHERE Status = 'SOLD' AND SoldDate IS NOT NULL
-    `, { today, thisYear });
+    `, { today, thisYear, thisMonth });
 
     const revenue = revenueStats[0];
     const profit = profitStats[0];
@@ -118,16 +117,17 @@ export async function GET(request: NextRequest) {
       yesterdayRevenue: revenue.yesterdayRevenue,
       todayCount: revenue.todayCount,
       salesTodayCount: sales.todayCount,
-      databaseTimezone: 'Vietnam +7 (stored in DB)',
-      serverTimezone: 'UTC (Vercel) but using Vietnam dates for queries'
+      databaseTimezone: 'Database stores Vietnam time - using direct date comparison'
     });
 
-    // Use Vietnam timezone revenue for display
+    // Database stores Vietnam time, use direct comparison values
     const finalTodayRevenue = revenue.todayRevenue || 0;
+    const finalYesterdayRevenue = revenue.yesterdayRevenue || 0;
+    const finalTodayCount = revenue.todayCount || 0;
 
-    // Calculate growth rate
-    const growthRate = revenue.yesterdayRevenue > 0
-      ? ((finalTodayRevenue - revenue.yesterdayRevenue) / revenue.yesterdayRevenue * 100)
+    // Calculate growth rate using the correct yesterday revenue
+    const growthRate = finalYesterdayRevenue > 0
+      ? ((finalTodayRevenue - finalYesterdayRevenue) / finalYesterdayRevenue * 100)
       : 0;
 
     // Calculate profit margin
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
         lowStock: inventory.totalBatches || 0   // Số lô hàng
       },
       sales: {
-        todayCount: sales.todayCount || 0,
+        todayCount: finalTodayCount,
         thisMonthCount: sales.monthCount || 0,
         avgOrderValue: Math.round(sales.avgOrderValue || 0)
       }
@@ -180,10 +180,10 @@ export async function GET(request: NextRequest) {
             explanation: 'Database stores Vietnam time (+7), queries use Vietnam dates'
           },
           revenue: {
-            todayRevenue: revenue.todayRevenue,
-            yesterdayRevenue: revenue.yesterdayRevenue,
-            todayCount: revenue.todayCount,
-            growthRate: Math.round(((finalTodayRevenue - revenue.yesterdayRevenue) / revenue.yesterdayRevenue * 100) * 100) / 100
+            todayRevenue: finalTodayRevenue,
+            yesterdayRevenue: finalYesterdayRevenue,
+            todayCount: finalTodayCount,
+            growthRate: Math.round(growthRate * 100) / 100
           }
         }
       })
