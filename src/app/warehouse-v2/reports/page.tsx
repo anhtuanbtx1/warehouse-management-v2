@@ -361,13 +361,18 @@ const ReportsPage: React.FC = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                       />
-                      <Button
-                        variant="primary"
-                        onClick={handleSearch}
-                        title="Tìm kiếm"
-                      >
-                        🔍
-                      </Button>
+                     <Button variant="outline-primary" onClick={handleSearch} className="px-3 btn btn-primary"  style={{
+                                                      backgroundColor: '#0d6efd',
+                                                      borderColor: '#0d6efd',
+                                                      color: 'white',
+                                                      display: 'flex',
+                                                      alignItems: 'center',
+                                                      justifyContent: 'center',
+                                                      fontWeight: 'bold',
+                                                      fontSize: '16px'
+                                                    }}>
+                                                    <span className="me-1">🔍</span>
+                                                  </Button>
                     </InputGroup>
                   </Form.Group>
                 </Col>
@@ -441,7 +446,7 @@ const ReportsPage: React.FC = () => {
                         <th>Lợi nhuận</th>
                         <th>Ngày bán</th>
                         <th>Hóa đơn</th>
-                        <th>Khách hàng</th>
+                        
                       </tr>
                     </thead>
                     <tbody>
@@ -502,13 +507,7 @@ const ReportsPage: React.FC = () => {
                                 </small>
                               )}
                             </td>
-                            <td>
-                              {product.CustomerInfo && (
-                                <small className="text-muted">
-                                  {product.CustomerInfo}
-                                </small>
-                              )}
-                            </td>
+                          
                           </tr>
                         ))
                       )}

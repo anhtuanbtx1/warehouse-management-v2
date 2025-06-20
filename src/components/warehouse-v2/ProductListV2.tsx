@@ -512,17 +512,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
               hideCategoryFilter ? "col-md-4" :
               hideResetButton ? "col-md-5" : "col-md-3"
             }>
-              <Form.Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="fs-6"
-              >
-                <option value="">Tất cả trạng thái</option>
-                <option value="IN_STOCK">Còn hàng</option>
-                <option value="SOLD">Đã bán</option>
-                <option value="DAMAGED">Hỏng</option>
-                <option value="RETURNED">Trả lại</option>
-              </Form.Select>
+             
             </div>
           )}
 
@@ -546,20 +536,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
           {!hideResetButton && (
             <div className="col-md-2">
               <div className="d-flex btn-group-compact">
-                <Button
-                  variant="outline-primary"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setStatusFilter('');
-                    setCategoryFilter('');
-                    fetchProducts(1);
-                  }}
-                  title="Đặt lại bộ lọc"
-                  className="btn-compact"
-                >
-                  <span className="me-1">🔄</span>
-                  Đặt lại
-                </Button>
+              
                 {showAddButton && (
                   <Button
                     variant={isBatchFull ? "secondary" : "success"}

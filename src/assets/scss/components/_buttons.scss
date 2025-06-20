@@ -166,6 +166,22 @@ $value in $theme-colors {
     --#{$prefix}btn-active-border-color: var(--#{$prefix}dark);
 }
 
+// Custom Create Button
+.btn-create {
+    --#{$prefix}btn-color: #{$white};
+    --#{$prefix}btn-bg: var(--#{$prefix}btn-create);
+    --#{$prefix}btn-border-color: var(--#{$prefix}btn-create);
+    --#{$prefix}btn-hover-color: #{$white};
+    --#{$prefix}btn-hover-bg: var(--#{$prefix}btn-create);
+    --#{$prefix}btn-hover-border-color: var(--#{$prefix}btn-create);
+    --#{$prefix}btn-active-color: #{$white};
+    --#{$prefix}btn-active-bg: var(--#{$prefix}btn-create);
+    --#{$prefix}btn-active-border-color: var(--#{$prefix}btn-create);
+    --#{$prefix}btn-disabled-color: #{$white};
+    --#{$prefix}btn-disabled-bg: var(--#{$prefix}btn-create);
+    --#{$prefix}btn-disabled-border-color: var(--#{$prefix}btn-create);
+}
+
 // Dark Mode
 html[data-bs-theme="dark"] {
     .btn-light {

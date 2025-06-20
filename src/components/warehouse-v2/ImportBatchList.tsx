@@ -356,7 +356,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
               Xuất Excel
             </Button>
             {onCreateBatch && (
-              <Button variant="primary" onClick={onCreateBatch} className="btn-compact">
+              <Button onClick={onCreateBatch} className="btn-compact btn-create">
                 <span className="me-1">➕</span>
                 Tạo lô hàng mới
               </Button>
@@ -412,9 +412,17 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
               />
             </div>
             <div className="col-md-3">
-              <Button variant="outline-primary" onClick={handleFilter} className="btn-compact">
+              <Button variant="outline-primary" onClick={handleFilter} className="px-3 btn btn-primary"  style={{
+                  backgroundColor: '#0d6efd',
+                  borderColor: '#0d6efd',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '16px'
+                }}>
                 <span className="me-1">🔍</span>
-                Lọc
               </Button>
             </div>
           </div>
@@ -490,7 +498,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
                           <div className="d-flex btn-group-compact gap-1" style={{ minWidth: '200px' }}>
                             {onViewDetails && (
                               <Button
-                                variant="primary"
+                                variant="outline-warning"
                                 onClick={() => onViewDetails(batch)}
                                 className="btn-compact flex-fill"
                                 title="Xem chi tiết lô hàng"

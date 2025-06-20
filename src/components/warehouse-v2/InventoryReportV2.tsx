@@ -99,17 +99,17 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'ACTIVE':
-        return <Badge bg="success">Đang hoạt động</Badge>;
-      case 'COMPLETED':
-        return <Badge bg="primary">Hoàn thành</Badge>;
-      case 'CANCELLED':
-        return <Badge bg="danger">Đã hủy</Badge>;
-      default:
-        return <Badge bg="secondary">{status}</Badge>;
-    }
-  };
+      switch (status) {
+        case 'COMPLETED':
+          return <Badge bg="success">Hoàn thành</Badge>;
+        case 'PARTIAL':
+          return <Badge bg="primary">Đang hoạt động</Badge>;
+        case 'CANCELLED':
+          return <Badge bg="danger">Đã hủy</Badge>;
+        default:
+          return <Badge bg="secondary">{status}</Badge>;
+      }
+    };
 
   const getProfitLossColor = (profitLoss: number) => {
     if (profitLoss > 0) return 'text-success';
@@ -119,9 +119,9 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
 
   const getProgressBarColor = (remaining: number, total: number) => {
     const percentage = (remaining / total) * 100;
-    if (percentage > 70) return 'bg-success';
+    if (percentage > 70) return 'bg-danger';
     if (percentage > 30) return 'bg-warning';
-    return 'bg-danger';
+    return 'bg-success';
   };
 
   return (
@@ -224,10 +224,18 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
               <Form.Group>
                 <Form.Label>&nbsp;</Form.Label>
                 <div>
-                  <Button variant="primary" onClick={handleFilter} className="w-100">
-                    <i className="fas fa-filter me-1"></i>
-                    Lọc
-                  </Button>
+                  <Button variant="outline-primary" onClick={handleFilter} className="px-3 btn btn-primary"  style={{
+                                  backgroundColor: '#0d6efd',
+                                  borderColor: '#0d6efd',
+                                  color: 'white',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontWeight: 'bold',
+                                  fontSize: '16px'
+                                }}>
+                                <span className="me-1">🔍</span>
+                              </Button>
                 </div>
               </Form.Group>
             </Col>
@@ -319,9 +327,9 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
                         <td>
                           {onViewBatchDetails && (
                             <Button
-                              variant="primary"
+                              variant="outline-warning"
                               onClick={() => onViewBatchDetails(item.BatchCode)}
-                              className="btn-compact"
+                              className="btn-compact flex-fill"
                               title="Xem chi tiết lô hàng"
                             >
                               <span className="me-1">👁️</span>

@@ -156,10 +156,7 @@ const InventoryPage: React.FC = () => {
                           <code>{selectedBatch.BatchCode}</code>
                         </div>
                       </Col>
-                      <Col md={3}>
-                        <strong>Danh mục:</strong>
-                        <div className="text-info">{selectedBatch.CategoryName}</div>
-                      </Col>
+                   
                       <Col md={3}>
                         <strong>Ngày nhập:</strong>
                         <div>{new Date(selectedBatch.ImportDate).toLocaleDateString('vi-VN')}</div>
