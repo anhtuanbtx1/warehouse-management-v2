@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
       ...(process.env.NODE_ENV !== 'production' && {
         debug: {
           timezone: {
-            server: now.toISOString(),
+            server: new Date().toISOString(),
             vietnam: today,
             yesterday: yesterday,
             explanation: 'Database stores Vietnam time (+7), queries use Vietnam dates'
