@@ -164,7 +164,7 @@ const WarehouseV2Dashboard: React.FC = () => {
             </Card>
           </Col>
           <Col md={3}>
-            <Card className={`border-${stats.profit.today >= 0 ? 'success' : 'danger'} h-100`} style={{ borderWidth: '3px' }}>
+            <Card className="border-danger h-100" style={{ borderWidth: '3px' }}>
               <Card.Body className="text-center" style={{ padding: '2rem' }}>
                 <i className={`fas fa-dollar-sign fa-4x ${stats.profit.today >= 0 ? 'text-success' : 'text-danger'} mb-4`}></i>
                 <h3 className={`${stats.profit.today >= 0 ? 'text-success' : 'text-danger'} mb-3`}
