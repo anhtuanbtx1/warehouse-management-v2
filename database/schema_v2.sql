@@ -150,21 +150,35 @@ AFTER UPDATE
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     -- Cập nhật thống kê lô hàng khi sản phẩm được bán
     IF UPDATE(Status) OR UPDATE(SalePrice)
     BEGIN
         UPDATE b SET
             TotalSoldQuantity = (
-                SELECT COUNT(*) 
-                FROM CRM_Products p 
+                SELECT COUNT(*)
+                FROM CRM_Products p
                 WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
             ),
             TotalSoldValue = (
                 SELECT ISNULL(SUM(p.SalePrice), 0)
-                FROM CRM_Products p 
+                FROM CRM_Products p
                 WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
             ),
+            -- Tự động cập nhật Status thành COMPLETED khi tất cả sản phẩm đã bán
+            Status = CASE
+                WHEN (
+                    SELECT COUNT(*)
+                    FROM CRM_Products p
+                    WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+                ) = b.TotalQuantity THEN 'COMPLETED'
+                WHEN (
+                    SELECT COUNT(*)
+                    FROM CRM_Products p
+                    WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+                ) > 0 THEN 'PARTIAL'
+                ELSE 'ACTIVE'
+            END,
             UpdatedAt = GETDATE()
         FROM CRM_ImportBatches b
         INNER JOIN inserted i ON b.BatchID = i.BatchID;
