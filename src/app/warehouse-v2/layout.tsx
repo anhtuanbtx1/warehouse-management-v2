@@ -168,7 +168,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
           padding: 0.875rem 0.75rem;
         }
         .warehouse-v2 .table td {
-          font-size: 1rem;
+          font-size: 1.5rem;
           padding: 0.875rem 0.75rem;
           vertical-align: middle;
         }

@@ -251,7 +251,7 @@ const ReportsPage: React.FC = () => {
   };
 
   return (
-    <Container fluid>
+    <Container fluid style={{ fontSize: '16px' }}>
       <Row>
         <Col>
           {/* Breadcrumb */}
@@ -262,7 +262,7 @@ const ReportsPage: React.FC = () => {
 
           {/* Page Header */}
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="mb-0">
+            <h2 className="mb-0" style={{ fontSize: '28px' }}>
               <span className="me-2">📝</span>
               Báo cáo bán hàng
             </h2>
@@ -273,32 +273,32 @@ const ReportsPage: React.FC = () => {
             <Col md={3}>
               <Card className="text-center">
                 <Card.Body>
-                  <h5 className="text-primary">{stats.totalSold}</h5>
-                  <small className="text-muted">Sản phẩm đã bán</small>
+                  <h5 className="text-primary" style={{ fontSize: '25px' }}>{stats.totalSold}</h5>
+                  <small className="text-muted" style={{ fontSize: '14px' }}>Sản phẩm đã bán</small>
                 </Card.Body>
               </Card>
             </Col>
             <Col md={3}>
               <Card className="text-center">
                 <Card.Body>
-                  <h5 className="text-success">{formatCurrency(stats.totalRevenue)}</h5>
-                  <small className="text-muted">Tổng doanh thu</small>
+                  <h5 className="text-success" style={{ fontSize: '25px' }}>{formatCurrency(stats.totalRevenue)}</h5>
+                  <small className="text-muted" style={{ fontSize: '14px' }}>Tổng doanh thu</small>
                 </Card.Body>
               </Card>
             </Col>
             <Col md={3}>
               <Card className="text-center">
                 <Card.Body>
-                  <h5 className="text-info">{formatCurrency(stats.totalCost)}</h5>
-                  <small className="text-muted">Tổng chi phí</small>
+                  <h5 className="text-info" style={{ fontSize: '25px' }}>{formatCurrency(stats.totalCost)}</h5>
+                  <small className="text-muted" style={{ fontSize: '14px' }}>Tổng chi phí</small>
                 </Card.Body>
               </Card>
             </Col>
             <Col md={3}>
               <Card className="text-center">
                 <Card.Body>
-                  <h5 className={getProfitColor(stats.totalProfit)}>{formatCurrency(stats.totalProfit)}</h5>
-                  <small className="text-muted">Tổng lợi nhuận</small>
+                  <h5 className={getProfitColor(stats.totalProfit)} style={{ fontSize: '25px' }}>{formatCurrency(stats.totalProfit)}</h5>
+                  <small className="text-muted" style={{ fontSize: '14px' }}>Tổng lợi nhuận</small>
                 </Card.Body>
               </Card>
             </Col>
@@ -307,7 +307,7 @@ const ReportsPage: React.FC = () => {
           {/* Filters and Export */}
           <Card className="mb-4">
             <Card.Header>
-              <h5 className="mb-0">
+              <h5 className="mb-0" style={{ fontSize: '18px' }}>
                 <span className="me-2">🔍</span>
                 Bộ lọc và xuất báo cáo
               </h5>
@@ -418,10 +418,10 @@ const ReportsPage: React.FC = () => {
           {/* Products Table */}
           <Card>
             <Card.Header className="d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">
+              <h5 className="mb-0" style={{ fontSize: '18px' }}>
                 <span className="me-2">📋</span>
                 Danh sách sản phẩm đã bán
-                <Badge bg="info" className="ms-2">{totalRecords} sản phẩm</Badge>
+                <Badge bg="info" className="ms-2" style={{ fontSize: '14px' }}>{totalRecords} sản phẩm</Badge>
               </h5>
             </Card.Header>
             <Card.Body>
@@ -433,20 +433,20 @@ const ReportsPage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <Table responsive striped hover>
+                  <Table responsive striped hover style={{ fontSize: '15px' }}>
                     <thead>
                       <tr>
-                        <th>STT</th>
-                        <th>Sản phẩm</th>
-                        <th>IMEI</th>
-                        <th>Danh mục</th>
-                        <th>Lô hàng</th>
-                        <th>Giá nhập</th>
-                        <th>Giá bán</th>
-                        <th>Lợi nhuận</th>
-                        <th>Ngày bán</th>
-                        <th>Hóa đơn</th>
-                        
+                        <th style={{ fontSize: '16px' }}>STT</th>
+                        <th style={{ fontSize: '16px' }}>Sản phẩm</th>
+                        <th style={{ fontSize: '16px' }}>IMEI</th>
+                        <th style={{ fontSize: '16px' }}>Danh mục</th>
+                        <th style={{ fontSize: '16px' }}>Lô hàng</th>
+                        <th style={{ fontSize: '16px' }}>Giá nhập</th>
+                        <th style={{ fontSize: '16px' }}>Giá bán</th>
+                        <th style={{ fontSize: '16px' }}>Lợi nhuận</th>
+                        <th style={{ fontSize: '16px' }}>Ngày bán</th>
+                        <th style={{ fontSize: '16px' }}>Hóa đơn</th>
+
                       </tr>
                     </thead>
                     <tbody>
