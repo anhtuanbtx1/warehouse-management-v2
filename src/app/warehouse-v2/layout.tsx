@@ -83,7 +83,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
                 href="/warehouse-v2/reports"
                 className={`${isActive('/warehouse-v2/reports')} px-3 py-2 fw-medium`}
               >
-                <span className="me-2">📊</span>
+                <span className="me-2">📝</span>
                 <span>Báo cáo</span>
               </Nav.Link>
             </Nav>

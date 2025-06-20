@@ -263,7 +263,7 @@ const ReportsPage: React.FC = () => {
           {/* Page Header */}
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="mb-0">
-              <span className="me-2">📊</span>
+              <span className="me-2">📝</span>
               Báo cáo bán hàng
             </h2>
           </div>
