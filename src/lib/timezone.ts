@@ -47,10 +47,39 @@ export function formatVietnamDateTime(date: Date | string, options?: Intl.DateTi
 
 /**
  * Get today's date string in Vietnam timezone (YYYY-MM-DD format)
+ * This is crucial for Vercel deployment where server runs UTC but database stores +7 time
  */
 export function getVietnamToday(): string {
   const vietnamDate = getVietnamDate();
   return vietnamDate.toISOString().split('T')[0];
+}
+
+/**
+ * Get yesterday's date string in Vietnam timezone (YYYY-MM-DD format)
+ */
+export function getVietnamYesterday(): string {
+  const vietnamDate = getVietnamDate();
+  vietnamDate.setDate(vietnamDate.getDate() - 1);
+  return vietnamDate.toISOString().split('T')[0];
+}
+
+/**
+ * Get date range for current month in Vietnam timezone
+ */
+export function getVietnamCurrentMonth(): { start: string; end: string; year: number; month: number } {
+  const vietnamDate = getVietnamDate();
+  const year = vietnamDate.getFullYear();
+  const month = vietnamDate.getMonth() + 1; // JavaScript months are 0-based
+
+  const firstDay = new Date(year, vietnamDate.getMonth(), 1);
+  const lastDay = new Date(year, vietnamDate.getMonth() + 1, 0);
+
+  return {
+    start: firstDay.toISOString().split('T')[0],
+    end: lastDay.toISOString().split('T')[0],
+    year,
+    month
+  };
 }
 
 /**

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/database';
+import { getVietnamToday, getVietnamYesterday, getVietnamCurrentMonth } from '@/lib/timezone';
 
 interface DashboardStats {
   revenue: {
@@ -29,44 +30,39 @@ interface DashboardStats {
 
 export async function GET(request: NextRequest) {
   try {
-    // Get Vietnam timezone date using proper timezone handling
-    const now = new Date();
-    const vietnamDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
-    const today = vietnamDate.toISOString().split('T')[0];
-    const thisYear = vietnamDate.getFullYear();
-    const thisMonth = vietnamDate.getMonth() + 1; // JavaScript months are 0-based
-
-    // Also get UTC date for comparison
-    const utcToday = now.toISOString().split('T')[0];
+    // Use timezone utilities to get Vietnam dates
+    // This ensures correct timezone handling regardless of server timezone (UTC on Vercel)
+    const today = getVietnamToday();
+    const yesterday = getVietnamYesterday();
+    const currentMonth = getVietnamCurrentMonth();
+    const { year: thisYear, month: thisMonth } = currentMonth;
 
     console.log('Dashboard Stats - Timezone Debug:', {
-      serverTime: now.toISOString(),
-      utcToday,
+      serverTime: new Date().toISOString(),
       vietnamToday: today,
+      yesterday: yesterday,
       thisYear,
       thisMonth,
-      vietnamDateTime: vietnamDate.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
-      environment: process.env.NODE_ENV || 'development'
+      currentMonth: currentMonth,
+      environment: process.env.NODE_ENV || 'development',
+      note: 'Using Vietnam timezone utilities for consistent date handling'
     });
 
-    // Revenue statistics - Today vs Yesterday
-    // Use both Vietnam date and UTC date for comparison in production
+    // Revenue statistics - Using Vietnam timezone dates
+    // Database stores Vietnam time (+7), so we query with Vietnam dates
     const revenueStats = await executeQuery(`
       SELECT
-        -- Doanh thu hôm nay (Vietnam timezone)
+        -- Doanh thu hôm nay (Vietnam timezone - database stores +7 time)
         ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @today THEN SalePrice ELSE 0 END), 0) as todayRevenue,
-        -- Doanh thu hôm nay (UTC timezone) - for Vercel comparison
-        ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @utcToday THEN SalePrice ELSE 0 END), 0) as todayRevenueUTC,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = @thisMonth THEN SalePrice ELSE 0 END), 0) as monthRevenue,
         ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear THEN SalePrice ELSE 0 END), 0) as yearRevenue,
-        -- Doanh thu hôm qua để tính growth
-        ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = DATEADD(day, -1, @today) THEN SalePrice ELSE 0 END), 0) as yesterdayRevenue,
+        -- Doanh thu hôm qua để tính growth (using Vietnam yesterday)
+        ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @yesterday THEN SalePrice ELSE 0 END), 0) as yesterdayRevenue,
         -- Debug: Count records for today
-        COUNT(CASE WHEN CAST(SoldDate AS DATE) = @today THEN 1 END) as todayCount,
-        COUNT(CASE WHEN CAST(SoldDate AS DATE) = @utcToday THEN 1 END) as todayCountUTC
+        COUNT(CASE WHEN CAST(SoldDate AS DATE) = @today THEN 1 END) as todayCount
       FROM CRM_Products
       WHERE Status = 'SOLD' AND SoldDate IS NOT NULL
-    `, { today, utcToday, thisMonth, thisYear });
+    `, { today, yesterday, thisMonth, thisYear });
 
     // Profit Statistics
     const profitStats = await executeQuery(`
@@ -117,15 +113,16 @@ export async function GET(request: NextRequest) {
     console.log('Dashboard Stats - Revenue Debug:', {
       environment: process.env.NODE_ENV,
       todayVietnam: today,
-      todayUTC: utcToday,
+      yesterday: yesterday,
       todayRevenue: revenue.todayRevenue,
-      todayRevenueUTC: revenue.todayRevenueUTC,
+      yesterdayRevenue: revenue.yesterdayRevenue,
       todayCount: revenue.todayCount,
-      todayCountUTC: revenue.todayCountUTC,
-      salesTodayCount: sales.todayCount
+      salesTodayCount: sales.todayCount,
+      databaseTimezone: 'Vietnam +7 (stored in DB)',
+      serverTimezone: 'UTC (Vercel) but using Vietnam dates for queries'
     });
 
-    // Use Vietnam timezone revenue for display, but log both for debugging
+    // Use Vietnam timezone revenue for display
     const finalTodayRevenue = revenue.todayRevenue || 0;
 
     // Calculate growth rate
@@ -179,13 +176,14 @@ export async function GET(request: NextRequest) {
           timezone: {
             server: now.toISOString(),
             vietnam: today,
-            utc: utcToday
+            yesterday: yesterday,
+            explanation: 'Database stores Vietnam time (+7), queries use Vietnam dates'
           },
           revenue: {
-            vietnamTz: revenue.todayRevenue,
-            utcTz: revenue.todayRevenueUTC,
-            countVietnam: revenue.todayCount,
-            countUTC: revenue.todayCountUTC
+            todayRevenue: revenue.todayRevenue,
+            yesterdayRevenue: revenue.yesterdayRevenue,
+            todayCount: revenue.todayCount,
+            growthRate: Math.round(((finalTodayRevenue - revenue.yesterdayRevenue) / revenue.yesterdayRevenue * 100) * 100) / 100
           }
         }
       })
