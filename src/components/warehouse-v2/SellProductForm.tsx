@@ -222,7 +222,7 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
                 <Col md={12}>
                   <div className="bg-light p-3 rounded">
                     <strong className="fs-4">Giá nhập:</strong>
-                    <span className="text-warning ms-2 fw-bold fs-4">
+                    <span className="text-succcess ms-2 fw-bold fs-4">
                       {formatCurrency(product.ImportPrice)}
                     </span>
                   </div>
@@ -292,7 +292,7 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
                   <Col md={4}>
                     <div className="text-center">
                       <div className="text-muted fs-5 mb-2">Giá nhập</div>
-                      <div className="h3 text-warning fw-bold">
+                      <div className="h3 text-success fw-bold">
                         {formatCurrency(product.ImportPrice)}
                       </div>
                     </div>

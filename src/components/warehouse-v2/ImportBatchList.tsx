@@ -222,6 +222,8 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
         return <Badge bg="success">Hoàn thành</Badge>;
       case 'PARTIAL':
         return <Badge bg="primary">Đang hoạt động</Badge>;
+      case 'ACTIVE':
+        return <Badge bg="primary">Đang hoạt động</Badge>;
       case 'CANCELLED':
         return <Badge bg="danger">Đã hủy</Badge>;
       default:
