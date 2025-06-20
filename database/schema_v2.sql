@@ -172,11 +172,6 @@ BEGIN
                     FROM CRM_Products p
                     WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
                 ) = b.TotalQuantity THEN 'COMPLETED'
-                WHEN (
-                    SELECT COUNT(*)
-                    FROM CRM_Products p
-                    WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
-                ) > 0 THEN 'PARTIAL'
                 ELSE 'ACTIVE'
             END,
             UpdatedAt = GETDATE()

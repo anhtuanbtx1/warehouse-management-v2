@@ -32,17 +32,12 @@ BEGIN
                 WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
             ),
             -- Tự động cập nhật Status thành COMPLETED khi tất cả sản phẩm đã bán
-            Status = CASE 
+            Status = CASE
                 WHEN (
-                    SELECT COUNT(*) 
-                    FROM CRM_Products p 
+                    SELECT COUNT(*)
+                    FROM CRM_Products p
                     WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
                 ) = b.TotalQuantity THEN 'COMPLETED'
-                WHEN (
-                    SELECT COUNT(*) 
-                    FROM CRM_Products p 
-                    WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
-                ) > 0 THEN 'PARTIAL'
                 ELSE 'ACTIVE'
             END,
             UpdatedAt = GETDATE()
@@ -84,15 +79,13 @@ END;
 PRINT 'Successfully created enhanced TR_CRM_Products_UpdateBatchStats trigger';
 
 -- Test the trigger by updating existing batches to correct status
-UPDATE CRM_ImportBatches 
-SET Status = CASE 
+UPDATE CRM_ImportBatches
+SET Status = CASE
     WHEN TotalSoldQuantity = TotalQuantity THEN 'COMPLETED'
-    WHEN TotalSoldQuantity > 0 THEN 'PARTIAL'
     ELSE 'ACTIVE'
 END
-WHERE Status != CASE 
+WHERE Status != CASE
     WHEN TotalSoldQuantity = TotalQuantity THEN 'COMPLETED'
-    WHEN TotalSoldQuantity > 0 THEN 'PARTIAL'
     ELSE 'ACTIVE'
 END;
 
@@ -106,9 +99,8 @@ SELECT
     TotalSoldQuantity,
     (TotalQuantity - TotalSoldQuantity) as RemainingQuantity,
     Status,
-    CASE 
+    CASE
         WHEN TotalSoldQuantity = TotalQuantity THEN 'Should be COMPLETED'
-        WHEN TotalSoldQuantity > 0 THEN 'Should be PARTIAL'
         ELSE 'Should be ACTIVE'
     END as ExpectedStatus
 FROM CRM_ImportBatches

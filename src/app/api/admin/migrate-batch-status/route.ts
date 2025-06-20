@@ -38,17 +38,12 @@ export async function POST(request: NextRequest) {
                       WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
                   ),
                   -- Tự động cập nhật Status thành COMPLETED khi tất cả sản phẩm đã bán
-                  Status = CASE 
+                  Status = CASE
                       WHEN (
-                          SELECT COUNT(*) 
-                          FROM CRM_Products p 
+                          SELECT COUNT(*)
+                          FROM CRM_Products p
                           WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
                       ) = b.TotalQuantity THEN 'COMPLETED'
-                      WHEN (
-                          SELECT COUNT(*) 
-                          FROM CRM_Products p 
-                          WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
-                      ) > 0 THEN 'PARTIAL'
                       ELSE 'ACTIVE'
                   END,
                   UpdatedAt = GETDATE()
@@ -61,16 +56,14 @@ export async function POST(request: NextRequest) {
 
     // Step 3: Update existing batches to correct status
     const updateResult = await executeQuery(`
-      UPDATE CRM_ImportBatches 
-      SET Status = CASE 
+      UPDATE CRM_ImportBatches
+      SET Status = CASE
           WHEN TotalSoldQuantity = TotalQuantity THEN 'COMPLETED'
-          WHEN TotalSoldQuantity > 0 THEN 'PARTIAL'
           ELSE 'ACTIVE'
       END,
       UpdatedAt = GETDATE()
-      WHERE Status != CASE 
+      WHERE Status != CASE
           WHEN TotalSoldQuantity = TotalQuantity THEN 'COMPLETED'
-          WHEN TotalSoldQuantity > 0 THEN 'PARTIAL'
           ELSE 'ACTIVE'
       END
     `);
@@ -85,15 +78,13 @@ export async function POST(request: NextRequest) {
           TotalSoldQuantity,
           (TotalQuantity - TotalSoldQuantity) as RemainingQuantity,
           Status,
-          CASE 
+          CASE
               WHEN TotalSoldQuantity = TotalQuantity THEN 'COMPLETED'
-              WHEN TotalSoldQuantity > 0 THEN 'PARTIAL'
               ELSE 'ACTIVE'
           END as ExpectedStatus,
-          CASE 
-              WHEN Status = CASE 
+          CASE
+              WHEN Status = CASE
                   WHEN TotalSoldQuantity = TotalQuantity THEN 'COMPLETED'
-                  WHEN TotalSoldQuantity > 0 THEN 'PARTIAL'
                   ELSE 'ACTIVE'
               END THEN 'CORRECT'
               ELSE 'MISMATCH'
@@ -130,7 +121,6 @@ export async function POST(request: NextRequest) {
         summary: {
           totalBatches: verificationData.length,
           activeBatches: verificationData.filter((b: any) => b.Status === 'ACTIVE').length,
-          partialBatches: verificationData.filter((b: any) => b.Status === 'PARTIAL').length,
           completedBatches: verificationData.filter((b: any) => b.Status === 'COMPLETED').length,
           correctStatuses: verificationData.filter((b: any) => b.StatusCheck === 'CORRECT').length,
           mismatches: verificationData.filter((b: any) => b.StatusCheck === 'MISMATCH').length
@@ -181,15 +171,13 @@ export async function GET(request: NextRequest) {
           TotalSoldQuantity,
           (TotalQuantity - TotalSoldQuantity) as RemainingQuantity,
           Status,
-          CASE 
+          CASE
               WHEN TotalSoldQuantity = TotalQuantity THEN 'COMPLETED'
-              WHEN TotalSoldQuantity > 0 THEN 'PARTIAL'
               ELSE 'ACTIVE'
           END as ExpectedStatus
       FROM CRM_ImportBatches
-      WHERE Status != CASE 
+      WHERE Status != CASE
           WHEN TotalSoldQuantity = TotalQuantity THEN 'COMPLETED'
-          WHEN TotalSoldQuantity > 0 THEN 'PARTIAL'
           ELSE 'ACTIVE'
       END
       ORDER BY ImportDate DESC

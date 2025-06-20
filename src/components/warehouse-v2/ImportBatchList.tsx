@@ -218,10 +218,10 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'ACTIVE':
-        return <Badge bg="success">Đang hoạt động</Badge>;
       case 'COMPLETED':
-        return <Badge bg="primary">Hoàn thành</Badge>;
+        return <Badge bg="success">Hoàn thành</Badge>;
+      case 'PARTIAL':
+        return <Badge bg="primary">Đang hoạt động</Badge>;
       case 'CANCELLED':
         return <Badge bg="danger">Đã hủy</Badge>;
       default:

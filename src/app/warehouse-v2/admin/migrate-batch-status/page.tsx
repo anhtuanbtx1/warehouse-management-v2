@@ -89,8 +89,7 @@ const MigrateBatchStatusPage: React.FC = () => {
         return <Badge bg="success">Đang hoạt động</Badge>;
       case 'COMPLETED':
         return <Badge bg="primary">Hoàn thành</Badge>;
-      case 'PARTIAL':
-        return <Badge bg="warning">Một phần</Badge>;
+
       case 'CANCELLED':
         return <Badge bg="danger">Đã hủy</Badge>;
       default:
@@ -295,7 +294,6 @@ const MigrateBatchStatusPage: React.FC = () => {
                   </Col>
                   <Col md={6}>
                     <p><strong>Lô đang hoạt động:</strong> {migrationResult.summary.activeBatches}</p>
-                    <p><strong>Lô một phần:</strong> {migrationResult.summary.partialBatches}</p>
                     <p><strong>Status chính xác:</strong> {migrationResult.summary.correctStatuses}</p>
                   </Col>
                 </Row>
