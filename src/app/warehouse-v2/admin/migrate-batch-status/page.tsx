@@ -186,7 +186,7 @@ const MigrateBatchStatusPage: React.FC = () => {
                 <Alert variant="warning">
                   <strong>Phát hiện vấn đề:</strong> Có {migrationData.summary.totalMismatches} lô hàng 
                   có trạng thái không khớp với số lượng đã bán. Trong đó có {migrationData.summary.batchesNeedingCompletion} lô 
-                  đã bán hết nhưng chưa được đánh dấu "Hoàn thành".
+                  đã bán hết nhưng chưa được đánh dấu &quot;Hoàn thành&quot;.
                 </Alert>
                 
                 <div className="d-flex gap-2">
@@ -225,7 +225,7 @@ const MigrateBatchStatusPage: React.FC = () => {
               <Card.Body>
                 <Alert variant="success">
                   <strong>Tuyệt vời!</strong> Trigger đã được cập nhật và tất cả lô hàng có trạng thái chính xác. 
-                  Hệ thống sẽ tự động cập nhật Status thành "Hoàn thành" khi remainingQuantity = 0.
+                  Hệ thống sẽ tự động cập nhật Status thành &quot;Hoàn thành&quot; khi remainingQuantity = 0.
                 </Alert>
               </Card.Body>
             </Card>
