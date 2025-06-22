@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeProcedure, executeQuery } from '@/lib/database';
 import { ApiResponse } from '@/types/warehouse';
+import { getVietnamNowISO } from '@/lib/timezone';
 
 // Interface cho Sales
 interface SalesInvoice {
@@ -193,12 +194,12 @@ export async function POST(request: NextRequest) {
       )
     `;
 
-    // Use Vietnam timezone for sale date
-    const vietnamDate = new Date(new Date().getTime() + (7 * 60 * 60 * 1000));
+    // Use Vietnam time for sale date (UTC+7)
+    const vietnamTimeISO = getVietnamNowISO();
 
     const invoiceParams = {
       invoiceNumber,
-      saleDate: vietnamDate.toISOString(),
+      saleDate: vietnamTimeISO,
       totalAmount: body.SalePrice,
       finalAmount: body.SalePrice
     };
@@ -235,16 +236,17 @@ export async function POST(request: NextRequest) {
           SoldDate = @soldDate,
           InvoiceNumber = @invoiceNumber,
           CustomerInfo = @customerInfo,
-          UpdatedAt = GETDATE()
+          UpdatedAt = @updatedAt
       WHERE ProductID = @productId
     `;
 
     const updateParams = {
       productId: body.ProductID,
       salePrice: body.SalePrice,
-      soldDate: vietnamDate.toISOString(),
+      soldDate: vietnamTimeISO,
       invoiceNumber,
-      customerInfo: 'Khách lẻ'
+      customerInfo: 'Khách lẻ',
+      updatedAt: vietnamTimeISO
     };
 
     await executeQuery(updateProductQuery, updateParams);

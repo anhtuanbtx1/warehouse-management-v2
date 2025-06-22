@@ -5,9 +5,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get Vietnam timezone date (UTC+7)
-    const vietnamDate = new Date(new Date().getTime() + (7 * 60 * 60 * 1000));
-    const today = vietnamDate.toISOString().split('T')[0];
+    // Get Vietnam timezone date using proper timezone conversion
+    const now = new Date();
+    const vietnamDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+    const today = `${vietnamDate.getFullYear()}-${String(vietnamDate.getMonth() + 1).padStart(2, '0')}-${String(vietnamDate.getDate()).padStart(2, '0')}`;
     
     console.log('Simple Stats Debug - Today:', today);
 

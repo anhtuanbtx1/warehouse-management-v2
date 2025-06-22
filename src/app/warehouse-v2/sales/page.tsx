@@ -104,23 +104,27 @@ const SalesPage: React.FC = () => {
   };
 
   const formatDateTime = (dateString: string) => {
-    // Parse date string - nếu database trả về UTC time
-    let date = new Date(dateString);
+    // Parse date string directly to avoid any timezone conversion
+    // Database stores Vietnam time, display exactly as stored
+    try {
+      // Extract date and time parts from ISO string
+      const isoString = dateString.includes('T') ? dateString : dateString + 'T00:00:00';
+      const [datePart, timePart] = isoString.split('T');
+      const [year, month, day] = datePart.split('-');
+      const [hours, minutes] = timePart.split(':');
 
-    // Nếu database trả về time không có timezone info và là UTC
-    // thì cần thêm 7 giờ cho múi giờ VN
-    if (!dateString.includes('Z') && !dateString.includes('+')) {
-      // Giả sử database time là UTC, thêm 7 giờ
-      date = new Date(date.getTime() + (7 * 60 * 60 * 1000));
+      return `${day}/${month}/${year} ${hours}:${minutes}`;
+    } catch (error) {
+      // Fallback to Date object if parsing fails
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      return `${day}/${month}/${year} ${hours}:${minutes}`;
     }
-
-    return date.toLocaleString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   const getPaymentMethodBadge = (method: string) => {

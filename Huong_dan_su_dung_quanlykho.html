@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn sử dụng Hệ thống Quản lý Kho hàng</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #fff;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2980b9;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 30px;
+            font-size: 20px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+            font-size: 16px;
+        }
+        h4 {
+            color: #7f8c8d;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        p, li {
+            text-align: justify;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        ul, ol {
+            margin-left: 20px;
+        }
+        .toc {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .toc h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border: none;
+            padding: 0;
+        }
+        .toc ul {
+            list-style-type: none;
+            margin-left: 0;
+        }
+        .toc li {
+            margin-bottom: 5px;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #3498db;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .warning {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .step {
+            background-color: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        @media print {
+            body {
+                font-size: 12px;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            h1 {
+                font-size: 18px;
+            }
+            h2 {
+                font-size: 16px;
+            }
+            h3 {
+                font-size: 14px;
+            }
+            h4 {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 HƯỚNG DẪN SỬ DỤNG HỆ THỐNG QUẢN LÝ KHO HÀNG<br>WAREHOUSE MANAGEMENT SYSTEM V2</h1>
+        
+        <div class="toc">
+            <h2>📋 MỤC LỤC</h2>
+            <ul>
+                <li><a href="#gioi-thieu">1. Giới thiệu tổng quan</a></li>
+                <li><a href="#dang-nhap">2. Đăng nhập hệ thống</a></li>
+                <li><a href="#dashboard">3. Dashboard - Trang chủ</a></li>
+                <li><a href="#nhap-hang">4. Quản lý nhập hàng</a></li>
+                <li><a href="#ban-hang">5. Quản lý bán hàng</a></li>
+                <li><a href="#ton-kho">6. Quản lý tồn kho</a></li>
+                <li><a href="#bao-cao">7. Báo cáo bán hàng</a></li>
+                <li><a href="#nang-cao">8. Các tính năng nâng cao</a></li>
+                <li><a href="#su-co">9. Xử lý sự cố thường gặp</a></li>
+            </ul>
+        </div>
+
+        <h2 id="gioi-thieu">1. GIỚI THIỆU TỔNG QUAN</h2>
+        
+        <h3>1.1 Về hệ thống</h3>
+        <p>Hệ thống Quản lý Kho hàng V2 là một ứng dụng web hiện đại được thiết kế đặc biệt cho việc quản lý kho hàng điện tử (điện thoại, máy tính bảng...) với các tính năng:</p>
+        
+        <ul>
+            <li><strong>Quản lý theo lô hàng</strong>: Mỗi lần nhập hàng tạo thành một lô riêng biệt</li>
+            <li><strong>Tracking IMEI</strong>: Theo dõi từng sản phẩm qua mã IMEI duy nhất</li>
+            <li><strong>Tính giá động</strong>: Giá bán được thiết lập tại thời điểm bán hàng</li>
+            <li><strong>Báo cáo lãi/lỗ</strong>: Tính toán tự động lợi nhuận theo từng lô hàng</li>
+            <li><strong>In hóa đơn</strong>: Hỗ trợ in hóa đơn bán hàng và nhập hàng</li>
+        </ul>
+
+        <h3>1.2 Yêu cầu hệ thống</h3>
+        <ul>
+            <li><strong>Trình duyệt</strong>: Chrome, Firefox, Safari, Edge (phiên bản mới nhất)</li>
+            <li><strong>Kết nối internet</strong>: Ổn định để đồng bộ dữ liệu</li>
+            <li><strong>Độ phân giải màn hình</strong>: Tối thiểu 1024x768px</li>
+        </ul>
+
+        <h3>1.3 Cấu trúc menu chính</h3>
+        <ul>
+            <li><strong>Dashboard</strong>: Trang chủ với thống kê tổng quan</li>
+            <li><strong>Nhập hàng</strong>: Quản lý lô hàng và sản phẩm nhập kho</li>
+            <li><strong>Bán hàng</strong>: Xử lý đơn hàng và bán sản phẩm</li>
+            <li><strong>Tồn kho</strong>: Báo cáo tình trạng tồn kho theo lô</li>
+            <li><strong>Báo cáo</strong>: Thống kê doanh thu và lợi nhuận</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <h2 id="dang-nhap">2. ĐĂNG NHẬP HỆ THỐNG</h2>
+        
+        <h3>2.1 Truy cập hệ thống</h3>
+        <div class="step">
+            <ol>
+                <li>Mở trình duyệt web</li>
+                <li>Nhập địa chỉ: <code>http://localhost:3001/warehouse-v2/login</code></li>
+                <li>Hệ thống sẽ hiển thị trang đăng nhập</li>
+            </ol>
+        </div>
+
+        <h3>2.2 Thực hiện đăng nhập</h3>
+        <div class="step">
+            <ol>
+                <li><strong>Nhập thông tin đăng nhập</strong>:
+                    <ul>
+                        <li>Username: Tên đăng nhập được cấp</li>
+                        <li>Password: Mật khẩu tương ứng</li>
+                    </ul>
+                </li>
+                <li><strong>Nhấn nút "Đăng nhập"</strong>
+                    <ul>
+                        <li>Hệ thống sẽ xác thực thông tin</li>
+                        <li>Nếu thành công, chuyển đến trang Dashboard</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <h4>Xử lý lỗi đăng nhập</h4>
+            <ul>
+                <li><strong>Sai thông tin</strong>: Kiểm tra lại username/password</li>
+                <li><strong>Kết nối lỗi</strong>: Kiểm tra internet và thử lại</li>
+                <li><strong>Tài khoản bị khóa</strong>: Liên hệ quản trị viên</li>
+            </ul>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2 id="dashboard">3. DASHBOARD - TRANG CHỦ</h2>
+        
+        <h3>3.1 Tổng quan Dashboard</h3>
+        <p>Dashboard là trang chủ hiển thị thông tin tổng quan về tình trạng kinh doanh:</p>
+
+        <h4>3.1.1 Thẻ thống kê chính</h4>
+        <ul>
+            <li><strong>Doanh thu</strong>: Tổng doanh thu hôm nay/tháng này</li>
+            <li><strong>Lãi/Lỗ</strong>: Tính toán lợi nhuận với tỷ lệ phần trăm</li>
+            <li><strong>Tồn kho</strong>: Số lượng sản phẩm còn lại trong kho</li>
+            <li><strong>Hoạt động gần đây</strong>: Danh sách giao dịch mới nhất</li>
+        </ul>
+
+        <h4>3.1.2 Biểu đồ doanh thu</h4>
+        <ul>
+            <li>Hiển thị doanh thu theo tháng trong năm</li>
+            <li>Có thể xem theo năm khác nhau</li>
+            <li>Cập nhật real-time khi có giao dịch mới</li>
+        </ul>
+
+        <h3>3.2 Thao tác nhanh</h3>
+        <p>Dashboard cung cấp các nút thao tác nhanh:</p>
+        <ul>
+            <li><strong>Nhập hàng</strong>: Chuyển đến trang tạo lô hàng mới</li>
+            <li><strong>Bán hàng</strong>: Chuyển đến trang bán sản phẩm</li>
+            <li><strong>Tồn kho</strong>: Xem báo cáo tồn kho chi tiết</li>
+            <li><strong>Báo cáo</strong>: Truy cập các báo cáo thống kê</li>
+        </ul>
+
+        <h3>3.3 Hoạt động gần đây</h3>
+        <p>Hiển thị 10 giao dịch mới nhất bao gồm:</p>
+        <ul>
+            <li>Thời gian thực hiện</li>
+            <li>Loại hoạt động (Nhập hàng/Bán hàng)</li>
+            <li>Sản phẩm liên quan</li>
+            <li>Giá trị giao dịch</li>
+            <li>Người thực hiện</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <h2 id="nhap-hang">4. QUẢN LÝ NHẬP HÀNG</h2>
+        
+        <h3>4.1 Khái niệm lô hàng</h3>
+        <div class="info">
+            <p>Lô hàng là đơn vị quản lý cơ bản trong hệ thống:</p>
+            <ul>
+                <li>Mỗi lần nhập hàng tạo thành một lô riêng biệt</li>
+                <li>Mỗi lô có mã định danh duy nhất (VD: LOT-2024-001)</li>
+                <li>Tất cả sản phẩm trong cùng lô có cùng giá nhập</li>
+                <li>Hệ thống tính lãi/lỗ theo từng lô</li>
+            </ul>
+        </div>
+
+        <h3>4.2 Tạo lô hàng mới</h3>
+        
+        <h4>4.2.1 Truy cập trang nhập hàng</h4>
+        <div class="step">
+            <ol>
+                <li>Từ menu chính, chọn <strong>"Nhập hàng"</strong></li>
+                <li>Hoặc từ Dashboard, nhấn nút <strong>"Nhập hàng"</strong> trong phần thao tác nhanh</li>
+            </ol>
+        </div>
+
+        <h4>4.2.2 Tạo lô hàng</h4>
+        <div class="step">
+            <ol>
+                <li><strong>Nhấn nút "Tạo lô hàng mới"</strong> (màu xanh lá)</li>
+                <li><strong>Điền thông tin lô hàng</strong>:
+                    <ul>
+                        <li><strong>Danh mục</strong>: Chọn loại sản phẩm (iPhone 16, Samsung S24...)</li>
+                        <li><strong>Ngày nhập</strong>: Mặc định là ngày hiện tại</li>
+                        <li><strong>Số lượng dự kiến</strong>: Tổng số sản phẩm sẽ nhập</li>
+                        <li><strong>Giá nhập đơn vị</strong>: Giá nhập cho mỗi sản phẩm</li>
+                        <li><strong>Tổng giá trị nhập</strong>: Tự động tính = Số lượng × Giá nhập</li>
+                        <li><strong>Ghi chú</strong>: Thông tin bổ sung (tùy chọn)</li>
+                    </ul>
+                </li>
+                <li><strong>Nhấn "Tạo lô hàng"</strong> để hoàn tất</li>
+            </ol>
+        </div>
+
+        <div class="highlight">
+            <h4>Lưu ý quan trọng</h4>
+            <ul>
+                <li>Giá nhập đơn vị sẽ áp dụng cho tất cả sản phẩm trong lô</li>
+                <li>Số lượng dự kiến có thể điều chỉnh sau khi tạo lô</li>
+                <li>Mã lô hàng được tạo tự động theo format: LOT-YYYY-XXX</li>
+            </ul>
+        </div>
+
+        <h3>4.3 Quản lý sản phẩm trong lô</h3>
+
+        <h4>4.3.1 Thêm sản phẩm vào lô</h4>
+        <div class="step">
+            <ol>
+                <li><strong>Chọn tab "Sản phẩm trong lô"</strong></li>
+                <li><strong>Chọn lô hàng</strong> từ danh sách (nếu chưa chọn)</li>
+                <li><strong>Nhấn nút "Thêm SP"</strong> (màu xanh lá)</li>
+                <li><strong>Điền thông tin sản phẩm</strong>:
+                    <ul>
+                        <li><strong>Tên sản phẩm</strong>: Tên chi tiết (VD: iPhone 16 Pro Max 256GB Gold)</li>
+                        <li><strong>IMEI</strong>: Mã IMEI duy nhất (15 số)</li>
+                        <li><strong>Giá nhập</strong>: Tự động điền từ lô hàng (có thể điều chỉnh)</li>
+                        <li><strong>Ghi chú</strong>: Thông tin bổ sung về sản phẩm</li>
+                    </ul>
+                </li>
+                <li><strong>Nhấn "Thêm sản phẩm"</strong> để lưu</li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <h4>Lưu ý về IMEI</h4>
+            <ul>
+                <li>IMEI phải là duy nhất trong toàn hệ thống</li>
+                <li>Không được trùng lặp với sản phẩm đã có</li>
+                <li>Định dạng: 15 chữ số liên tiếp</li>
+                <li>Hệ thống sẽ báo lỗi nếu IMEI đã tồn tại</li>
+            </ul>
+        </div>
+
+        <h4>4.3.3 Giới hạn số lượng</h4>
+        <ul>
+            <li>Không thể thêm quá số lượng dự kiến của lô</li>
+            <li>Khi đạt đủ số lượng, nút "Thêm SP" sẽ bị vô hiệu hóa</li>
+            <li>Có thể tăng số lượng dự kiến bằng cách sửa lô hàng</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <h2 id="ban-hang">5. QUẢN LÝ BÁN HÀNG</h2>
+
+        <h3>5.1 Khái niệm bán hàng</h3>
+        <div class="info">
+            <p>Hệ thống bán hàng hoạt động theo nguyên tắc:</p>
+            <ul>
+                <li>Bán từng sản phẩm riêng lẻ theo IMEI</li>
+                <li>Giá bán được thiết lập tại thời điểm bán</li>
+                <li>Tự động tính lợi nhuận = Giá bán - Giá nhập</li>
+                <li>Cập nhật trạng thái sản phẩm từ IN_STOCK thành SOLD</li>
+            </ul>
+        </div>
+
+        <h3>5.2 Thực hiện bán hàng</h3>
+
+        <h4>5.2.1 Truy cập trang bán hàng</h4>
+        <div class="step">
+            <ol>
+                <li>Từ menu chính, chọn <strong>"Bán hàng"</strong></li>
+                <li>Hoặc từ Dashboard, nhấn <strong>"Bán hàng"</strong> trong thao tác nhanh</li>
+            </ol>
+        </div>
+
+        <h4>5.2.2 Tìm sản phẩm để bán</h4>
+        <div class="step">
+            <ol>
+                <li><strong>Sử dụng thanh tìm kiếm</strong>:
+                    <ul>
+                        <li>Tìm theo tên sản phẩm</li>
+                        <li>Tìm theo mã IMEI</li>
+                        <li>Tìm theo mã lô hàng</li>
+                    </ul>
+                </li>
+                <li><strong>Lọc sản phẩm</strong>:
+                    <ul>
+                        <li>Lọc theo danh mục</li>
+                        <li>Chỉ hiển thị sản phẩm còn hàng (IN_STOCK)</li>
+                    </ul>
+                </li>
+                <li><strong>Chọn sản phẩm</strong> từ danh sách hiển thị</li>
+            </ol>
+        </div>
+
+        <h4>5.2.3 Thực hiện giao dịch bán</h4>
+        <div class="step">
+            <ol>
+                <li><strong>Nhấn nút "Bán"</strong> trên sản phẩm muốn bán</li>
+                <li><strong>Điền thông tin bán hàng</strong>:
+                    <ul>
+                        <li><strong>Giá bán</strong>: Nhập giá bán thực tế</li>
+                        <li><strong>Thông tin khách hàng</strong>: Tên, số điện thoại (tùy chọn)</li>
+                        <li><strong>Ghi chú</strong>: Thông tin bổ sung về giao dịch</li>
+                    </ul>
+                </li>
+                <li><strong>Xem thông tin lợi nhuận</strong>:
+                    <ul>
+                        <li>Hệ thống tự động tính: Lợi nhuận = Giá bán - Giá nhập</li>
+                        <li>Hiển thị tỷ lệ lợi nhuận phần trăm</li>
+                    </ul>
+                </li>
+                <li><strong>Nhấn "Xác nhận bán"</strong> để hoàn tất</li>
+            </ol>
+        </div>
+
+        <div class="highlight">
+            <h4>Xác nhận giao dịch</h4>
+            <ul>
+                <li>Hệ thống sẽ cập nhật trạng thái sản phẩm thành SOLD</li>
+                <li>Tạo bản ghi giao dịch với thời gian hiện tại</li>
+                <li>Cập nhật thống kê lô hàng tự động</li>
+                <li>Hiển thị thông báo thành công</li>
+            </ul>
+        </div>
+
+        <h3>5.3 In hóa đơn bán hàng</h3>
+
+        <h4>5.3.1 In hóa đơn ngay sau bán</h4>
+        <div class="step">
+            <ol>
+                <li><strong>Sau khi bán thành công</strong>, nhấn <strong>"In hóa đơn"</strong></li>
+                <li><strong>Xem trước hóa đơn</strong> trên màn hình</li>
+                <li><strong>Nhấn "In"</strong> để in ra máy in</li>
+            </ol>
+        </div>
+
+        <h4>5.3.2 Nội dung hóa đơn bán hàng</h4>
+        <ul>
+            <li>Thông tin sản phẩm (tên, IMEI)</li>
+            <li>Giá bán và thời gian bán</li>
+            <li>Thông tin khách hàng (nếu có)</li>
+            <li>Số hóa đơn tự động</li>
+            <li>Thông tin người bán</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <h2 id="ton-kho">6. QUẢN LÝ TỒN KHO</h2>
+
+        <h3>6.1 Tổng quan tồn kho</h3>
+        <div class="info">
+            <p>Hệ thống quản lý tồn kho theo nguyên tắc:</p>
+            <ul>
+                <li>Tồn kho được tính theo từng lô hàng</li>
+                <li>Hiển thị số lượng: Nhập - Bán - Tồn</li>
+                <li>Tính toán lãi/lỗ theo từng lô</li>
+                <li>Cập nhật real-time khi có giao dịch</li>
+            </ul>
+        </div>
+
+        <h3>6.2 Xem báo cáo tồn kho</h3>
+
+        <h4>6.2.1 Truy cập trang tồn kho</h4>
+        <div class="step">
+            <ol>
+                <li>Từ menu chính, chọn <strong>"Tồn kho"</strong></li>
+                <li>Hoặc từ Dashboard, nhấn <strong>"Tồn kho"</strong> trong thao tác nhanh</li>
+            </ol>
+        </div>
+
+        <h4>6.2.2 Thông tin hiển thị</h4>
+        <p>Mỗi lô hàng hiển thị:</p>
+        <ul>
+            <li><strong>Mã lô hàng</strong>: Mã định danh duy nhất</li>
+            <li><strong>Danh mục</strong>: Loại sản phẩm</li>
+            <li><strong>Ngày nhập</strong>: Thời gian tạo lô</li>
+            <li><strong>Số lượng nhập</strong>: Tổng sản phẩm đã nhập</li>
+            <li><strong>Số lượng bán</strong>: Tổng sản phẩm đã bán</li>
+            <li><strong>Số lượng tồn</strong>: Còn lại trong kho</li>
+            <li><strong>Giá trị nhập</strong>: Tổng tiền đã đầu tư</li>
+            <li><strong>Giá trị bán</strong>: Tổng tiền đã thu về</li>
+            <li><strong>Lãi/Lỗ</strong>: Lợi nhuận thực tế</li>
+            <li><strong>Trạng thái</strong>: ACTIVE, PARTIAL, COMPLETE</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <h2 id="bao-cao">7. BÁO CÁO BÁN HÀNG</h2>
+
+        <h3>7.1 Tổng quan báo cáo</h3>
+        <p>Trang báo cáo bán hàng cung cấp thông tin chi tiết về:</p>
+        <ul>
+            <li>Tất cả sản phẩm đã bán</li>
+            <li>Thống kê doanh thu và lợi nhuận</li>
+            <li>Lọc theo nhiều tiêu chí</li>
+            <li>Xuất báo cáo Excel chi tiết</li>
+        </ul>
+
+        <h3>7.2 Xem báo cáo bán hàng</h3>
+
+        <h4>7.2.1 Truy cập trang báo cáo</h4>
+        <div class="step">
+            <ol>
+                <li>Từ menu chính, chọn <strong>"Báo cáo"</strong></li>
+                <li>Trang sẽ hiển thị báo cáo bán hàng mặc định</li>
+            </ol>
+        </div>
+
+        <h4>7.2.2 Thống kê tổng quan</h4>
+        <p>Phần đầu trang hiển thị 4 thẻ thống kê:</p>
+        <ul>
+            <li><strong>Sản phẩm đã bán</strong>: Tổng số lượng</li>
+            <li><strong>Tổng doanh thu</strong>: Tổng tiền thu được</li>
+            <li><strong>Tổng chi phí</strong>: Tổng tiền đầu tư</li>
+            <li><strong>Tổng lợi nhuận</strong>: Lãi/lỗ thực tế</li>
+        </ul>
+
+        <h3>7.3 Bộ lọc báo cáo</h3>
+
+        <h4>7.3.1 Lọc theo thời gian</h4>
+        <ul>
+            <li><strong>Từ ngày</strong>: Chọn ngày bắt đầu</li>
+            <li><strong>Đến ngày</strong>: Chọn ngày kết thúc</li>
+            <li><strong>Mặc định</strong>: Tháng hiện tại</li>
+        </ul>
+
+        <h4>7.3.2 Áp dụng bộ lọc</h4>
+        <div class="step">
+            <ol>
+                <li><strong>Thiết lập các tiêu chí</strong> lọc</li>
+                <li><strong>Nhấn nút "Tìm kiếm"</strong> (biểu tượng kính lúp)</li>
+                <li><strong>Kết quả sẽ cập nhật</strong> ngay lập tức</li>
+            </ol>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2 id="su-co">9. XỬ LÝ SỰ CỐ THƯỜNG GẶP</h2>
+
+        <h3>9.1 Lỗi đăng nhập</h3>
+
+        <h4>9.1.1 Không thể đăng nhập</h4>
+        <div class="warning">
+            <p><strong>Nguyên nhân</strong>:</p>
+            <ul>
+                <li>Sai username/password</li>
+                <li>Kết nối internet không ổn định</li>
+                <li>Server tạm thời không hoạt động</li>
+            </ul>
+            <p><strong>Giải pháp</strong>:</p>
+            <ol>
+                <li>Kiểm tra lại thông tin đăng nhập</li>
+                <li>Thử refresh trang (F5)</li>
+                <li>Kiểm tra kết nối internet</li>
+                <li>Liên hệ quản trị viên nếu vẫn lỗi</li>
+            </ol>
+        </div>
+
+        <h3>9.2 Lỗi khi nhập liệu</h3>
+
+        <h4>9.2.1 IMEI bị trùng lặp</h4>
+        <div class="warning">
+            <p><strong>Thông báo</strong>: "IMEI đã tồn tại trong hệ thống"</p>
+            <p><strong>Giải pháp</strong>:</p>
+            <ol>
+                <li>Kiểm tra lại IMEI đã nhập</li>
+                <li>Tìm kiếm IMEI trong hệ thống để xem sản phẩm cũ</li>
+                <li>Nếu là sản phẩm mới, liên hệ quản trị viên</li>
+            </ol>
+        </div>
+
+        <h3>9.3 Lỗi in ấn</h3>
+
+        <h4>9.3.1 Không thể in hóa đơn</h4>
+        <div class="warning">
+            <p><strong>Nguyên nhân</strong>:</p>
+            <ul>
+                <li>Máy in không kết nối</li>
+                <li>Trình duyệt chặn popup</li>
+                <li>Không có quyền in</li>
+            </ul>
+            <p><strong>Giải pháp</strong>:</p>
+            <ol>
+                <li>Kiểm tra kết nối máy in</li>
+                <li>Cho phép popup trong trình duyệt</li>
+                <li>Thử in từ trang xem trước</li>
+            </ol>
+        </div>
+
+        <div class="info">
+            <h3>📞 THÔNG TIN LIÊN HỆ HỖ TRỢ</h3>
+            <ul>
+                <li><strong>Email hỗ trợ</strong>: support@warehouse.com</li>
+                <li><strong>Hotline</strong>: 1900-xxxx</li>
+                <li><strong>Thời gian hỗ trợ</strong>: 8:00 - 17:00 (Thứ 2 - Thứ 6)</li>
+            </ul>
+        </div>
+
+        <div class="highlight">
+            <h3>📝 GHI CHÚ QUAN TRỌNG</h3>
+            <ol>
+                <li><strong>Backup dữ liệu định kỳ</strong> bằng cách xuất Excel</li>
+                <li><strong>Kiểm tra IMEI cẩn thận</strong> trước khi nhập</li>
+                <li><strong>Đặt giá bán hợp lý</strong> để đảm bảo lợi nhuận</li>
+                <li><strong>Theo dõi báo cáo thường xuyên</strong> để đánh giá hiệu quả</li>
+                <li><strong>Liên hệ hỗ trợ sớm</strong> khi gặp vấn đề</li>
+            </ol>
+        </div>
+
+        <hr style="margin-top: 30px; border: 1px solid #bdc3c7;">
+        <p style="text-align: center; color: #7f8c8d; font-size: 12px; margin-top: 20px;">
+            <em>Tài liệu này được cập nhật lần cuối: Tháng 12/2024</em><br>
+            <em>Phiên bản hệ thống: Warehouse Management System V2</em>
+        </p>
+    </div>
+</body>
+</html>

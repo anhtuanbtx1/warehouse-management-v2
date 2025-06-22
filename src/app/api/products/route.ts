@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/database';
 import { Product, ProductForm, ApiResponse, PaginatedResponse } from '@/types/warehouse';
+import { getVietnamNowISO } from '@/lib/timezone';
 
 // GET /api/products - Lấy danh sách sản phẩm
 export async function GET(request: NextRequest) {
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest) {
       )
       OUTPUT INSERTED.*
       VALUES (
-        @batchId, @categoryId, @productName, @imei, @importPrice, 'IN_STOCK', @notes, GETDATE()
+        @batchId, @categoryId, @productName, @imei, @importPrice, 'IN_STOCK', @notes, @createdAt
       )
     `;
 
@@ -159,7 +160,8 @@ export async function POST(request: NextRequest) {
       productName: body.ProductName,
       imei: body.IMEI,
       importPrice: body.ImportPrice,
-      notes: body.Notes || null
+      notes: body.Notes || null,
+      createdAt: getVietnamNowISO()
     };
 
     const result = await executeQuery(insertQuery, params);
@@ -168,9 +170,13 @@ export async function POST(request: NextRequest) {
     await executeQuery(`
       UPDATE CRM_ImportBatches
       SET TotalImportValue = TotalImportValue + @importPrice,
-          UpdatedAt = GETDATE()
+          UpdatedAt = @updatedAt
       WHERE BatchID = @batchId
-    `, { batchId: body.BatchID, importPrice: body.ImportPrice });
+    `, {
+      batchId: body.BatchID,
+      importPrice: body.ImportPrice,
+      updatedAt: getVietnamNowISO()
+    });
 
     return NextResponse.json({
       success: true,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getConnection } from '@/lib/database';
 import sql from 'mssql';
+import { getVietnamNowISO } from '@/lib/timezone';
 
 // PUT - Update product (only for IN_STOCK products)
 export async function PUT(
@@ -100,14 +101,15 @@ export async function PUT(
       .input('IMEI', sql.NVarChar(50), IMEI)
       .input('ImportPrice', sql.Decimal(18, 2), parseFloat(ImportPrice))
       .input('Notes', sql.NVarChar(500), Notes || null)
+      .input('UpdatedAt', sql.DateTime, getVietnamNowISO())
       .query(`
         UPDATE CRM_Products 
-        SET 
+        SET
           ProductName = @ProductName,
           IMEI = @IMEI,
           ImportPrice = @ImportPrice,
           Notes = @Notes,
-          UpdatedAt = GETDATE()
+          UpdatedAt = @UpdatedAt
         WHERE ProductID = @ProductID AND Status = 'IN_STOCK'
       `);
 

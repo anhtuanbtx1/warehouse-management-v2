@@ -90,18 +90,28 @@ const WarehouseV2Dashboard: React.FC = () => {
   };
 
   const formatDateTime = (dateString: string) => {
-    // Parse UTC time và hiển thị như UTC (không convert timezone)
-    const date = new Date(dateString);
+    // Parse date string directly to avoid any timezone conversion
+    // Database stores Vietnam time, display exactly as stored
+    try {
+      // Extract date and time parts from ISO string
+      const isoString = dateString.includes('T') ? dateString : dateString + 'T00:00:00';
+      const [datePart, timePart] = isoString.split('T');
+      const [year, month, day] = datePart.split('-');
+      const [hours, minutes, seconds] = timePart.split(':');
 
-    // Sử dụng UTC methods để hiển thị đúng thời gian gốc
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    const hours = String(date.getUTCHours()).padStart(2, '0');
-    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+      return `${day}/${month}/${year} ${hours}:${minutes}:${seconds.split('.')[0]}`;
+    } catch (error) {
+      // Fallback to Date object if parsing fails
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
 
-    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+      return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+    }
   };
 
 

@@ -5,19 +5,11 @@
 /**
  * Convert database datetime to Vietnam timezone
  * @param dateString - Date string from database
- * @returns Date object adjusted to Vietnam timezone
+ * @returns Date object (database already stores Vietnam time)
  */
 export const convertToVietnamTime = (dateString: string): Date => {
-  let date = new Date(dateString);
-  
-  // Nếu database trả về UTC time mà không có timezone indicator
-  // thì cần adjust cho múi giờ VN (+7 UTC)
-  if (!dateString.includes('Z') && !dateString.includes('+') && !dateString.includes('-', 10)) {
-    // Thêm 7 giờ cho múi giờ VN
-    date = new Date(date.getTime() + (7 * 60 * 60 * 1000));
-  }
-  
-  return date;
+  // Database already stores Vietnam time, no conversion needed
+  return new Date(dateString);
 };
 
 /**
@@ -84,6 +76,7 @@ export const formatCurrency = (amount: number): string => {
 /**
  * Get current Vietnam time
  * @returns Current date in Vietnam timezone
+ * @deprecated Use getVietnamNow() from @/lib/timezone instead
  */
 export const getCurrentVietnamTime = (): Date => {
   const now = new Date();

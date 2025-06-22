@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/database';
+import { getVietnamNowISO } from '@/lib/timezone';
 
 export const dynamic = 'force-dynamic';
 
@@ -170,7 +171,7 @@ export async function PUT(
         TotalImportValue = @TotalImportValue,
         ImportPrice = @ImportPricePerUnit,
         Notes = @Notes,
-        UpdatedAt = GETDATE()
+        UpdatedAt = @UpdatedAt
       WHERE BatchID = @batchId
     `, {
       batchId,
@@ -178,7 +179,8 @@ export async function PUT(
       TotalQuantity: totalQuantity,
       TotalImportValue: totalImportValue,
       ImportPricePerUnit: importPricePerUnit,
-      Notes: Notes || null
+      Notes: Notes || null,
+      UpdatedAt: getVietnamNowISO()
     });
 
     // Update ImportPrice for all products in this batch
