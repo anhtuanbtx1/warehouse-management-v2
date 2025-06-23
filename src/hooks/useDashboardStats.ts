@@ -54,16 +54,25 @@ export function useDashboardStats(): UseDashboardStatsReturn {
 
       console.log('Client Timezone Debug:', debug);
 
-      // Create API URL with client-calculated dates
+      // Create API URL with client-calculated dates and timestamp to prevent caching
       const params = new URLSearchParams({
         clientToday: today,
         clientYesterday: yesterday,
         clientMonth: currentMonth.month.toString(),
         clientYear: currentMonth.year.toString(),
-        timezoneOverride: 'client'
+        timezoneOverride: 'client',
+        _t: Date.now().toString() // Timestamp to prevent caching
       });
 
-      const response = await fetch(`/api/dashboard/stats?${params.toString()}`);
+      // Force fresh data on production (Vercel) - disable all caching
+      const response = await fetch(`/api/dashboard/stats?${params.toString()}&_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
       const result = await response.json();
 
       if (result.success) {

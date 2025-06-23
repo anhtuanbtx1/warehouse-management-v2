@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/database';
 import { getVietnamToday, getVietnamYesterday, getVietnamCurrentMonth } from '@/lib/timezone';
 
+// Disable caching for this API route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface DashboardStats {
   revenue: {
     today: number;       // Doanh thu hôm nay
@@ -203,12 +207,14 @@ export async function GET(request: NextRequest) {
     };
 
     // Add debug info for production troubleshooting - Always include for timezone debugging
+    const responseTimestamp = new Date().toISOString();
     const response = {
       success: true,
       data: stats,
+      timestamp: responseTimestamp, // Track when response was generated
       debug: {
         timezone: {
-          server: new Date().toISOString(),
+          server: responseTimestamp,
           vietnam: today,
           yesterday: yesterday,
           environment: process.env.NODE_ENV || 'development',
@@ -225,11 +231,31 @@ export async function GET(request: NextRequest) {
           revenueQuery: revenue,
           salesQuery: sales,
           inventoryQuery: inventory
+        },
+        caching: {
+          note: 'API configured with no-store, no-cache for fresh data',
+          dynamic: 'force-dynamic',
+          revalidate: 0
         }
       }
     };
 
-    return NextResponse.json(response);
+    // Disable all caching for production (Vercel) - Force fresh data
+    const jsonResponse = NextResponse.json(response);
+
+    // Disable browser caching
+    jsonResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    jsonResponse.headers.set('Pragma', 'no-cache');
+    jsonResponse.headers.set('Expires', '0');
+
+    // Disable Vercel Edge caching
+    jsonResponse.headers.set('CDN-Cache-Control', 'no-store');
+    jsonResponse.headers.set('Vercel-CDN-Cache-Control', 'no-store');
+
+    // Add timestamp to response for debugging
+    jsonResponse.headers.set('X-Timestamp', new Date().toISOString());
+
+    return jsonResponse;
 
   } catch (error) {
     console.error('Dashboard stats error:', error);
