@@ -1,9 +1,19 @@
 'use client'
 import type { ChildrenType } from '@/types/component-props'
-import type SimpleBarCore from 'simplebar-core'
-import SimpleBar, { type Props } from 'simplebar-react'
+import SimpleBar from 'simplebar-react'
 
-type SimplebarReactClientProps = React.ForwardRefExoticComponent<Props & React.RefAttributes<SimpleBarCore | null>>['defaultProps'] & ChildrenType
+interface SimplebarReactClientProps extends ChildrenType {
+  className?: string;
+  style?: React.CSSProperties;
+  autoHide?: boolean;
+  forceVisible?: boolean | 'x' | 'y';
+  clickOnTrack?: boolean;
+  scrollbarMinSize?: number;
+  scrollbarMaxSize?: number;
+  direction?: 'rtl' | 'ltr';
+  timeout?: number;
+  [key: string]: any;
+}
 
 const SimplebarReactClient = ({ children, ...options }: SimplebarReactClientProps) => {
   return <SimpleBar {...options}>{children}</SimpleBar>

@@ -1,5 +1,6 @@
 declare module 'gumshoejs'
 declare module 'google-maps-react'
+declare module 'simplebar-react'
 
 // Image file types
 declare module '*.jpg' {
