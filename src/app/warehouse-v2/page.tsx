@@ -34,11 +34,11 @@ const WarehouseV2Dashboard: React.FC = () => {
 
     // Log timezone debug info
     const clientDebug = getClientTimezoneDebug();
-    console.log('Dashboard Client Timezone Debug:', clientDebug);
+    console.log(`Dashboard Client Timezone Debug:`, clientDebug);
 
     // Log comparison when both client and server debug are available
     if (timezoneDebug) {
-      console.log('Dashboard Timezone Comparison:', timezoneDebug);
+      console.log(`Dashboard Timezone Comparison:`, timezoneDebug);
     }
   }, [timezoneDebug]);
 
@@ -54,7 +54,7 @@ const WarehouseV2Dashboard: React.FC = () => {
         setRecentActivities(activitiesResult.data);
       }
     } catch (error) {
-      console.error('Error fetching activities:', error);
+      console.error(`Error fetching activities:`, error);
     } finally {
       setActivitiesLoading(false);
     }

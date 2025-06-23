@@ -148,7 +148,7 @@ const TimezoneTestPage: React.FC = () => {
               ) : (
                 <div className="text-center py-3 text-muted">
                   <i className="fas fa-info-circle fa-2x mb-2"></i>
-                  <div>Click "Test Dashboard API" to get server debug info</div>
+                  <div>Click &quot;Test Dashboard API&quot; to get server debug info</div>
                 </div>
               )}
             </Card.Body>
