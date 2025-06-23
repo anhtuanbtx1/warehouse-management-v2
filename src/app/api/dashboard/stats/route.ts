@@ -50,28 +50,46 @@ export async function GET(request: NextRequest) {
       note: 'Using Vietnam timezone utilities for consistent date handling'
     });
 
-    // Revenue statistics - Use CRM_SalesInvoices for accurate revenue calculation (same as revenue-chart API)
+    // Revenue statistics - Use CRM_SalesInvoices with Vietnam timezone handling
     const revenueStats = await executeQuery(`
       SELECT
-        -- Doanh thu hôm nay từ FinalAmount (giống revenue-chart API)
-        ISNULL(SUM(CASE WHEN CAST(i.SaleDate AS DATE) = @today THEN i.FinalAmount ELSE 0 END), 0) as todayRevenue,
-        ISNULL(SUM(CASE WHEN YEAR(i.SaleDate) = @thisYear AND MONTH(i.SaleDate) = @thisMonth THEN i.FinalAmount ELSE 0 END), 0) as monthRevenue,
-        ISNULL(SUM(CASE WHEN YEAR(i.SaleDate) = @thisYear THEN i.FinalAmount ELSE 0 END), 0) as yearRevenue,
+        -- Doanh thu hôm nay - Database stores Vietnam time, compare directly with Vietnam date
+        ISNULL(SUM(CASE
+          WHEN CAST(DATEADD(HOUR, 0, i.SaleDate) AS DATE) = @today
+          THEN i.FinalAmount ELSE 0 END), 0) as todayRevenue,
+        ISNULL(SUM(CASE
+          WHEN YEAR(DATEADD(HOUR, 0, i.SaleDate)) = @thisYear
+          AND MONTH(DATEADD(HOUR, 0, i.SaleDate)) = @thisMonth
+          THEN i.FinalAmount ELSE 0 END), 0) as monthRevenue,
+        ISNULL(SUM(CASE
+          WHEN YEAR(DATEADD(HOUR, 0, i.SaleDate)) = @thisYear
+          THEN i.FinalAmount ELSE 0 END), 0) as yearRevenue,
         -- Doanh thu hôm qua để tính growth
-        ISNULL(SUM(CASE WHEN CAST(i.SaleDate AS DATE) = @yesterday THEN i.FinalAmount ELSE 0 END), 0) as yesterdayRevenue,
+        ISNULL(SUM(CASE
+          WHEN CAST(DATEADD(HOUR, 0, i.SaleDate) AS DATE) = @yesterday
+          THEN i.FinalAmount ELSE 0 END), 0) as yesterdayRevenue,
         -- Count invoices for today
-        COUNT(CASE WHEN CAST(i.SaleDate AS DATE) = @today THEN 1 END) as todayCount
+        COUNT(CASE
+          WHEN CAST(DATEADD(HOUR, 0, i.SaleDate) AS DATE) = @today
+          THEN 1 END) as todayCount
       FROM CRM_SalesInvoices i
       WHERE i.SaleDate IS NOT NULL
     `, { today, yesterday, thisMonth, thisYear });
 
-    // Profit Statistics - Use invoice details for accurate profit calculation
+    // Profit Statistics - Use invoice details with Vietnam timezone handling
     const profitStats = await executeQuery(`
       SELECT
-        -- Lợi nhuận hôm nay từ invoice details
-        ISNULL(SUM(CASE WHEN CAST(i.SaleDate AS DATE) = @today THEN (d.SalePrice - p.ImportPrice) ELSE 0 END), 0) as todayProfit,
-        ISNULL(SUM(CASE WHEN YEAR(i.SaleDate) = @thisYear AND MONTH(i.SaleDate) = @thisMonth THEN (d.SalePrice - p.ImportPrice) ELSE 0 END), 0) as monthProfit,
-        ISNULL(SUM(CASE WHEN YEAR(i.SaleDate) = @thisYear THEN (d.SalePrice - p.ImportPrice) ELSE 0 END), 0) as yearProfit,
+        -- Lợi nhuận hôm nay - Database stores Vietnam time, compare directly
+        ISNULL(SUM(CASE
+          WHEN CAST(DATEADD(HOUR, 0, i.SaleDate) AS DATE) = @today
+          THEN (d.SalePrice - p.ImportPrice) ELSE 0 END), 0) as todayProfit,
+        ISNULL(SUM(CASE
+          WHEN YEAR(DATEADD(HOUR, 0, i.SaleDate)) = @thisYear
+          AND MONTH(DATEADD(HOUR, 0, i.SaleDate)) = @thisMonth
+          THEN (d.SalePrice - p.ImportPrice) ELSE 0 END), 0) as monthProfit,
+        ISNULL(SUM(CASE
+          WHEN YEAR(DATEADD(HOUR, 0, i.SaleDate)) = @thisYear
+          THEN (d.SalePrice - p.ImportPrice) ELSE 0 END), 0) as yearProfit,
         ISNULL(SUM(d.SalePrice), 0) as totalRevenue,
         ISNULL(SUM(p.ImportPrice), 0) as totalCost
       FROM CRM_SalesInvoices i
@@ -96,12 +114,17 @@ export async function GET(request: NextRequest) {
       FROM CRM_ImportBatches ib
     `);
 
-    // Sales Count Statistics - Use invoice data for accurate order counting
+    // Sales Count Statistics - Use invoice data with Vietnam timezone handling
     const salesStats = await executeQuery(`
       SELECT
-        -- Số đơn hôm nay từ invoices
-        COUNT(CASE WHEN CAST(i.SaleDate AS DATE) = @today THEN 1 END) as todayCount,
-        COUNT(CASE WHEN YEAR(i.SaleDate) = @thisYear AND MONTH(i.SaleDate) = @thisMonth THEN 1 END) as monthCount,
+        -- Số đơn hôm nay - Database stores Vietnam time, compare directly
+        COUNT(CASE
+          WHEN CAST(DATEADD(HOUR, 0, i.SaleDate) AS DATE) = @today
+          THEN 1 END) as todayCount,
+        COUNT(CASE
+          WHEN YEAR(DATEADD(HOUR, 0, i.SaleDate)) = @thisYear
+          AND MONTH(DATEADD(HOUR, 0, i.SaleDate)) = @thisMonth
+          THEN 1 END) as monthCount,
         ISNULL(AVG(i.FinalAmount), 0) as avgOrderValue
       FROM CRM_SalesInvoices i
       WHERE i.SaleDate IS NOT NULL
@@ -117,6 +140,8 @@ export async function GET(request: NextRequest) {
       environment: process.env.NODE_ENV,
       serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       vercelRegion: process.env.VERCEL_REGION || 'local',
+      serverTime: new Date().toISOString(),
+      vietnamTime: new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }),
       todayVietnam: today,
       yesterday: yesterday,
       todayRevenue: revenue.todayRevenue,
@@ -125,8 +150,9 @@ export async function GET(request: NextRequest) {
       salesTodayCount: sales.todayCount,
       monthRevenue: revenue.monthRevenue,
       yearRevenue: revenue.yearRevenue,
-      databaseTimezone: 'Database stores Vietnam time - using direct date comparison',
-      queryParams: { today, yesterday, thisMonth, thisYear }
+      databaseTimezone: 'Database stores Vietnam time - using DATEADD(HOUR, 0, date) for consistency',
+      queryParams: { today, yesterday, thisMonth, thisYear },
+      note: 'Server UTC+0, Database Vietnam time, Query handles timezone correctly'
     });
 
     // Database stores Vietnam time, use direct comparison values
