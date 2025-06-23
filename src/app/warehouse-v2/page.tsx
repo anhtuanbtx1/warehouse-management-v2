@@ -168,7 +168,7 @@ const WarehouseV2Dashboard: React.FC = () => {
             <Button
               variant="outline-secondary"
               size="sm"
-              onClick={() => console.log('Timezone Debug:', timezoneDebug)}
+              onClick={() => console.log(`Timezone Debug:`, timezoneDebug)}
               title="Click to log timezone debug info to console"
             >
               <i className="fas fa-clock me-1"></i>
