@@ -45,6 +45,8 @@ export async function GET(request: NextRequest) {
       thisMonth,
       currentMonth: currentMonth,
       environment: process.env.NODE_ENV || 'development',
+      serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      vercelRegion: process.env.VERCEL_REGION || 'local',
       note: 'Using Vietnam timezone utilities for consistent date handling'
     });
 
@@ -108,16 +110,21 @@ export async function GET(request: NextRequest) {
     const inventory = inventoryStats[0];
     const sales = salesStats[0];
 
-    // Debug logging for production
+    // Debug logging for production - Enhanced for timezone troubleshooting
     console.log('Dashboard Stats - Revenue Debug:', {
       environment: process.env.NODE_ENV,
+      serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      vercelRegion: process.env.VERCEL_REGION || 'local',
       todayVietnam: today,
       yesterday: yesterday,
       todayRevenue: revenue.todayRevenue,
       yesterdayRevenue: revenue.yesterdayRevenue,
       todayCount: revenue.todayCount,
       salesTodayCount: sales.todayCount,
-      databaseTimezone: 'Database stores Vietnam time - using direct date comparison'
+      monthRevenue: revenue.monthRevenue,
+      yearRevenue: revenue.yearRevenue,
+      databaseTimezone: 'Database stores Vietnam time - using direct date comparison',
+      queryParams: { today, yesterday, thisMonth, thisYear }
     });
 
     // Database stores Vietnam time, use direct comparison values
@@ -167,26 +174,31 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    // Add debug info for production troubleshooting
+    // Add debug info for production troubleshooting - Always include for timezone debugging
     const response = {
       success: true,
       data: stats,
-      ...(process.env.NODE_ENV !== 'production' && {
-        debug: {
-          timezone: {
-            server: new Date().toISOString(),
-            vietnam: today,
-            yesterday: yesterday,
-            explanation: 'Database stores Vietnam time (+7), queries use Vietnam dates'
-          },
-          revenue: {
-            todayRevenue: finalTodayRevenue,
-            yesterdayRevenue: finalYesterdayRevenue,
-            todayCount: finalTodayCount,
-            growthRate: Math.round(growthRate * 100) / 100
-          }
+      debug: {
+        timezone: {
+          server: new Date().toISOString(),
+          vietnam: today,
+          yesterday: yesterday,
+          environment: process.env.NODE_ENV || 'development',
+          serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          explanation: 'Database stores Vietnam time (+7), queries use Vietnam dates'
+        },
+        revenue: {
+          todayRevenue: finalTodayRevenue,
+          yesterdayRevenue: finalYesterdayRevenue,
+          todayCount: finalTodayCount,
+          growthRate: Math.round(growthRate * 100) / 100
+        },
+        rawData: {
+          revenueQuery: revenue,
+          salesQuery: sales,
+          inventoryQuery: inventory
         }
-      })
+      }
     };
 
     return NextResponse.json(response);
