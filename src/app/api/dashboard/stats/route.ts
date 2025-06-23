@@ -50,32 +50,34 @@ export async function GET(request: NextRequest) {
       note: 'Using Vietnam timezone utilities for consistent date handling'
     });
 
-    // Revenue statistics - Database stores Vietnam time, use direct date comparison
+    // Revenue statistics - Use CRM_SalesInvoices for accurate revenue calculation (same as revenue-chart API)
     const revenueStats = await executeQuery(`
       SELECT
-        -- Doanh thu hôm nay (database stores Vietnam time)
-        ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @today THEN SalePrice ELSE 0 END), 0) as todayRevenue,
-        ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = @thisMonth THEN SalePrice ELSE 0 END), 0) as monthRevenue,
-        ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear THEN SalePrice ELSE 0 END), 0) as yearRevenue,
+        -- Doanh thu hôm nay từ FinalAmount (giống revenue-chart API)
+        ISNULL(SUM(CASE WHEN CAST(i.SaleDate AS DATE) = @today THEN i.FinalAmount ELSE 0 END), 0) as todayRevenue,
+        ISNULL(SUM(CASE WHEN YEAR(i.SaleDate) = @thisYear AND MONTH(i.SaleDate) = @thisMonth THEN i.FinalAmount ELSE 0 END), 0) as monthRevenue,
+        ISNULL(SUM(CASE WHEN YEAR(i.SaleDate) = @thisYear THEN i.FinalAmount ELSE 0 END), 0) as yearRevenue,
         -- Doanh thu hôm qua để tính growth
-        ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @yesterday THEN SalePrice ELSE 0 END), 0) as yesterdayRevenue,
-        -- Count records for today
-        COUNT(CASE WHEN CAST(SoldDate AS DATE) = @today THEN 1 END) as todayCount
-      FROM CRM_Products
-      WHERE Status = 'SOLD' AND SoldDate IS NOT NULL
+        ISNULL(SUM(CASE WHEN CAST(i.SaleDate AS DATE) = @yesterday THEN i.FinalAmount ELSE 0 END), 0) as yesterdayRevenue,
+        -- Count invoices for today
+        COUNT(CASE WHEN CAST(i.SaleDate AS DATE) = @today THEN 1 END) as todayCount
+      FROM CRM_SalesInvoices i
+      WHERE i.SaleDate IS NOT NULL
     `, { today, yesterday, thisMonth, thisYear });
 
-    // Profit Statistics - Use direct date comparison (database stores Vietnam time)
+    // Profit Statistics - Use invoice details for accurate profit calculation
     const profitStats = await executeQuery(`
       SELECT
-        -- Lợi nhuận hôm nay (direct comparison - database stores Vietnam time)
-        ISNULL(SUM(CASE WHEN CAST(SoldDate AS DATE) = @today THEN (SalePrice - ImportPrice) ELSE 0 END), 0) as todayProfit,
-        ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = @thisMonth THEN (SalePrice - ImportPrice) ELSE 0 END), 0) as monthProfit,
-        ISNULL(SUM(CASE WHEN YEAR(SoldDate) = @thisYear THEN (SalePrice - ImportPrice) ELSE 0 END), 0) as yearProfit,
-        ISNULL(SUM(CASE WHEN Status = 'SOLD' THEN SalePrice ELSE 0 END), 0) as totalRevenue,
-        ISNULL(SUM(CASE WHEN Status = 'SOLD' THEN ImportPrice ELSE 0 END), 0) as totalCost
-      FROM CRM_Products
-      WHERE SoldDate IS NOT NULL
+        -- Lợi nhuận hôm nay từ invoice details
+        ISNULL(SUM(CASE WHEN CAST(i.SaleDate AS DATE) = @today THEN (d.SalePrice - p.ImportPrice) ELSE 0 END), 0) as todayProfit,
+        ISNULL(SUM(CASE WHEN YEAR(i.SaleDate) = @thisYear AND MONTH(i.SaleDate) = @thisMonth THEN (d.SalePrice - p.ImportPrice) ELSE 0 END), 0) as monthProfit,
+        ISNULL(SUM(CASE WHEN YEAR(i.SaleDate) = @thisYear THEN (d.SalePrice - p.ImportPrice) ELSE 0 END), 0) as yearProfit,
+        ISNULL(SUM(d.SalePrice), 0) as totalRevenue,
+        ISNULL(SUM(p.ImportPrice), 0) as totalCost
+      FROM CRM_SalesInvoices i
+      INNER JOIN CRM_SalesInvoiceDetails d ON i.InvoiceID = d.InvoiceID
+      INNER JOIN CRM_Products p ON d.ProductID = p.ProductID
+      WHERE i.SaleDate IS NOT NULL
     `, { today, thisMonth, thisYear });
 
     // Inventory Statistics - Phân biệt rõ sản phẩm có sẵn vs tồn kho
@@ -94,15 +96,15 @@ export async function GET(request: NextRequest) {
       FROM CRM_ImportBatches ib
     `);
 
-    // Sales Count Statistics - Use direct date comparison (database stores Vietnam time)
+    // Sales Count Statistics - Use invoice data for accurate order counting
     const salesStats = await executeQuery(`
       SELECT
-        -- Số đơn hôm nay (direct comparison - database stores Vietnam time)
-        COUNT(CASE WHEN CAST(SoldDate AS DATE) = @today THEN 1 END) as todayCount,
-        COUNT(CASE WHEN YEAR(SoldDate) = @thisYear AND MONTH(SoldDate) = @thisMonth THEN 1 END) as monthCount,
-        ISNULL(AVG(CASE WHEN Status = 'SOLD' THEN SalePrice END), 0) as avgOrderValue
-      FROM CRM_Products
-      WHERE Status = 'SOLD' AND SoldDate IS NOT NULL
+        -- Số đơn hôm nay từ invoices
+        COUNT(CASE WHEN CAST(i.SaleDate AS DATE) = @today THEN 1 END) as todayCount,
+        COUNT(CASE WHEN YEAR(i.SaleDate) = @thisYear AND MONTH(i.SaleDate) = @thisMonth THEN 1 END) as monthCount,
+        ISNULL(AVG(i.FinalAmount), 0) as avgOrderValue
+      FROM CRM_SalesInvoices i
+      WHERE i.SaleDate IS NOT NULL
     `, { today, thisYear, thisMonth });
 
     const revenue = revenueStats[0];
