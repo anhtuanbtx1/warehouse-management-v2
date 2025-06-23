@@ -4,32 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import Link from 'next/link';
 import RevenueChart from '@/components/warehouse-v2/RevenueChart';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { getClientTimezoneDebug } from '@/utils/clientTimezone';
 
-interface DashboardStats {
-  revenue: {
-    today: number;
-    thisMonth: number;
-    thisYear: number;
-    growth: number;
-  };
-  profit: {
-    today: number;
-    thisMonth: number;
-    thisYear: number;
-    margin: number;
-  };
-  inventory: {
-    totalProducts: number;
-    inStock: number;
-    sold: number;
-    lowStock: number;
-  };
-  sales: {
-    todayCount: number;
-    thisMonthCount: number;
-    avgOrderValue: number;
-  };
-}
+// DashboardStats interface is now imported from the hook
 
 interface Activity {
   id: string;
@@ -45,25 +23,28 @@ interface Activity {
 
 
 const WarehouseV2Dashboard: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  // Use custom hook for timezone-aware dashboard stats
+  const { stats, loading: statsLoading, error: statsError, refetch: refetchStats, timezoneDebug } = useDashboardStats();
+
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [activitiesLoading, setActivitiesLoading] = useState(true);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    fetchRecentActivities();
 
-  const fetchDashboardData = async () => {
+    // Log timezone debug info
+    const clientDebug = getClientTimezoneDebug();
+    console.log('Dashboard Client Timezone Debug:', clientDebug);
+
+    // Log comparison when both client and server debug are available
+    if (timezoneDebug) {
+      console.log('Dashboard Timezone Comparison:', timezoneDebug);
+    }
+  }, [timezoneDebug]);
+
+  const fetchRecentActivities = async () => {
     try {
-      setLoading(true);
-
-      // Fetch new dashboard statistics
-      const statsResponse = await fetch('/api/dashboard/stats');
-      const statsResult = await statsResponse.json();
-
-      if (statsResult.success) {
-        setStats(statsResult.data);
-      }
+      setActivitiesLoading(true);
 
       // Fetch recent activities
       const activitiesResponse = await fetch('/api/dashboard/activities?limit=10');
@@ -72,15 +53,19 @@ const WarehouseV2Dashboard: React.FC = () => {
       if (activitiesResult.success) {
         setRecentActivities(activitiesResult.data);
       }
-
-
-
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('Error fetching activities:', error);
     } finally {
-      setLoading(false);
+      setActivitiesLoading(false);
     }
   };
+
+  const fetchDashboardData = async () => {
+    refetchStats();
+    fetchRecentActivities();
+  };
+
+  const loading = statsLoading || activitiesLoading;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -124,6 +109,40 @@ const WarehouseV2Dashboard: React.FC = () => {
             <span className="visually-hidden">Loading...</span>
           </div>
           <div className="mt-2">Đang tải dữ liệu...</div>
+          {timezoneDebug && (
+            <div className="mt-3">
+              <small className="text-muted">
+                Timezone: {timezoneDebug.client?.vietnamToday || 'Loading...'}
+              </small>
+            </div>
+          )}
+        </div>
+      </Container>
+    );
+  }
+
+  if (statsError) {
+    return (
+      <Container fluid className="py-4">
+        <div className="text-center py-5">
+          <div className="alert alert-danger">
+            <i className="fas fa-exclamation-triangle me-2"></i>
+            Lỗi tải dữ liệu: {statsError}
+          </div>
+          <Button variant="primary" onClick={fetchDashboardData}>
+            <i className="fas fa-sync-alt me-1"></i>
+            Thử lại
+          </Button>
+          {timezoneDebug && (
+            <div className="mt-3">
+              <details>
+                <summary>Debug Info</summary>
+                <pre className="text-start mt-2">
+                  {JSON.stringify(timezoneDebug, null, 2)}
+                </pre>
+              </details>
+            </div>
+          )}
         </div>
       </Container>
     );
@@ -140,11 +159,23 @@ const WarehouseV2Dashboard: React.FC = () => {
           </h2>
        
         </div>
-        <div>
+        <div className="d-flex gap-2">
           <Button variant="outline-primary" onClick={fetchDashboardData}>
             <i className="fas fa-sync-alt me-1"></i>
             Làm mới
           </Button>
+          {timezoneDebug && (
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              onClick={() => console.log('Timezone Debug:', timezoneDebug)}
+              title="Click to log timezone debug info to console"
+            >
+              <i className="fas fa-clock me-1"></i>
+              {timezoneDebug.client?.vietnamToday}
+              {timezoneDebug.comparison?.match ? ' ✓' : ' ⚠️'}
+            </Button>
+          )}
         </div>
       </div>
 
