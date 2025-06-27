@@ -180,11 +180,11 @@ export async function POST(request: NextRequest) {
       categoryInfo[0].CategoryName.includes('Cáp')
     )) {
       const batchId = result[0].BatchID;
-      const productName = body.Notes || 'Cáp sạc';
 
-      // Tạo sản phẩm tự động cho từng số lượng
+      // Tạo sản phẩm tự động cho từng số lượng với tên chuẩn
       for (let i = 1; i <= body.TotalQuantity; i++) {
         const productCode = `CAP${Date.now()}${String(i).padStart(3, '0')}`;
+        const standardProductName = `Type-C to Lightning #${i}`;
 
         try {
           await executeQuery(`
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
           `, {
             batchId: batchId,
             categoryId: body.CategoryID,
-            productName: `${productName} #${i}`,
+            productName: standardProductName,
             productCode: productCode,
             importPrice: importPrice,
             notes: `Tự động tạo từ lô hàng ${result[0].BatchCode}`
