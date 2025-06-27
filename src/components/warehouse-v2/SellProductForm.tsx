@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col, Alert, Card } from 'react-bootstrap';
 import { useToast } from '@/contexts/ToastContext';
 import InvoicePrint from './InvoicePrint';
@@ -23,10 +23,26 @@ interface SellProductFormProps {
   product: ProductV2 | null;
 }
 
+interface CableBatch {
+  BatchID: number;
+  BatchCode: string;
+  ImportDate: string;
+  TotalQuantity: number;
+  AvailableProducts: number;
+  AvgPrice: number;
+  MinPrice: number;
+  MaxPrice: number;
+  CategoryName: string;
+  Notes?: string;
+}
+
 interface SellProductData {
   ProductID: number;
   SalePrice: number;
   PaymentMethod: string;
+  IncludeCable: boolean;
+  CableBatchId?: number;
+  CablePrice?: number;
 }
 
 const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSuccess, product }) => {
@@ -34,26 +50,55 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
   const [formData, setFormData] = useState<SellProductData>({
     ProductID: 0,
     SalePrice: 0,
-    PaymentMethod: 'CASH'
+    PaymentMethod: 'CASH',
+    IncludeCable: false
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [validated, setValidated] = useState(false);
+  const [cablePrice, setCablePrice] = useState(100000); // Giá cáp sạc mặc định
+  const [cableBatches, setCableBatches] = useState<CableBatch[]>([]);
+  const [selectedCableBatch, setSelectedCableBatch] = useState<CableBatch | null>(null);
 
   // Invoice states
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState<any>(null);
+
+  // Fetch cable batches on component mount
+  useEffect(() => {
+    const fetchCableBatches = async () => {
+      try {
+        const response = await fetch('/api/cable-batches');
+        const result = await response.json();
+        if (result.success && result.data) {
+          setCableBatches(result.data);
+          // Set default cable price from first batch
+          if (result.data.length > 0) {
+            setCablePrice(result.data[0].AvgPrice);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching cable batches:', error);
+      }
+    };
+
+    fetchCableBatches();
+  }, []);
 
   React.useEffect(() => {
     if (show && product) {
       setFormData({
         ProductID: product.ProductID,
         SalePrice: 0, // Start with 0, user must enter sale price
-        PaymentMethod: 'CASH'
+        PaymentMethod: 'CASH',
+        IncludeCable: false,
+        CableBatchId: undefined,
+        CablePrice: undefined
       });
       setValidated(false);
       setError('');
+      setSelectedCableBatch(null);
     }
   }, [show, product]);
 
@@ -62,6 +107,26 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleCableBatchChange = (batchId: string) => {
+    const batch = cableBatches.find(b => b.BatchID.toString() === batchId);
+    if (batch) {
+      setSelectedCableBatch(batch);
+      setCablePrice(batch.AvgPrice);
+      setFormData(prev => ({
+        ...prev,
+        CableBatchId: batch.BatchID,
+        CablePrice: batch.AvgPrice
+      }));
+    } else {
+      setSelectedCableBatch(null);
+      setFormData(prev => ({
+        ...prev,
+        CableBatchId: undefined,
+        CablePrice: undefined
+      }));
+    }
   };
 
   const validateForm = () => {
@@ -152,7 +217,9 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
 
   const calculateProfit = () => {
     if (product && formData.SalePrice > 0) {
-      return formData.SalePrice - product.ImportPrice;
+      const cableCost = formData.IncludeCable ? (formData.CablePrice || cablePrice) : 0;
+      const totalCost = product.ImportPrice + cableCost;
+      return formData.SalePrice - totalCost;
     }
     return 0;
   };
@@ -166,7 +233,9 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
 
   const getProfitPercentage = () => {
     if (product && formData.SalePrice > 0) {
-      return ((formData.SalePrice - product.ImportPrice) / product.ImportPrice) * 100;
+      const cableCost = formData.IncludeCable ? (formData.CablePrice || cablePrice) : 0;
+      const totalCost = product.ImportPrice + cableCost;
+      return ((formData.SalePrice - totalCost) / totalCost) * 100;
     }
     return 0;
   };
@@ -276,7 +345,71 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
             </Col>
           </Row>
 
+          {/* Cable Gift Option */}
+          <Row className="mb-4">
+            <Col md={12}>
+              <Card className="border-warning">
+                <Card.Body className="py-3">
+                  <Form.Check
+                    type="checkbox"
+                    id="includeCable"
+                    className="fs-5"
+                    checked={formData.IncludeCable}
+                    onChange={(e) => handleInputChange('IncludeCable', e.target.checked)}
+                    label={
+                      <span>
+                        <span className="me-2">🔌</span>
+                        <strong>Bán kèm cáp sạc</strong>
+                        <span className="text-muted ms-2">
+                          (+ {formatCurrency(formData.CablePrice || cablePrice)} vào giá nhập để tính lãi/lỗ)
+                        </span>
+                      </span>
+                    }
+                  />
 
+                  {formData.IncludeCable && (
+                    <div className="mt-3">
+                      <Form.Group>
+                        <Form.Label className="fs-6 fw-medium">Chọn lô cáp sạc:</Form.Label>
+                        <Form.Select
+                          className="fs-6"
+                          value={selectedCableBatch?.BatchID || ''}
+                          onChange={(e) => handleCableBatchChange(e.target.value)}
+                        >
+                          <option value="">-- Chọn lô cáp sạc --</option>
+                          {cableBatches.map(batch => (
+                            <option key={batch.BatchID} value={batch.BatchID}>
+                              {batch.BatchCode} - {batch.AvailableProducts} sản phẩm - {formatCurrency(batch.AvgPrice)}/cái
+                              {batch.Notes && ` (${batch.Notes})`}
+                            </option>
+                          ))}
+                        </Form.Select>
+                      </Form.Group>
+
+                      {selectedCableBatch && (
+                        <div className="mt-2 p-2 bg-light rounded">
+                          <div className="text-info fs-6">
+                            <span className="me-2">📦</span>
+                            <strong>Lô {selectedCableBatch.BatchCode}</strong>
+                          </div>
+                          <div className="text-muted fs-6">
+                            • Còn lại: {selectedCableBatch.AvailableProducts} sản phẩm<br/>
+                            • Giá: {formatCurrency(selectedCableBatch.MinPrice)} - {formatCurrency(selectedCableBatch.MaxPrice)}<br/>
+                            • Trung bình: {formatCurrency(selectedCableBatch.AvgPrice)}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="mt-2 text-info fs-6">
+                        <span className="me-2">💡</span>
+                        Giá nhập sẽ được tính: {formatCurrency(product.ImportPrice)} + {formatCurrency(formData.CablePrice || cablePrice)} = {formatCurrency(product.ImportPrice + (formData.CablePrice || cablePrice))}
+                      </div>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
 
           {/* Profit Calculation */}
           {formData.SalePrice > 0 && (
@@ -291,10 +424,22 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
                 <Row>
                   <Col md={4}>
                     <div className="text-center">
-                      <div className="text-muted fs-5 mb-2">Giá nhập</div>
-                      <div className="h3 text-success fw-bold">
-                        {formatCurrency(product.ImportPrice)}
+                      <div className="text-muted fs-5 mb-2">
+                        Giá nhập {formData.IncludeCable && '(+ cáp sạc)'}
                       </div>
+                      <div className="h3 text-success fw-bold">
+                        {formatCurrency(product.ImportPrice + (formData.IncludeCable ? (formData.CablePrice || cablePrice) : 0))}
+                      </div>
+                      {formData.IncludeCable && (
+                        <div className="text-muted fs-6">
+                          {formatCurrency(product.ImportPrice)} + {formatCurrency(formData.CablePrice || cablePrice)}
+                          {selectedCableBatch && (
+                            <div className="text-info">
+                              (Lô {selectedCableBatch.BatchCode})
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </Col>
                   <Col md={4}>
