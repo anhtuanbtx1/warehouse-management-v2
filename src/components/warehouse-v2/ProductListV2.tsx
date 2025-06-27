@@ -125,7 +125,8 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/categories');
+      // Loại trừ danh mục cáp sạc vì chỉ bán kèm, không bán riêng lẻ
+      const response = await fetch('/api/categories?excludeCables=true');
       const result = await response.json();
       if (result.success) {
         setCategories(result.data);
@@ -468,7 +469,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
           </Button>
         </div>
       </Card.Header>
-      
+
       <Card.Body>
         {/* Search and Filter */}
         <div className="row mb-3">
@@ -512,7 +513,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
               hideCategoryFilter ? "col-md-4" :
               hideResetButton ? "col-md-5" : "col-md-3"
             }>
-             
+
             </div>
           )}
 
@@ -536,7 +537,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
           {!hideResetButton && (
             <div className="col-md-2">
               <div className="d-flex btn-group-compact">
-              
+
                 {showAddButton && (
                   <Button
                     variant={isBatchFull ? "secondary" : "success"}

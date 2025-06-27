@@ -9,10 +9,10 @@ AS
 BEGIN
     DECLARE @BatchCode NVARCHAR(50);
     DECLARE @DateTime NVARCHAR(20);
-    
+
     SET @DateTime = FORMAT(GETDATE(), 'yyyyMMddHHmmss');
     SET @BatchCode = 'LOT' + @DateTime;
-    
+
     RETURN @BatchCode;
 END;
 
@@ -24,15 +24,15 @@ BEGIN
     DECLARE @InvoiceNumber NVARCHAR(50);
     DECLARE @Count INT;
     DECLARE @Today NVARCHAR(8);
-    
+
     SET @Today = FORMAT(GETDATE(), 'yyyyMMdd');
-    
+
     SELECT @Count = COUNT(*) + 1
-    FROM CRM_SalesInvoices 
+    FROM CRM_SalesInvoices
     WHERE FORMAT(CreatedAt, 'yyyyMMdd') = @Today;
-    
+
     SET @InvoiceNumber = 'HD' + @Today + RIGHT('000' + CAST(@Count AS NVARCHAR), 3);
-    
+
     RETURN @InvoiceNumber;
 END;
 
@@ -47,34 +47,34 @@ CREATE PROCEDURE SP_CRM_CreateImportBatch
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     DECLARE @BatchCode NVARCHAR(50);
     DECLARE @BatchID INT;
-    
+
     -- Tạo mã lô hàng tự động
     SET @BatchCode = dbo.FN_CRM_GenerateBatchCode();
-    
+
     -- Kiểm tra mã lô có trùng không (rất hiếm)
     WHILE EXISTS(SELECT 1 FROM CRM_ImportBatches WHERE BatchCode = @BatchCode)
     BEGIN
         WAITFOR DELAY '00:00:01'; -- Đợi 1 giây
         SET @BatchCode = dbo.FN_CRM_GenerateBatchCode();
     END
-    
+
     -- Tạo lô hàng
     INSERT INTO CRM_ImportBatches (
-        BatchCode, ImportDate, CategoryID, TotalQuantity, 
+        BatchCode, ImportDate, CategoryID, TotalQuantity,
         TotalImportValue, Notes, CreatedBy
     )
     VALUES (
         @BatchCode, @ImportDate, @CategoryID, @TotalQuantity,
         @TotalImportValue, @Notes, @CreatedBy
     );
-    
+
     SET @BatchID = SCOPE_IDENTITY();
-    
+
     -- Trả về thông tin lô hàng vừa tạo
-    SELECT 
+    SELECT
         b.*,
         c.CategoryName
     FROM CRM_ImportBatches b
@@ -92,27 +92,27 @@ CREATE PROCEDURE SP_CRM_AddProductToBatch
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     DECLARE @CategoryID INT;
-    
+
     -- Lấy CategoryID từ lô hàng
-    SELECT @CategoryID = CategoryID 
-    FROM CRM_ImportBatches 
+    SELECT @CategoryID = CategoryID
+    FROM CRM_ImportBatches
     WHERE BatchID = @BatchID;
-    
+
     IF @CategoryID IS NULL
     BEGIN
         RAISERROR('Lô hàng không tồn tại', 16, 1);
         RETURN;
     END
-    
+
     -- Kiểm tra IMEI đã tồn tại chưa
     IF EXISTS(SELECT 1 FROM CRM_Products WHERE IMEI = @IMEI)
     BEGIN
         RAISERROR('IMEI đã tồn tại trong hệ thống', 16, 1);
         RETURN;
     END
-    
+
     -- Thêm sản phẩm
     INSERT INTO CRM_Products (
         BatchID, CategoryID, ProductName, IMEI, ImportPrice, Notes
@@ -120,7 +120,7 @@ BEGIN
     VALUES (
         @BatchID, @CategoryID, @ProductName, @IMEI, @ImportPrice, @Notes
     );
-    
+
     -- Trả về thông tin sản phẩm vừa tạo
     SELECT * FROM CRM_Products WHERE ProductID = SCOPE_IDENTITY();
 END;
@@ -132,8 +132,8 @@ CREATE PROCEDURE SP_CRM_GetAvailableProducts
 AS
 BEGIN
     SET NOCOUNT ON;
-    
-    SELECT 
+
+    SELECT
         p.ProductID,
         p.ProductName,
         p.IMEI,
@@ -147,11 +147,11 @@ BEGIN
     FROM CRM_Products p
     INNER JOIN CRM_Categories c ON p.CategoryID = c.CategoryID
     INNER JOIN CRM_ImportBatches b ON p.BatchID = b.BatchID
-    WHERE 
+    WHERE
         p.Status = 'IN_STOCK'
         AND (@CategoryID IS NULL OR p.CategoryID = @CategoryID)
-        AND (@SearchTerm IS NULL OR 
-             p.ProductName LIKE '%' + @SearchTerm + '%' OR 
+        AND (@SearchTerm IS NULL OR
+             p.ProductName LIKE '%' + @SearchTerm + '%' OR
              p.IMEI LIKE '%' + @SearchTerm + '%')
     ORDER BY p.CreatedAt DESC;
 END;
@@ -168,12 +168,12 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRANSACTION;
-    
+
     DECLARE @InvoiceNumber NVARCHAR(50);
     DECLARE @InvoiceID INT;
     DECLARE @ProductName NVARCHAR(200);
     DECLARE @IMEI NVARCHAR(50);
-    
+
     TRY
         -- Kiểm tra sản phẩm có thể bán không
         IF NOT EXISTS(SELECT 1 FROM CRM_Products WHERE ProductID = @ProductID AND Status = 'IN_STOCK')
@@ -181,15 +181,15 @@ BEGIN
             RAISERROR('Sản phẩm không có sẵn để bán', 16, 1);
             RETURN;
         END
-        
+
         -- Lấy thông tin sản phẩm
         SELECT @ProductName = ProductName, @IMEI = IMEI
-        FROM CRM_Products 
+        FROM CRM_Products
         WHERE ProductID = @ProductID;
-        
+
         -- Tạo số hóa đơn
         SET @InvoiceNumber = dbo.FN_CRM_GenerateInvoiceNumber();
-        
+
         -- Tạo hóa đơn
         INSERT INTO CRM_SalesInvoices (
             InvoiceNumber, CustomerName, CustomerPhone, SaleDate,
@@ -199,9 +199,9 @@ BEGIN
             @InvoiceNumber, @CustomerName, @CustomerPhone, GETDATE(),
             @SalePrice, @SalePrice, @PaymentMethod, @CreatedBy
         );
-        
+
         SET @InvoiceID = SCOPE_IDENTITY();
-        
+
         -- Tạo chi tiết hóa đơn
         INSERT INTO CRM_SalesInvoiceDetails (
             InvoiceID, ProductID, ProductName, IMEI, SalePrice, Quantity, TotalPrice
@@ -209,7 +209,7 @@ BEGIN
         VALUES (
             @InvoiceID, @ProductID, @ProductName, @IMEI, @SalePrice, 1, @SalePrice
         );
-        
+
         -- Cập nhật sản phẩm
         UPDATE CRM_Products SET
             SalePrice = @SalePrice,
@@ -219,11 +219,11 @@ BEGIN
             CustomerInfo = @CustomerName + ' - ' + ISNULL(@CustomerPhone, ''),
             UpdatedAt = GETDATE()
         WHERE ProductID = @ProductID;
-        
+
         COMMIT TRANSACTION;
-        
+
         -- Trả về thông tin hóa đơn
-        SELECT 
+        SELECT
             i.*,
             d.ProductName,
             d.IMEI,
@@ -231,7 +231,7 @@ BEGIN
         FROM CRM_SalesInvoices i
         INNER JOIN CRM_SalesInvoiceDetails d ON i.InvoiceID = d.InvoiceID
         WHERE i.InvoiceID = @InvoiceID;
-        
+
     CATCH
         ROLLBACK TRANSACTION;
         THROW;
@@ -246,8 +246,8 @@ CREATE PROCEDURE SP_CRM_GetInventoryReport
 AS
 BEGIN
     SET NOCOUNT ON;
-    
-    SELECT 
+
+    SELECT
         b.BatchCode,
         b.ImportDate,
         c.CategoryName,
@@ -257,22 +257,22 @@ BEGIN
         b.TotalSoldValue,
         b.RemainingQuantity,
         b.TotalImportValue / NULLIF(b.TotalQuantity, 0) as AvgImportPrice,
-        CASE 
-            WHEN b.TotalSoldQuantity > 0 
-            THEN b.TotalSoldValue / b.TotalSoldQuantity 
-            ELSE 0 
+        CASE
+            WHEN b.TotalSoldQuantity > 0
+            THEN b.TotalSoldValue / b.TotalSoldQuantity
+            ELSE 0
         END as AvgSalePrice,
         b.ProfitLoss,
-        CASE 
-            WHEN b.TotalImportValue > 0 
-            THEN (b.ProfitLoss / b.TotalImportValue) * 100 
-            ELSE 0 
+        CASE
+            WHEN b.TotalImportValue > 0
+            THEN (b.ProfitLoss / b.TotalImportValue) * 100
+            ELSE 0
         END as ProfitMarginPercent,
         b.Status,
         b.CreatedAt
     FROM CRM_ImportBatches b
     INNER JOIN CRM_Categories c ON b.CategoryID = c.CategoryID
-    WHERE 
+    WHERE
         (@FromDate IS NULL OR b.ImportDate >= @FromDate)
         AND (@ToDate IS NULL OR b.ImportDate <= @ToDate)
         AND (@CategoryID IS NULL OR b.CategoryID = @CategoryID)
@@ -285,8 +285,8 @@ CREATE PROCEDURE SP_CRM_GetBatchProductDetails
 AS
 BEGIN
     SET NOCOUNT ON;
-    
-    SELECT 
+
+    SELECT
         p.ProductID,
         p.ProductName,
         p.IMEI,
@@ -297,11 +297,53 @@ BEGIN
         p.InvoiceNumber,
         p.CustomerInfo,
         p.CreatedAt,
-        CASE 
+        CASE
             WHEN p.Status = 'SOLD' THEN p.SalePrice - p.ImportPrice
             ELSE 0
         END as Profit
     FROM CRM_Products p
     WHERE p.BatchID = @BatchID
     ORDER BY p.Status, p.CreatedAt;
+END;
+
+-- Stored Procedure: Lấy sản phẩm có sẵn để bán (loại trừ cáp sạc)
+CREATE PROCEDURE SP_CRM_GetAvailableProducts
+    @CategoryID INT = NULL,
+    @SearchTerm NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        p.ProductID,
+        p.BatchID,
+        p.CategoryID,
+        p.ProductName,
+        p.IMEI,
+        p.ImportPrice,
+        p.SalePrice,
+        p.Status,
+        p.SoldDate,
+        p.InvoiceNumber,
+        p.CustomerInfo,
+        p.Notes,
+        p.CreatedAt,
+        p.UpdatedAt,
+        c.CategoryName,
+        b.BatchCode,
+        b.ImportDate
+    FROM CRM_Products p
+    INNER JOIN CRM_Categories c ON p.CategoryID = c.CategoryID
+    INNER JOIN CRM_ImportBatches b ON p.BatchID = b.BatchID
+    WHERE
+        p.Status = 'IN_STOCK'
+        -- Loại trừ danh mục cáp sạc vì chỉ bán kèm
+        AND c.CategoryName NOT LIKE '%cáp%'
+        AND c.CategoryName NOT LIKE '%cap%'
+        AND c.CategoryName NOT LIKE '%Cáp%'
+        AND (@CategoryID IS NULL OR p.CategoryID = @CategoryID)
+        AND (@SearchTerm IS NULL OR
+             p.ProductName LIKE '%' + @SearchTerm + '%' OR
+             p.IMEI LIKE '%' + @SearchTerm + '%')
+    ORDER BY p.CreatedAt DESC;
 END;

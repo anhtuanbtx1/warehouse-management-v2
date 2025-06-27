@@ -16,17 +16,25 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const isActive = searchParams.get('isActive');
-    
+    const excludeCables = searchParams.get('excludeCables') === 'true'; // Loại trừ cáp sạc
+
     let whereClause = 'WHERE 1=1';
     const params: any = {};
-    
+
     if (isActive !== null) {
       whereClause += ' AND IsActive = @isActive';
       params.isActive = isActive === 'true';
     }
-    
+
+    // Loại trừ danh mục cáp sạc nếu được yêu cầu
+    if (excludeCables) {
+      whereClause += ` AND CategoryName NOT LIKE '%cáp%'
+                       AND CategoryName NOT LIKE '%cap%'
+                       AND CategoryName NOT LIKE '%Cáp%'`;
+    }
+
     const query = `
-      SELECT 
+      SELECT
         CategoryID,
         CategoryName,
         Description,
@@ -37,20 +45,20 @@ export async function GET(request: NextRequest) {
       ${whereClause}
       ORDER BY CategoryName
     `;
-    
+
     const categories = await executeQuery<Category>(query, params);
-    
+
     const response: ApiResponse<Category[]> = {
       success: true,
       data: categories
     };
-    
+
     return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching categories:', error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to fetch categories',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
@@ -63,7 +71,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     // Validate required fields
     if (!body.CategoryName) {
       return NextResponse.json(
@@ -71,45 +79,45 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Check if category name already exists
     const existingCategory = await executeQuery(
       'SELECT CategoryID FROM CRM_Categories WHERE CategoryName = @categoryName',
       { categoryName: body.CategoryName }
     );
-    
+
     if (existingCategory.length > 0) {
       return NextResponse.json(
         { success: false, error: 'Category name already exists' },
         { status: 400 }
       );
     }
-    
+
     const insertQuery = `
       INSERT INTO CRM_Categories (CategoryName, Description)
       OUTPUT INSERTED.*
       VALUES (@categoryName, @description)
     `;
-    
+
     const params = {
       categoryName: body.CategoryName,
       description: body.Description || null
     };
-    
+
     const result = await executeQuery<Category>(insertQuery, params);
-    
+
     const response: ApiResponse<Category> = {
       success: true,
       data: result[0],
       message: 'Category created successfully'
     };
-    
+
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     console.error('Error creating category:', error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to create category',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
