@@ -7,6 +7,7 @@ import CreateBatchForm from '@/components/warehouse-v2/CreateBatchForm';
 import ProductListV2 from '@/components/warehouse-v2/ProductListV2';
 import ImportInvoicePrint from '@/components/warehouse-v2/ImportInvoicePrint';
 import InvoicePrint from '@/components/warehouse-v2/InvoicePrint';
+import styles from './import.module.css';
 
 interface ImportBatch {
   BatchID: number;
@@ -124,23 +125,23 @@ const ImportPage: React.FC = () => {
 
 
   return (
-    <Container fluid className="py-4 import-page">
+    <Container fluid className={`py-4 import-page ${styles.importContainer}`}>
       <Row>
         <Col>
           {/* Breadcrumb */}
-          <Breadcrumb>
+          <Breadcrumb className={styles.breadcrumb}>
             <Breadcrumb.Item href="/warehouse-v2">Quản lý kho V2</Breadcrumb.Item>
             <Breadcrumb.Item active>Nhập hàng</Breadcrumb.Item>
           </Breadcrumb>
 
           {/* Page Header */}
-          <div className="d-flex justify-content-between align-items-center mb-4">
+          <div className={`d-flex justify-content-between align-items-center ${styles.pageHeader}`}>
             <div>
-              <h2 className="mb-1">
+              <h2 className={styles.pageTitle}>
                 <span className="text-primary me-2">📦</span>
                 Quản lý nhập hàng
               </h2>
-              <p className="text-muted mb-0">
+              <p className={`text-muted mb-0 ${styles.pageSubtitle}`}>
                 Tạo lô hàng mới và quản lý sản phẩm theo từng lô
               </p>
             </div>
@@ -150,10 +151,10 @@ const ImportPage: React.FC = () => {
           <Tabs
             activeKey={activeTab}
             onSelect={(k) => setActiveTab(k || 'batches')}
-            className="mb-3"
+            className={`mb-3 ${styles.tabsContainer}`}
           >
             <Tab eventKey="batches" title={
-              <span>
+              <span className={styles.tabTitle}>
                 <span className="me-2">📋</span>
                 Danh sách lô hàng
               </span>
@@ -170,11 +171,11 @@ const ImportPage: React.FC = () => {
             <Tab
               eventKey="products"
               title={
-                <span>
+                <span className={styles.tabTitle}>
                   <span className="me-2">📱</span>
                   Sản phẩm trong lô
                   {selectedBatch && (
-                    <span className="badge bg-primary ms-2">
+                    <span className={`badge bg-primary ${styles.tabBadge}`}>
                       {selectedBatch.BatchCode}
                     </span>
                   )}
@@ -185,25 +186,27 @@ const ImportPage: React.FC = () => {
               {selectedBatch && (
                 <div>
                   {/* Batch Info */}
-                  <div className="bg-light p-3 rounded mb-3">
+                  <div className={styles.batchInfo}>
                     <Row>
                       <Col md={3}>
-                        <strong>Mã lô hàng:</strong>
-                        <div className="text-primary">
-                          <code>{selectedBatch.BatchCode}</code>
+                        <div className={styles.batchInfoLabel}>Mã lô hàng:</div>
+                        <div className={styles.batchCode}>
+                          {selectedBatch.BatchCode}
                         </div>
                       </Col>
                       <Col md={3}>
-                        <strong>Danh mục:</strong>
-                        <div className="text-info">{selectedBatch.CategoryName}</div>
+                        <div className={styles.batchInfoLabel}>Danh mục:</div>
+                        <div className={styles.categoryName}>{selectedBatch.CategoryName}</div>
                       </Col>
                       <Col md={3}>
-                        <strong>Ngày nhập:</strong>
-                        <div>{new Date(selectedBatch.ImportDate).toLocaleDateString('vi-VN')}</div>
+                        <div className={styles.batchInfoLabel}>Ngày nhập:</div>
+                        <div className={styles.batchInfoValue}>
+                          {new Date(selectedBatch.ImportDate).toLocaleDateString('vi-VN')}
+                        </div>
                       </Col>
                       <Col md={3}>
-                        <strong>Tổng số lượng:</strong>
-                        <div className="text-success fw-bold">
+                        <div className={styles.batchInfoLabel}>Tổng số lượng:</div>
+                        <div className={`${styles.statValue} text-success`}>
                           {actualProductCount}
                           {actualProductCount !== selectedBatch.TotalQuantity && (
                             <small className="text-muted ms-2">

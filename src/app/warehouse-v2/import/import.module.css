@@ -1,0 +1,182 @@
+/* Import Page Styles */
+
+.importContainer {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+/* Page Header */
+.pageHeader {
+  margin-bottom: 2rem;
+}
+
+.pageTitle {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.pageSubtitle {
+  font-size: 1.3rem;
+  color: #6c757d;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Tabs */
+.tabsContainer {
+  font-size: 1.3rem;
+}
+
+.tabTitle {
+  font-size: 1.3rem;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+}
+
+.tabBadge {
+  font-size: 1.1rem;
+  padding: 0.35rem 0.65rem;
+  margin-left: 0.5rem;
+}
+
+/* Batch Info Section */
+.batchInfo {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.batchInfoLabel {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.batchInfoValue {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.batchCode {
+  font-size: 1.5rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #0d6efd;
+  background-color: #e7f1ff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.categoryName {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #17a2b8;
+}
+
+/* Statistics */
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.statLabel {
+  font-size: 1.1rem;
+  color: #6c757d;
+}
+
+/* Tables Enhancement */
+.importTable {
+  font-size: 1.3rem;
+}
+
+.importTable th {
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 1rem;
+  background-color: #f8f9fa;
+}
+
+.importTable td {
+  font-size: 1.3rem;
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+/* Buttons in Import Page */
+.actionButton {
+  font-size: 1.2rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+}
+
+.actionButton.primary {
+  font-size: 1.3rem;
+  padding: 0.75rem 1.5rem;
+}
+
+/* Modal Titles */
+.modalTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.modalBody {
+  font-size: 1.3rem;
+}
+
+/* Form Labels */
+.formLabel {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.formControl {
+  font-size: 1.3rem;
+  padding: 0.75rem 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+  
+  .pageSubtitle {
+    font-size: 1.1rem;
+  }
+  
+  .importTable {
+    font-size: 1.1rem;
+  }
+  
+  .importTable th,
+  .importTable td {
+    font-size: 1.1rem;
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+  
+  .importTable {
+    font-size: 1rem;
+  }
+  
+  .actionButton {
+    font-size: 1rem;
+    padding: 0.375rem 0.75rem;
+  }
+}

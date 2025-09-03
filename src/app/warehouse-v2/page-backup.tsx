@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import Link from 'next/link';
 import RevenueChart from '@/components/warehouse-v2/RevenueChart';
-import CategoryRevenueChart from '@/components/warehouse-v2/CategoryRevenueChart';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { getClientTimezoneDebug } from '@/utils/clientTimezone';
 import styles from './dashboard.module.css';
@@ -260,10 +259,10 @@ const WarehouseV2Dashboard: React.FC = () => {
                   Thao tác nhanh
                 </h5>
               </div>
-              <div style={{ padding: '1.5rem', flex: 1 }}>
-                <Row className="h-100">
-                  <Col md={4} className="mb-3 d-flex">
-                    <Link href="/warehouse-v2/import" className="text-decoration-none w-100">
+              <div style={{ padding: '1.5rem' }}>
+                <Row>
+                  <Col md={4} className="mb-3">
+                    <Link href="/warehouse-v2/import" className="text-decoration-none">
                       <div className={styles.quickActionItem}>
                         <div className={styles.actionIcon}>
                           <i className="fas fa-download"></i>
@@ -274,8 +273,8 @@ const WarehouseV2Dashboard: React.FC = () => {
                       </div>
                     </Link>
                   </Col>
-                  <Col md={4} className="mb-3 d-flex">
-                    <Link href="/warehouse-v2/sales" className="text-decoration-none w-100">
+                  <Col md={4} className="mb-3">
+                    <Link href="/warehouse-v2/sales" className="text-decoration-none">
                       <div className={styles.quickActionItem}>
                         <div className={styles.actionIcon}>
                           <i className="fas fa-shopping-cart"></i>
@@ -288,8 +287,8 @@ const WarehouseV2Dashboard: React.FC = () => {
                       </div>
                     </Link>
                   </Col>
-                  <Col md={4} className="mb-3 d-flex">
-                    <Link href="/warehouse-v2/inventory" className="text-decoration-none w-100">
+                  <Col md={4} className="mb-3">
+                    <Link href="/warehouse-v2/inventory" className="text-decoration-none">
                       <div className={styles.quickActionItem}>
                         <div className={styles.actionIcon}>
                           <i className="fas fa-warehouse"></i>
@@ -307,9 +306,57 @@ const WarehouseV2Dashboard: React.FC = () => {
             </div>
           </Col>
 
-          {/* Category Revenue Chart */}
+          {/* Recent Activities */}
           <Col md={4}>
-            <CategoryRevenueChart />
+            <div className={styles.activitiesCard}>
+              <div className={styles.activitiesHeader}>
+                <h5 className={styles.activitiesTitle}>
+                  <i className="fas fa-history"></i>
+                  Hoạt động gần đây
+                </h5>
+              </div>
+              <div className={styles.activitiesBody}>
+                {recentActivities.length > 0 ? (
+                  <div className="timeline">
+                    {recentActivities.slice(0, 8).map((activity) => (
+                      <div key={activity.id} className="timeline-item mb-3">
+                        <div className="d-flex align-items-start">
+                          <span className="me-2" style={{ fontSize: '1.2rem' }}>
+                            {activity.icon}
+                          </span>
+                          <div className="flex-grow-1">
+                            <div className="d-flex justify-content-between align-items-start">
+                              <div>
+                                <strong className="d-block">{activity.title}</strong>
+                                <small className="text-muted">{activity.description}</small>
+                                {activity.amount && (
+                                  <div className="mt-1">
+                                    <Badge bg={activity.color} className="me-1">
+                                      {formatCurrency(activity.amount)}
+                                    </Badge>
+                                  </div>
+                                )}
+                              </div>
+                              <small className="text-muted ms-2">
+                                {formatDateTime(activity.timestamp)}
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.emptyState}>
+                    <i className={'fas fa-clock ' + styles.emptyIcon}></i>
+                    <div className={styles.emptyTitle}>Chưa có hoạt động nào</div>
+                    <p className={styles.emptyDescription}>
+                      Hoạt động sẽ hiển thị khi có giao dịch
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </Col>
         </Row>
 

@@ -120,6 +120,17 @@
   padding: 1rem 1.25rem;
 }
 
+/* Small tag improvements */
+.warehouse-v2 small {
+  font-size: 1.70rem !important;
+  line-height: 1.5;
+}
+
+/* Bootstrap fs-6 override */
+.warehouse-v2 .fs-6 {
+  font-size: 1.70rem !important;
+}
+
 /* Modal improvements */
 .warehouse-v2 .modal-title {
   font-size: 1.3rem;

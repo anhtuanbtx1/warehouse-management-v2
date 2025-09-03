@@ -716,8 +716,18 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
         }
         
         .navbar-brand small {
-          font-size: 0.75rem;
+          font-size: 1.70rem;
           font-weight: normal;
+        }
+        
+        /* Global fs-6 override */
+        .fs-6 {
+          font-size: 1.70rem !important;
+        }
+        
+        /* Global small and .small override */
+        small, .small {
+          font-size: 1.70rem !important;
         }
         
         @media (max-width: 768px) {
@@ -744,7 +754,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
 
           .btn-group-sm > .btn, .btn-sm {
             padding: 0.125rem 0.25rem;
-            font-size: 0.75rem;
+            font-size: 1rem;
           }
         }
 
@@ -752,7 +762,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
           .warehouse-v2 { font-size: 0.95rem; }
 
           .warehouse-v2 .action-buttons .btn {
-            font-size: 0.75rem;
+            font-size: 1rem;
             min-width: 60px;
             padding: 0.25rem 0.5rem;
           }
