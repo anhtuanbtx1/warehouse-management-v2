@@ -124,8 +124,7 @@ const CategoryRevenueChart = () => {
     dataLabels: {
       enabled: true,
       formatter: function(val: any, opts: any) {
-        const name = opts.w.globals.labels[opts.seriesIndex];
-        return [name, val.toFixed(1) + '%'];
+        return val.toFixed(1) + '%';
       },
       style: {
         fontSize: '12px',
@@ -196,9 +195,9 @@ const CategoryRevenueChart = () => {
         colors: '#1a1a1a'
       },
       markers: {
-        width: 12,
-        height: 12,
-        radius: 3
+        size: 12,
+        offsetX: 0,
+        offsetY: 0
       },
       itemMargin: {
         horizontal: 10,

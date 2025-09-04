@@ -49,18 +49,18 @@ export async function GET(request: NextRequest) {
         AND p.SoldDate <= @endDate
     `;
     
-    const request = pool.request()
+    const dbRequest = pool.request()
       .input('startDate', sql.DateTime, startDate)
       .input('endDate', sql.DateTime, endDate);
     
     if (categoryId && categoryId !== 'all') {
       query += ' AND c.CategoryID = @categoryId';
-      request.input('categoryId', sql.Int, parseInt(categoryId));
+      dbRequest.input('categoryId', sql.Int, parseInt(categoryId));
     }
     
     query += ' ORDER BY p.SoldDate DESC';
     
-    const result = await request.query(query);
+    const result = await dbRequest.query(query);
     
     // Tính tổng thống kê
     const stats = {
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
         .input('endDate', sql.DateTime, new Date(endDate));
       
       if (categoryIds && categoryIds.length > 0) {
-        detailsQuery += ` AND c.CategoryID IN (${categoryIds.map((_, i: number) => `@categoryId${i}`).join(',')})`;
+        detailsQuery += ` AND c.CategoryID IN (${categoryIds.map((_: any, i: number) => `@categoryId${i}`).join(',')})`;
         categoryIds.forEach((id: number, index: number) => {
           detailsRequest.input(`categoryId${index}`, sql.Int, id);
         });
