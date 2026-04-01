@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Breadcrumb, Card, Table, Button, Form, Badge, Pagination, InputGroup } from 'react-bootstrap';
 import { useToast } from '@/contexts/ToastContext';
 import * as XLSX from 'xlsx';
@@ -29,31 +29,26 @@ const ReportsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
-  
-  // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [categories, setCategories] = useState<any[]>([]);
-
-  // Statistics
   const [stats, setStats] = useState({
     totalSold: 0,
     totalRevenue: 0,
     totalProfit: 0,
-    totalCost: 0
+    totalCost: 0,
   });
 
   useEffect(() => {
     fetchSoldProducts();
     fetchCategories();
-    
-    // Set default date range (current month)
+
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    
+
     setFromDate(firstDay.toISOString().split('T')[0]);
     setToDate(lastDay.toISOString().split('T')[0]);
   }, []);
@@ -68,7 +63,7 @@ const ReportsPage: React.FC = () => {
         ...(searchTerm && { search: searchTerm }),
         ...(categoryFilter && { categoryId: categoryFilter }),
         ...(fromDate && { fromDate }),
-        ...(toDate && { toDate })
+        ...(toDate && { toDate }),
       });
 
       const response = await fetch(`/api/products-v2?${params}`);
@@ -79,8 +74,6 @@ const ReportsPage: React.FC = () => {
         setTotalPages(result.data.totalPages);
         setCurrentPage(result.data.page);
         setTotalRecords(result.data.total);
-        
-        // Calculate statistics
         calculateStats(result.data.data);
       }
     } catch (error) {
@@ -113,7 +106,7 @@ const ReportsPage: React.FC = () => {
       totalSold,
       totalRevenue,
       totalProfit,
-      totalCost
+      totalCost,
     });
   };
 
@@ -128,7 +121,7 @@ const ReportsPage: React.FC = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'VND'
+      currency: 'VND',
     }).format(amount);
   };
 
@@ -137,18 +130,14 @@ const ReportsPage: React.FC = () => {
   };
 
   const formatDateTime = (dateString: string) => {
-    // Parse date string directly to avoid any timezone conversion
-    // Database stores Vietnam time, display exactly as stored
     try {
-      // Extract date and time parts from ISO string
-      const isoString = dateString.includes('T') ? dateString : dateString + 'T00:00:00';
+      const isoString = dateString.includes('T') ? dateString : `${dateString}T00:00:00`;
       const [datePart, timePart] = isoString.split('T');
       const [year, month, day] = datePart.split('-');
       const [hours, minutes] = timePart.split(':');
 
       return `${day}/${month}/${year} ${hours}:${minutes}`;
     } catch (error) {
-      // Fallback to Date object if parsing fails
       const date = new Date(dateString);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -169,8 +158,7 @@ const ReportsPage: React.FC = () => {
   const exportToExcel = async () => {
     try {
       setLoading(true);
-      
-      // Fetch all sold products for export (without pagination)
+
       const params = new URLSearchParams({
         page: '1',
         limit: '10000',
@@ -178,7 +166,7 @@ const ReportsPage: React.FC = () => {
         ...(searchTerm && { search: searchTerm }),
         ...(categoryFilter && { categoryId: categoryFilter }),
         ...(fromDate && { fromDate }),
-        ...(toDate && { toDate })
+        ...(toDate && { toDate }),
       });
 
       const response = await fetch(`/api/products-v2?${params}`);
@@ -186,28 +174,27 @@ const ReportsPage: React.FC = () => {
 
       if (result.success && result.data) {
         const exportData = result.data.data.map((product: SoldProduct, index: number) => ({
-          'STT': index + 1,
+          STT: index + 1,
           'Tên sản phẩm': product.ProductName,
-          'IMEI': product.IMEI,
+          IMEI: product.IMEI,
           'Danh mục': product.CategoryName,
           'Mã lô hàng': product.BatchCode,
           'Ngày nhập': formatDate(product.ImportDate),
           'Giá nhập (VNĐ)': product.ImportPrice,
           'Giá bán (VNĐ)': product.SalePrice,
           'Lợi nhuận (VNĐ)': product.SalePrice - product.ImportPrice,
-          'Tỷ lệ lợi nhuận (%)': ((product.SalePrice - product.ImportPrice) / product.ImportPrice * 100).toFixed(2),
+          'Tỷ lệ lợi nhuận (%)': (((product.SalePrice - product.ImportPrice) / product.ImportPrice) * 100).toFixed(2),
           'Ngày bán': formatDateTime(product.SoldDate),
           'Số hóa đơn': product.InvoiceNumber || '',
           'Thông tin khách hàng': product.CustomerInfo || '',
           'Ghi chú': product.Notes || '',
-          'Người tạo': product.CreatedBy || ''
+          'Người tạo': product.CreatedBy || '',
         }));
 
-        // Add summary row
         const summaryRow = {
-          'STT': '',
+          STT: '',
           'Tên sản phẩm': 'TỔNG CỘNG',
-          'IMEI': '',
+          IMEI: '',
           'Danh mục': '',
           'Mã lô hàng': '',
           'Ngày nhập': '',
@@ -219,47 +206,39 @@ const ReportsPage: React.FC = () => {
           'Số hóa đơn': '',
           'Thông tin khách hàng': '',
           'Ghi chú': `Tổng ${result.data.data.length} sản phẩm`,
-          'Người tạo': ''
+          'Người tạo': '',
         };
 
         exportData.push(summaryRow);
 
-        // Create workbook and worksheet
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.json_to_sheet(exportData);
-
-        // Set column widths
-        const colWidths = [
-          { wch: 5 },   // STT
-          { wch: 25 },  // Tên sản phẩm
-          { wch: 18 },  // IMEI
-          { wch: 15 },  // Danh mục
-          { wch: 15 },  // Mã lô hàng
-          { wch: 12 },  // Ngày nhập
-          { wch: 15 },  // Giá nhập
-          { wch: 15 },  // Giá bán
-          { wch: 15 },  // Lợi nhuận
-          { wch: 12 },  // Tỷ lệ lợi nhuận
-          { wch: 18 },  // Ngày bán
-          { wch: 15 },  // Số hóa đơn
-          { wch: 25 },  // Thông tin khách hàng
-          { wch: 20 },  // Ghi chú
-          { wch: 15 }   // Người tạo
+        ws['!cols'] = [
+          { wch: 5 },
+          { wch: 25 },
+          { wch: 18 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 12 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 12 },
+          { wch: 18 },
+          { wch: 15 },
+          { wch: 25 },
+          { wch: 20 },
+          { wch: 15 },
         ];
-        ws['!cols'] = colWidths;
 
-        // Add worksheet to workbook
         XLSX.utils.book_append_sheet(wb, ws, 'Báo cáo bán hàng');
 
-        // Generate filename with date range
         const fromDateStr = fromDate ? new Date(fromDate).toLocaleDateString('vi-VN').replace(/\//g, '-') : '';
         const toDateStr = toDate ? new Date(toDate).toLocaleDateString('vi-VN').replace(/\//g, '-') : '';
         const dateRange = fromDateStr && toDateStr ? `_${fromDateStr}_den_${toDateStr}` : '';
         const filename = `Bao_cao_ban_hang${dateRange}.xlsx`;
 
-        // Save file
         XLSX.writeFile(wb, filename);
-
         showSuccess('Xuất Excel thành công!', `File ${filename} đã được tải xuống`);
       }
     } catch (error) {
@@ -271,98 +250,77 @@ const ReportsPage: React.FC = () => {
   };
 
   return (
-    <Container fluid style={{ fontSize: '16px' }}>
+    <Container fluid className="py-4">
       <Row>
         <Col>
-          {/* Breadcrumb */}
           <Breadcrumb className="mb-3">
             <Breadcrumb.Item href="/warehouse-v2">Trang chủ</Breadcrumb.Item>
             <Breadcrumb.Item active>Báo cáo bán hàng</Breadcrumb.Item>
           </Breadcrumb>
 
-          {/* Page Header */}
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="mb-0" style={{ fontSize: '28px' }}>
-              <span className="me-2">📝</span>
-              Báo cáo bán hàng
-            </h2>
-          </div>
+          <section className="warehouse-page-header">
+            <div className="warehouse-page-title">
+              <span className="warehouse-page-title-icon">
+                <i className="fas fa-file-lines" aria-hidden="true"></i>
+              </span>
+              <div>
+                <h2 className="mb-1">Báo cáo bán hàng</h2>
+                <p>Lọc giao dịch, so sánh chi phí - doanh thu và xuất báo cáo Excel theo khoảng thời gian.</p>
+              </div>
+            </div>
+          </section>
 
-          {/* Statistics Cards */}
-          <Row className="mb-4">
-            <Col md={3}>
-              <Card className="text-center">
-                <Card.Body>
-                  <h5 className="text-primary" style={{ fontSize: '25px' }}>{stats.totalSold}</h5>
-                  <small className="text-muted" style={{ fontSize: '14px' }}>Sản phẩm đã bán</small>
-                </Card.Body>
-              </Card>
+          <Row className="g-3 mb-4">
+            <Col md={6} xl={3}>
+              <div className="warehouse-info-panel text-center">
+                <span className="warehouse-stat-label">Sản phẩm đã bán</span>
+                <div className="warehouse-stat-value text-primary">{stats.totalSold}</div>
+              </div>
             </Col>
-            <Col md={3}>
-              <Card className="text-center">
-                <Card.Body>
-                  <h5 className="text-success" style={{ fontSize: '25px' }}>{formatCurrency(stats.totalRevenue)}</h5>
-                  <small className="text-muted" style={{ fontSize: '14px' }}>Tổng doanh thu</small>
-                </Card.Body>
-              </Card>
+            <Col md={6} xl={3}>
+              <div className="warehouse-info-panel text-center">
+                <span className="warehouse-stat-label">Tổng doanh thu</span>
+                <div className="warehouse-stat-value text-success">{formatCurrency(stats.totalRevenue)}</div>
+              </div>
             </Col>
-            <Col md={3}>
-              <Card className="text-center">
-                <Card.Body>
-                  <h5 className="text-info" style={{ fontSize: '25px' }}>{formatCurrency(stats.totalCost)}</h5>
-                  <small className="text-muted" style={{ fontSize: '14px' }}>Tổng chi phí</small>
-                </Card.Body>
-              </Card>
+            <Col md={6} xl={3}>
+              <div className="warehouse-info-panel text-center">
+                <span className="warehouse-stat-label">Tổng chi phí</span>
+                <div className="warehouse-stat-value text-info">{formatCurrency(stats.totalCost)}</div>
+              </div>
             </Col>
-            <Col md={3}>
-              <Card className="text-center">
-                <Card.Body>
-                  <h5 className={getProfitColor(stats.totalProfit)} style={{ fontSize: '25px' }}>{formatCurrency(stats.totalProfit)}</h5>
-                  <small className="text-muted" style={{ fontSize: '14px' }}>Tổng lợi nhuận</small>
-                </Card.Body>
-              </Card>
+            <Col md={6} xl={3}>
+              <div className="warehouse-info-panel text-center">
+                <span className="warehouse-stat-label">Tổng lợi nhuận</span>
+                <div className={`warehouse-stat-value ${getProfitColor(stats.totalProfit)}`}>{formatCurrency(stats.totalProfit)}</div>
+              </div>
             </Col>
           </Row>
 
-          {/* Filters and Export */}
           <Card className="mb-4">
             <Card.Header>
-              <h5 className="mb-0" style={{ fontSize: '18px' }}>
-                <span className="me-2">🔍</span>
-                Bộ lọc và xuất báo cáo
-              </h5>
+              <h5 className="mb-0">Bộ lọc và xuất báo cáo</h5>
             </Card.Header>
             <Card.Body>
-              <Row className="mb-3">
+              <Row className="g-3 mb-3">
                 <Col md={3}>
                   <Form.Group>
                     <Form.Label>Từ ngày</Form.Label>
-                    <Form.Control
-                      type="date"
-                      value={fromDate}
-                      onChange={(e) => setFromDate(e.target.value)}
-                    />
+                    <Form.Control type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
                   </Form.Group>
                 </Col>
                 <Col md={3}>
                   <Form.Group>
                     <Form.Label>Đến ngày</Form.Label>
-                    <Form.Control
-                      type="date"
-                      value={toDate}
-                      onChange={(e) => setToDate(e.target.value)}
-                    />
+                    <Form.Control type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
                   </Form.Group>
                 </Col>
                 <Col md={3}>
                   <Form.Group>
                     <Form.Label>Danh mục</Form.Label>
-                    <Form.Select
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
-                    >
+                    <Form.Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
                       <option value="">Tất cả danh mục</option>
-                      {categories.map(category => (
+                      {categories.map((category) => (
                         <option key={category.CategoryID} value={category.CategoryID}>
                           {category.CategoryName}
                         </option>
@@ -381,24 +339,15 @@ const ReportsPage: React.FC = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                       />
-                     <Button variant="outline-primary" onClick={handleSearch} className="px-3 btn btn-primary"  style={{
-                                                      backgroundColor: '#0d6efd',
-                                                      borderColor: '#0d6efd',
-                                                      color: 'white',
-                                                      display: 'flex',
-                                                      alignItems: 'center',
-                                                      justifyContent: 'center',
-                                                      fontWeight: 'bold',
-                                                      fontSize: '16px'
-                                                    }}>
-                                                    <span className="me-1">🔍</span>
-                                                  </Button>
+                      <Button variant="primary" onClick={handleSearch}>
+                        <i className="fas fa-magnifying-glass" aria-hidden="true"></i>
+                      </Button>
                     </InputGroup>
                   </Form.Group>
                 </Col>
               </Row>
 
-              <div className="d-flex gap-2">
+              <div className="d-flex gap-2 flex-wrap">
                 <Button
                   variant="outline-primary"
                   onClick={() => {
@@ -410,15 +359,10 @@ const ReportsPage: React.FC = () => {
                   }}
                   title="Đặt lại bộ lọc"
                 >
-                  <span className="me-1">🔄</span>
+                  <i className="fas fa-rotate-left me-2" aria-hidden="true"></i>
                   Đặt lại
                 </Button>
-                <Button
-                  variant="success"
-                  onClick={exportToExcel}
-                  disabled={loading}
-                  title="Xuất báo cáo Excel"
-                >
+                <Button variant="success" onClick={exportToExcel} disabled={loading} title="Xuất báo cáo Excel">
                   {loading ? (
                     <>
                       <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -426,7 +370,7 @@ const ReportsPage: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <span className="me-1">📄</span>
+                      <i className="fas fa-file-arrow-down me-2" aria-hidden="true"></i>
                       Xuất Excel
                     </>
                   )}
@@ -435,14 +379,10 @@ const ReportsPage: React.FC = () => {
             </Card.Body>
           </Card>
 
-          {/* Products Table */}
           <Card>
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <h5 className="mb-0" style={{ fontSize: '18px' }}>
-                <span className="me-2">📋</span>
-                Danh sách sản phẩm đã bán
-                <Badge bg="info" className="ms-2" style={{ fontSize: '14px' }}>{totalRecords} sản phẩm</Badge>
-              </h5>
+            <Card.Header className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <h5 className="mb-0">Danh sách sản phẩm đã bán</h5>
+              <Badge bg="info">{totalRecords} sản phẩm</Badge>
             </Card.Header>
             <Card.Body>
               {loading ? (
@@ -453,20 +393,19 @@ const ReportsPage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <Table responsive striped hover style={{ fontSize: '15px' }}>
+                  <Table responsive striped hover>
                     <thead>
                       <tr>
-                        <th style={{ fontSize: '16px' }}>STT</th>
-                        <th style={{ fontSize: '16px' }}>Sản phẩm</th>
-                        <th style={{ fontSize: '16px' }}>IMEI</th>
-                        <th style={{ fontSize: '16px' }}>Danh mục</th>
-                        <th style={{ fontSize: '16px' }}>Lô hàng</th>
-                        <th style={{ fontSize: '16px' }}>Giá nhập</th>
-                        <th style={{ fontSize: '16px' }}>Giá bán</th>
-                        <th style={{ fontSize: '16px' }}>Lợi nhuận</th>
-                        <th style={{ fontSize: '16px' }}>Ngày bán</th>
-                        <th style={{ fontSize: '16px' }}>Hóa đơn</th>
-
+                        <th>STT</th>
+                        <th>Sản phẩm</th>
+                        <th>IMEI</th>
+                        <th>Danh mục</th>
+                        <th>Lô hàng</th>
+                        <th>Giá nhập</th>
+                        <th>Giá bán</th>
+                        <th>Lợi nhuận</th>
+                        <th>Ngày bán</th>
+                        <th>Hóa đơn</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -483,11 +422,7 @@ const ReportsPage: React.FC = () => {
                             <td>
                               <div>
                                 <strong>{product.ProductName}</strong>
-                                {product.Notes && (
-                                  <small className="d-block text-muted">
-                                    {product.Notes}
-                                  </small>
-                                )}
+                                {product.Notes && <small className="d-block text-muted">{product.Notes}</small>}
                               </div>
                             </td>
                             <td>
@@ -499,16 +434,12 @@ const ReportsPage: React.FC = () => {
                             <td>
                               <small>
                                 <code>{product.BatchCode}</code>
-                                <div className="text-muted">
-                                  {formatDate(product.ImportDate)}
-                                </div>
+                                <div className="text-muted">{formatDate(product.ImportDate)}</div>
                               </small>
                             </td>
                             <td>{formatCurrency(product.ImportPrice)}</td>
                             <td>
-                              <span className="text-success">
-                                {formatCurrency(product.SalePrice)}
-                              </span>
+                              <span className="text-success">{formatCurrency(product.SalePrice)}</span>
                             </td>
                             <td>
                               <span className={getProfitColor(product.SalePrice - product.ImportPrice)}>
@@ -516,48 +447,28 @@ const ReportsPage: React.FC = () => {
                               </span>
                             </td>
                             <td>
-                              <div>
-                                <small>{formatDateTime(product.SoldDate)}</small>
-                              </div>
+                              <small>{formatDateTime(product.SoldDate)}</small>
                             </td>
-                            <td>
-                              {product.InvoiceNumber && (
-                                <small>
-                                  <code>{product.InvoiceNumber}</code>
-                                </small>
-                              )}
-                            </td>
-                          
+                            <td>{product.InvoiceNumber && <code>{product.InvoiceNumber}</code>}</td>
                           </tr>
                         ))
                       )}
                     </tbody>
                   </Table>
 
-                  {/* Pagination */}
                   {totalPages > 1 && (
-                    <div className="d-flex justify-content-center">
+                    <div className="d-flex justify-content-center mt-3">
                       <Pagination>
-                        <Pagination.Prev
-                          disabled={currentPage === 1}
-                          onClick={() => handlePageChange(currentPage - 1)}
-                        />
+                        <Pagination.Prev disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)} />
                         {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
                           const page = i + 1;
                           return (
-                            <Pagination.Item
-                              key={page}
-                              active={page === currentPage}
-                              onClick={() => handlePageChange(page)}
-                            >
+                            <Pagination.Item key={page} active={page === currentPage} onClick={() => handlePageChange(page)}>
                               {page}
                             </Pagination.Item>
                           );
                         })}
-                        <Pagination.Next
-                          disabled={currentPage === totalPages}
-                          onClick={() => handlePageChange(currentPage + 1)}
-                        />
+                        <Pagination.Next disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)} />
                       </Pagination>
                     </div>
                   )}

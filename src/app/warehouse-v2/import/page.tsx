@@ -47,7 +47,7 @@ const ImportPage: React.FC = () => {
   };
 
   const handleCreateSuccess = () => {
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
     setShowCreateForm(false);
   };
 
@@ -68,7 +68,6 @@ const ImportPage: React.FC = () => {
   };
 
   const handlePrintInvoiceFromProduct = (product: any) => {
-    // Create invoice from product data
     const invoice = {
       invoiceNumber: product.InvoiceNumber || `HD${Date.now()}`,
       saleDate: product.SoldDate || new Date().toISOString(),
@@ -78,13 +77,15 @@ const ImportPage: React.FC = () => {
         IMEI: product.IMEI,
         ImportPrice: product.ImportPrice,
         SalePrice: product.SalePrice || product.ImportPrice * 1.2,
-        CategoryName: product.CategoryName
+        CategoryName: product.CategoryName,
       },
-      customerInfo: product.CustomerInfo ? {
-        name: product.CustomerInfo,
-        phone: '',
-        address: ''
-      } : undefined
+      customerInfo: product.CustomerInfo
+        ? {
+            name: product.CustomerInfo,
+            phone: '',
+            address: '',
+          }
+        : undefined,
     };
 
     setProductInvoiceData(invoice);
@@ -97,10 +98,8 @@ const ImportPage: React.FC = () => {
   };
 
   const handleEditBatch = (batch: ImportBatch) => {
-    // Refresh the list after edit
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
 
-    // If this batch is currently selected, refresh its details
     if (selectedBatch && selectedBatch.BatchID === batch.BatchID) {
       fetchActualProductCount(selectedBatch.BatchID);
     }
@@ -122,43 +121,43 @@ const ImportPage: React.FC = () => {
     }
   };
 
-
-
   return (
     <Container fluid className={`py-4 import-page ${styles.importContainer}`}>
       <Row>
         <Col>
-          {/* Breadcrumb */}
           <Breadcrumb className={styles.breadcrumb}>
             <Breadcrumb.Item href="/warehouse-v2">Quản lý kho V2</Breadcrumb.Item>
             <Breadcrumb.Item active>Nhập hàng</Breadcrumb.Item>
           </Breadcrumb>
 
-          {/* Page Header */}
-          <div className={`d-flex justify-content-between align-items-center ${styles.pageHeader}`}>
-            <div>
-              <h2 className={styles.pageTitle}>
-                <span className="text-primary me-2">📦</span>
-                Quản lý nhập hàng
-              </h2>
-              <p className={`text-muted mb-0 ${styles.pageSubtitle}`}>
-                Tạo lô hàng mới và quản lý sản phẩm theo từng lô
-              </p>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <Tabs
-            activeKey={activeTab}
-            onSelect={(k) => setActiveTab(k || 'batches')}
-            className={`mb-3 ${styles.tabsContainer}`}
-          >
-            <Tab eventKey="batches" title={
-              <span className={styles.tabTitle}>
-                <span className="me-2">📋</span>
-                Danh sách lô hàng
+          <section className={`warehouse-page-header ${styles.pageHeader}`}>
+            <div className="warehouse-page-title">
+              <span className="warehouse-page-title-icon">
+                <i className="fas fa-box-open" aria-hidden="true"></i>
               </span>
-            }>
+              <div>
+                <h2 className={styles.pageTitle}>Quản lý nhập hàng</h2>
+                <p className={styles.pageSubtitle}>Tạo lô hàng mới, kiểm soát số lượng và theo dõi sản phẩm theo từng lô.</p>
+              </div>
+            </div>
+            <div className="warehouse-page-actions">
+              <div className={styles.statusPill}>
+                <i className="fas fa-layer-group" aria-hidden="true"></i>
+                Đồng bộ theo lô hàng
+              </div>
+            </div>
+          </section>
+
+          <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'batches')} className={`mb-3 ${styles.tabsContainer}`}>
+            <Tab
+              eventKey="batches"
+              title={
+                <span className={styles.tabTitle}>
+                  <i className="fas fa-list-check" aria-hidden="true"></i>
+                  Danh sách lô hàng
+                </span>
+              }
+            >
               <ImportBatchList
                 key={refreshKey}
                 onCreateBatch={handleCreateBatch}
@@ -172,60 +171,48 @@ const ImportPage: React.FC = () => {
               eventKey="products"
               title={
                 <span className={styles.tabTitle}>
-                  <span className="me-2">📱</span>
+                  <i className="fas fa-mobile-screen-button" aria-hidden="true"></i>
                   Sản phẩm trong lô
-                  {selectedBatch && (
-                    <span className={`badge bg-primary ${styles.tabBadge}`}>
-                      {selectedBatch.BatchCode}
-                    </span>
-                  )}
+                  {selectedBatch && <span className={`badge bg-primary ${styles.tabBadge}`}>{selectedBatch.BatchCode}</span>}
                 </span>
               }
               disabled={!selectedBatch}
             >
               {selectedBatch && (
                 <div>
-                  {/* Batch Info */}
-                  <div className={styles.batchInfo}>
-                    <Row>
+                  <div className={`warehouse-info-panel ${styles.batchInfo}`}>
+                    <Row className="g-3">
                       <Col md={3}>
-                        <div className={styles.batchInfoLabel}>Mã lô hàng:</div>
-                        <div className={styles.batchCode}>
-                          {selectedBatch.BatchCode}
-                        </div>
+                        <span className="warehouse-stat-label">Mã lô hàng</span>
+                        <div className={styles.batchCode}>{selectedBatch.BatchCode}</div>
                       </Col>
                       <Col md={3}>
-                        <div className={styles.batchInfoLabel}>Danh mục:</div>
+                        <span className="warehouse-stat-label">Danh mục</span>
                         <div className={styles.categoryName}>{selectedBatch.CategoryName}</div>
                       </Col>
                       <Col md={3}>
-                        <div className={styles.batchInfoLabel}>Ngày nhập:</div>
-                        <div className={styles.batchInfoValue}>
-                          {new Date(selectedBatch.ImportDate).toLocaleDateString('vi-VN')}
-                        </div>
+                        <span className="warehouse-stat-label">Ngày nhập</span>
+                        <div className={styles.batchInfoValue}>{new Date(selectedBatch.ImportDate).toLocaleDateString('vi-VN')}</div>
                       </Col>
                       <Col md={3}>
-                        <div className={styles.batchInfoLabel}>Tổng số lượng:</div>
+                        <span className="warehouse-stat-label">Số lượng hiện có</span>
                         <div className={`${styles.statValue} text-success`}>
                           {actualProductCount}
                           {actualProductCount !== selectedBatch.TotalQuantity && (
-                            <small className="text-muted ms-2">
-                              (Dự kiến: {selectedBatch.TotalQuantity})
-                            </small>
+                            <small className="text-muted ms-2">(Dự kiến: {selectedBatch.TotalQuantity})</small>
                           )}
                         </div>
                       </Col>
                     </Row>
                   </div>
 
-                  {/* Products in Batch */}
                   <ProductListV2
                     batchId={selectedBatch.BatchID}
                     onProductCountChange={() => fetchActualProductCount(selectedBatch.BatchID)}
                     onPrintInvoice={handlePrintInvoiceFromProduct}
                     batchInfo={{
                       totalQuantity: selectedBatch.TotalQuantity,
-                      currentCount: actualProductCount
+                      currentCount: actualProductCount,
                     }}
                   />
                 </div>
@@ -233,26 +220,11 @@ const ImportPage: React.FC = () => {
             </Tab>
           </Tabs>
 
-          {/* Create Batch Form Modal */}
-          <CreateBatchForm
-            show={showCreateForm}
-            onHide={handleCloseCreateForm}
-            onSuccess={handleCreateSuccess}
-          />
+          <CreateBatchForm show={showCreateForm} onHide={handleCloseCreateForm} onSuccess={handleCreateSuccess} />
 
-          {/* Import Invoice Print Modal */}
-          <ImportInvoicePrint
-            show={showInvoice}
-            onHide={handleCloseInvoice}
-            batchData={invoiceBatch}
-          />
+          <ImportInvoicePrint show={showInvoice} onHide={handleCloseInvoice} batchData={invoiceBatch} />
 
-          {/* Product Invoice Print Modal */}
-          <InvoicePrint
-            show={showProductInvoice}
-            onHide={handleCloseProductInvoice}
-            invoiceData={productInvoiceData}
-          />
+          <InvoicePrint show={showProductInvoice} onHide={handleCloseProductInvoice} invoiceData={productInvoiceData} />
         </Col>
       </Row>
     </Container>

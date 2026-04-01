@@ -1,201 +1,808 @@
 /* Global styles for Warehouse V2 */
 
-/* Increase base font size for better readability */
+:root {
+  --warehouse-primary: #0891b2;
+  --warehouse-primary-strong: #0e7490;
+  --warehouse-primary-soft: #ecfeff;
+  --warehouse-accent: #22c55e;
+  --warehouse-accent-soft: #f0fdf4;
+  --warehouse-surface: #ffffff;
+  --warehouse-surface-muted: #f8fafc;
+  --warehouse-surface-soft: #f1f5f9;
+  --warehouse-surface-elevated: rgba(255, 255, 255, 0.94);
+  --warehouse-surface-glass: rgba(255, 255, 255, 0.78);
+  --warehouse-border: #dbe4ee;
+  --warehouse-border-strong: #c3d4e3;
+  --warehouse-text: #164e63;
+  --warehouse-heading: #0f3d52;
+  --warehouse-text-muted: #5b7486;
+  --warehouse-text-soft: #7b91a3;
+  --warehouse-code-bg: rgba(8, 145, 178, 0.08);
+  --warehouse-table-head-bg: rgba(241, 245, 249, 0.8);
+  --warehouse-input-bg: rgba(255, 255, 255, 0.96);
+  --warehouse-overlay-start: rgba(34, 211, 238, 0.18);
+  --warehouse-page-bg-start: #f8fdff;
+  --warehouse-page-bg-mid: #f4f9fc;
+  --warehouse-page-bg-end: #eef5f8;
+  --warehouse-danger: #dc2626;
+  --warehouse-warning: #d97706;
+  --warehouse-shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --warehouse-shadow-md: 0 18px 40px rgba(15, 23, 42, 0.08);
+  --warehouse-shadow-lg: 0 28px 60px rgba(15, 23, 42, 0.12);
+  --warehouse-radius-sm: 0.75rem;
+  --warehouse-radius-md: 1rem;
+  --warehouse-radius-lg: 1.5rem;
+}
+
+html[data-bs-theme='dark'] {
+  --warehouse-primary: #22d3ee;
+  --warehouse-primary-strong: #67e8f9;
+  --warehouse-primary-soft: rgba(34, 211, 238, 0.12);
+  --warehouse-accent: #4ade80;
+  --warehouse-accent-soft: rgba(74, 222, 128, 0.14);
+  --warehouse-surface: #0f172a;
+  --warehouse-surface-muted: #111c34;
+  --warehouse-surface-soft: #162238;
+  --warehouse-surface-elevated: rgba(15, 23, 42, 0.88);
+  --warehouse-surface-glass: rgba(15, 23, 42, 0.72);
+  --warehouse-border: rgba(100, 116, 139, 0.34);
+  --warehouse-border-strong: rgba(148, 163, 184, 0.42);
+  --warehouse-text: #d7f7ff;
+  --warehouse-heading: #f4fbff;
+  --warehouse-text-muted: #9db7c6;
+  --warehouse-text-soft: #7b93a3;
+  --warehouse-code-bg: rgba(34, 211, 238, 0.16);
+  --warehouse-table-head-bg: rgba(30, 41, 59, 0.92);
+  --warehouse-input-bg: rgba(15, 23, 42, 0.92);
+  --warehouse-overlay-start: rgba(34, 211, 238, 0.08);
+  --warehouse-page-bg-start: #020617;
+  --warehouse-page-bg-mid: #081120;
+  --warehouse-page-bg-end: #0b1326;
+  --warehouse-shadow-sm: 0 12px 28px rgba(2, 6, 23, 0.42);
+  --warehouse-shadow-md: 0 22px 48px rgba(2, 6, 23, 0.5);
+  --warehouse-shadow-lg: 0 30px 64px rgba(2, 6, 23, 0.6);
+}
+
 .warehouse-v2 {
-  font-size: 1.3rem;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, var(--warehouse-overlay-start), transparent 22%),
+    linear-gradient(180deg, var(--warehouse-page-bg-start) 0%, var(--warehouse-page-bg-mid) 48%, var(--warehouse-page-bg-end) 100%);
+  color: var(--warehouse-text);
+  font-size: 1rem;
   line-height: 1.6;
-  color: #2c3e50;
+}
+
+.warehouse-v2,
+.warehouse-v2 .btn,
+.warehouse-v2 .form-control,
+.warehouse-v2 .form-select,
+.warehouse-v2 .dropdown-menu,
+.warehouse-v2 .table,
+.warehouse-v2 .badge {
+  font-family: inherit;
+}
+
+.warehouse-v2 h1,
+.warehouse-v2 h2,
+.warehouse-v2 h3,
+.warehouse-v2 h4,
+.warehouse-v2 h5,
+.warehouse-v2 h6 {
+  color: var(--warehouse-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .warehouse-v2 h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-size: clamp(1.9rem, 1.4rem + 1.4vw, 2.6rem);
 }
 
 .warehouse-v2 h2 {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
 }
 
-.warehouse-v2 h3 {
-  font-size: 1.9rem;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.warehouse-v2 h4 {
-  font-size: 1.7rem;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.warehouse-v2 h5 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #34495e;
-}
-
+.warehouse-v2 h5,
 .warehouse-v2 h6 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #34495e;
+  margin-bottom: 0;
 }
 
-/* Table improvements */
-.warehouse-v2 .table {
-  font-size: 1.2rem;
+.warehouse-shell-container {
+  width: min(1440px, calc(100% - 2rem));
+  margin: 0 auto;
 }
 
-.warehouse-v2 .table th {
-  font-size: 1.3rem;
-  font-weight: 700;
-  padding: 1rem 0.75rem;
-  color: #2c3e50;
-  background-color: #f8f9fa;
+.warehouse-shell-header {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  backdrop-filter: blur(14px);
+  background: var(--warehouse-surface-glass);
+  border-bottom: 1px solid var(--warehouse-border);
 }
 
-.warehouse-v2 .table td {
-  font-size: 1.5rem;
-  padding: 1rem 0.75rem;
-  vertical-align: middle;
-  color: #34495e;
+.warehouse-navbar {
+  padding: 1rem 0;
 }
 
-/* Button improvements */
-.warehouse-v2 .btn {
+.warehouse-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.875rem;
+  color: var(--warehouse-text) !important;
+  text-decoration: none;
+}
+
+.warehouse-brand-mark {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--warehouse-primary), #22d3ee);
+  color: #fff;
+  box-shadow: var(--warehouse-shadow-sm);
+}
+
+.warehouse-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.warehouse-brand-title {
   font-size: 1rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
-.warehouse-v2 .btn-sm {
+.warehouse-brand-subtitle {
+  font-size: 0.8rem;
+  color: var(--warehouse-text-muted);
+  line-height: 1.1;
+}
+
+.warehouse-navbar-toggle {
+  border: 1px solid var(--warehouse-border);
+  border-radius: 0.85rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.warehouse-navbar-toggle .navbar-toggler-icon {
+  filter: var(--warehouse-toggler-filter, none);
+}
+
+html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
+  --warehouse-toggler-filter: invert(1);
+}
+
+.warehouse-navbar-toggle:focus {
+  box-shadow: 0 0 0 0.25rem rgba(8, 145, 178, 0.18);
+}
+
+.warehouse-nav {
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.warehouse-nav-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.8rem 1rem !important;
+  border-radius: 999px;
+  color: var(--warehouse-text-muted) !important;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.warehouse-nav-link:hover {
+  color: var(--warehouse-primary-strong) !important;
+  background: var(--warehouse-primary-soft);
+  transform: translateY(-1px);
+}
+
+.warehouse-nav-link.active {
+  background: linear-gradient(135deg, var(--warehouse-primary), #22d3ee);
+  color: #fff !important;
+  box-shadow: 0 12px 24px rgba(8, 145, 178, 0.22);
+}
+
+.warehouse-nav-link i {
+  font-size: 0.95rem;
+}
+
+.warehouse-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.warehouse-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.warehouse-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 999px;
+  background: var(--warehouse-accent-soft);
+  color: var(--warehouse-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.warehouse-status-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--warehouse-accent);
+  box-shadow: 0 0 0 0.25rem rgba(34, 197, 94, 0.16);
+}
+
+.warehouse-user-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--warehouse-border) !important;
+  border-radius: 1rem !important;
+  padding: 0.55rem 0.75rem !important;
+  background: var(--warehouse-surface-elevated) !important;
+  color: var(--warehouse-text) !important;
+  box-shadow: var(--warehouse-shadow-sm);
+}
+
+.warehouse-user-toggle::after {
+  display: none !important;
+}
+
+.warehouse-user-toggle:hover,
+.warehouse-user-toggle:focus {
+  border-color: rgba(8, 145, 178, 0.4) !important;
+  background: var(--warehouse-surface) !important;
+}
+
+.warehouse-user-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(8, 145, 178, 0.12), rgba(34, 211, 238, 0.24));
+  color: var(--warehouse-primary-strong);
+}
+
+.warehouse-user-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.warehouse-user-role {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.warehouse-user-caption {
+  font-size: 0.78rem;
+  color: var(--warehouse-text-muted);
+}
+
+.warehouse-user-menu {
+  min-width: 240px;
+  border: 1px solid var(--warehouse-border) !important;
+  border-radius: 1rem !important;
+  padding: 0.5rem !important;
+  box-shadow: var(--warehouse-shadow-md) !important;
+  background: var(--warehouse-surface-elevated) !important;
+}
+
+.warehouse-user-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  color: var(--warehouse-text);
+  font-weight: 600;
+}
+
+.warehouse-user-menu .dropdown-item:hover {
+  background: var(--warehouse-surface-soft);
+  color: var(--warehouse-heading);
+}
+
+.warehouse-main {
+  padding: 1.5rem 0 2rem;
+}
+
+.warehouse-footer {
+  border-top: 1px solid var(--warehouse-border);
+  background: var(--warehouse-surface-glass);
+  backdrop-filter: blur(10px);
+}
+
+.warehouse-footer-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0 1.5rem;
+}
+
+.warehouse-footer-title {
+  font-weight: 700;
+  color: var(--warehouse-heading);
+}
+
+.warehouse-footer-subtitle,
+.warehouse-footer-meta {
+  color: var(--warehouse-text-muted);
   font-size: 0.9rem;
-  padding: 0.375rem 0.75rem;
 }
 
-.warehouse-v2 .btn-lg {
-  font-size: 1.2rem;
-  padding: 0.75rem 1.5rem;
+.warehouse-footer-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
 }
 
-/* Card improvements */
+.warehouse-v2 .breadcrumb {
+  margin-bottom: 1rem;
+  padding: 0;
+  background: transparent;
+  font-size: 0.9rem;
+}
+
+.warehouse-v2 .breadcrumb-item,
+.warehouse-v2 .breadcrumb-item.active {
+  color: var(--warehouse-text-muted);
+  font-weight: 600;
+}
+
+.warehouse-v2 .breadcrumb-item a {
+  color: var(--warehouse-primary-strong);
+  text-decoration: none;
+}
+
+.warehouse-v2 .breadcrumb-item + .breadcrumb-item::before {
+  color: var(--warehouse-text-soft);
+}
+
+.warehouse-v2 .card {
+  border: 1px solid var(--warehouse-border);
+  border-radius: var(--warehouse-radius-md);
+  box-shadow: var(--warehouse-shadow-sm);
+  background: var(--warehouse-surface-elevated);
+}
+
 .warehouse-v2 .card-header {
-  font-size: 1.1rem;
   padding: 1rem 1.25rem;
+  background: transparent;
+  border-bottom: 1px solid var(--warehouse-border);
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .warehouse-v2 .card-body {
-  font-size: 1rem;
   padding: 1.25rem;
+  font-size: 0.95rem;
 }
 
-/* Form improvements */
-.warehouse-v2 .form-label {
-  font-size: 1rem;
+.warehouse-v2 .btn {
+  border-radius: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  padding: 0.7rem 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.warehouse-v2 .form-control {
-  font-size: 1rem;
+.warehouse-v2 .btn:hover {
+  transform: translateY(-1px);
+}
+
+.warehouse-v2 .btn-primary,
+.warehouse-v2 .btn-success {
+  border: none;
+  box-shadow: 0 12px 24px rgba(8, 145, 178, 0.2);
+}
+
+.warehouse-v2 .btn-primary {
+  background: linear-gradient(135deg, var(--warehouse-primary), #22d3ee);
+}
+
+.warehouse-v2 .btn-success {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+}
+
+.warehouse-v2 .btn-outline-primary {
+  border-width: 1px;
+  border-color: rgba(8, 145, 178, 0.25);
+  color: var(--warehouse-primary-strong);
+  background: var(--warehouse-surface-elevated);
+}
+
+.warehouse-v2 .btn-outline-primary:hover {
+  background: var(--warehouse-primary-soft);
+  border-color: rgba(8, 145, 178, 0.4);
+  color: var(--warehouse-primary-strong);
+}
+
+.warehouse-v2 .btn i,
+.warehouse-v2 .btn span {
+  vertical-align: middle;
+}
+
+.warehouse-v2 .btn-sm {
   padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  border-radius: 0.75rem;
 }
 
-.warehouse-v2 .form-select {
-  font-size: 1rem;
-  padding: 0.5rem 0.75rem;
-}
-
-/* Badge improvements */
 .warehouse-v2 .badge {
+  border-radius: 999px;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.warehouse-v2 .bg-info,
+.warehouse-v2 .badge.bg-info {
+  background: rgba(8, 145, 178, 0.14) !important;
+  color: var(--warehouse-primary-strong) !important;
+}
+
+.warehouse-v2 .badge.bg-primary {
+  background: rgba(8, 145, 178, 0.12) !important;
+  color: var(--warehouse-primary-strong) !important;
+}
+
+.warehouse-v2 .badge.bg-success {
+  background: rgba(34, 197, 94, 0.14) !important;
+  color: var(--warehouse-accent) !important;
+}
+
+.warehouse-v2 .badge.bg-secondary {
+  background: rgba(100, 116, 139, 0.14) !important;
+  color: #94a3b8 !important;
+}
+
+.warehouse-v2 .form-label {
+  margin-bottom: 0.45rem;
+  color: var(--warehouse-heading);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.warehouse-v2 .form-control,
+.warehouse-v2 .form-select {
+  min-height: 2.9rem;
+  border-radius: 0.9rem;
+  border-color: var(--warehouse-border-strong);
+  padding: 0.7rem 0.9rem;
+  font-size: 0.95rem;
+  background-color: var(--warehouse-input-bg);
+  color: var(--warehouse-text);
+}
+
+.warehouse-v2 .form-control::placeholder {
+  color: var(--warehouse-text-soft);
+}
+
+.warehouse-v2 .form-control:focus,
+.warehouse-v2 .form-select:focus,
+.warehouse-v2 .btn:focus,
+.warehouse-v2 .dropdown-toggle:focus,
+.warehouse-v2 .nav-link:focus {
+  border-color: rgba(8, 145, 178, 0.55);
+  box-shadow: 0 0 0 0.25rem rgba(8, 145, 178, 0.16);
+  outline: none;
+}
+
+.warehouse-v2 .input-group .btn {
+  min-width: 46px;
+  justify-content: center;
+}
+
+.warehouse-v2 .nav-tabs {
+  gap: 0.6rem;
+  border-bottom: none;
+  margin-bottom: 1rem;
+}
+
+.warehouse-v2 .nav-tabs .nav-link {
+  border: 1px solid var(--warehouse-border);
+  border-radius: 999px;
+  color: var(--warehouse-text-muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.8rem 1rem;
+  background: var(--warehouse-surface-elevated);
+}
+
+.warehouse-v2 .nav-tabs .nav-link:hover {
+  border-color: rgba(8, 145, 178, 0.22);
+  color: var(--warehouse-primary-strong);
+}
+
+.warehouse-v2 .nav-tabs .nav-link.active {
+  background: linear-gradient(135deg, var(--warehouse-primary), #22d3ee);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(8, 145, 178, 0.18);
+}
+
+.warehouse-v2 .table {
+  margin-bottom: 0;
+  color: var(--warehouse-text);
+  font-size: 0.94rem;
+}
+
+.warehouse-v2 .table th {
+  padding: 0.95rem 0.9rem;
+  border-top: none;
+  border-bottom-width: 1px;
+  border-color: var(--warehouse-border);
+  background: var(--warehouse-table-head-bg);
+  color: var(--warehouse-heading);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.warehouse-v2 .table td {
+  padding: 0.95rem 0.9rem;
+  vertical-align: middle;
+  color: var(--warehouse-text);
+  border-color: var(--warehouse-border);
+}
+
+.warehouse-v2 .table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.warehouse-v2 .table-hover tbody tr:hover {
+  background: rgba(8, 145, 178, 0.06);
+}
+
+.warehouse-v2 code {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.65rem;
+  padding: 0.3rem 0.5rem;
+  background: var(--warehouse-code-bg);
+  color: var(--warehouse-primary-strong);
   font-size: 0.85rem;
-  padding: 0.375rem 0.75rem;
 }
 
-/* Alert improvements */
-.warehouse-v2 .alert {
-  font-size: 1rem;
-  padding: 1rem 1.25rem;
-}
-
-/* Small tag improvements */
-.warehouse-v2 small {
-  font-size: 1.70rem !important;
-  line-height: 1.5;
-}
-
-/* Bootstrap fs-6 override */
+.warehouse-v2 small,
+.warehouse-v2 .small,
 .warehouse-v2 .fs-6 {
-  font-size: 1.70rem !important;
+  font-size: 0.84rem !important;
+  line-height: 1.45;
 }
 
-/* Modal improvements */
+.warehouse-v2 .alert {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: var(--warehouse-shadow-sm);
+}
+
+.warehouse-v2 .modal-content {
+  border: 1px solid var(--warehouse-border);
+  border-radius: var(--warehouse-radius-lg);
+  overflow: hidden;
+  background: var(--warehouse-surface-elevated);
+}
+
+.warehouse-v2 .modal-header,
+.warehouse-v2 .modal-footer {
+  background: var(--warehouse-surface-soft);
+  border-color: var(--warehouse-border);
+}
+
 .warehouse-v2 .modal-title {
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
-.warehouse-v2 .modal-body {
-  font-size: 1rem;
+.warehouse-v2 .toast {
+  border: none !important;
+  border-radius: 1rem !important;
+  box-shadow: var(--warehouse-shadow-md) !important;
+  backdrop-filter: blur(12px);
 }
 
-/* Navigation improvements */
-.warehouse-v2 .nav-link {
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.75rem 1rem;
+.warehouse-v2 .toast-header {
+  border-bottom: 1px solid var(--warehouse-border) !important;
 }
 
-/* Action buttons specific styling */
+.warehouse-v2 .btn-group-sm .btn,
 .warehouse-v2 .action-buttons .btn {
-  font-size: 0.85rem;
-  font-weight: 500;
-  white-space: nowrap;
-  min-width: 80px;
+  min-width: 38px;
 }
 
-.warehouse-v2 .action-buttons .btn i {
+.warehouse-v2 .fas,
+.warehouse-v2 .far,
+.warehouse-v2 .fab,
+.warehouse-v2 .fal,
+.warehouse-v2 .fad,
+.warehouse-v2 .fass,
+.warehouse-v2 .fasr,
+.warehouse-v2 .fasl {
+  line-height: 1;
+}
+
+.warehouse-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--warehouse-border);
+  border-radius: var(--warehouse-radius-lg);
+  background: linear-gradient(180deg, var(--warehouse-surface-elevated), var(--warehouse-surface-soft));
+  box-shadow: var(--warehouse-shadow-sm);
+}
+
+.warehouse-page-title {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.warehouse-page-title-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--warehouse-primary), #22d3ee);
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(8, 145, 178, 0.22);
+}
+
+.warehouse-page-title p {
+  margin: 0.35rem 0 0;
+  color: var(--warehouse-text-muted);
+}
+
+.warehouse-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.warehouse-surface-panel {
+  border: 1px solid var(--warehouse-border);
+  border-radius: var(--warehouse-radius-md);
+  background: var(--warehouse-surface-elevated);
+  box-shadow: var(--warehouse-shadow-sm);
+}
+
+.warehouse-info-panel {
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--warehouse-border);
+  border-radius: var(--warehouse-radius-md);
+  background: linear-gradient(180deg, var(--warehouse-surface-elevated), var(--warehouse-surface-soft));
+  box-shadow: var(--warehouse-shadow-sm);
+}
+
+.warehouse-stat-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--warehouse-text-muted);
   font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-/* Responsive adjustments */
+.warehouse-stat-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--warehouse-heading);
+}
+
+.warehouse-empty-state {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  color: var(--warehouse-text-muted);
+}
+
+.warehouse-empty-state i {
+  font-size: 2rem;
+  color: var(--warehouse-text-soft);
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 991.98px) {
+  .warehouse-nav,
+  .warehouse-header-actions {
+    margin-top: 1rem;
+  }
+
+  .warehouse-header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .warehouse-user-toggle,
+  .warehouse-theme-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .warehouse-status-chip {
+    justify-content: center;
+  }
+}
+
 @media (max-width: 768px) {
-  .warehouse-v2 {
-    font-size: 1rem;
+  .warehouse-shell-container {
+    width: min(100% - 1.25rem, 100%);
   }
-  
-  .warehouse-v2 h1 {
-    font-size: 1.8rem;
+
+  .warehouse-main {
+    padding: 1rem 0 1.5rem;
   }
-  
-  .warehouse-v2 h2 {
-    font-size: 1.6rem;
+
+  .warehouse-page-header {
+    padding: 1.25rem;
+    flex-direction: column;
   }
-  
-  .warehouse-v2 .action-buttons .btn {
-    font-size: 0.8rem;
-    min-width: 70px;
+
+  .warehouse-page-actions {
+    width: 100%;
+  }
+
+  .warehouse-page-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .warehouse-footer-content {
+    flex-direction: column;
+  }
+
+  .warehouse-footer-meta {
+    align-items: flex-start;
+  }
+
+  .warehouse-v2 .table th,
+  .warehouse-v2 .table td {
+    padding: 0.8rem 0.75rem;
   }
 }
 
 @media (max-width: 576px) {
-  .warehouse-v2 {
-    font-size: 0.95rem;
+  .warehouse-nav-link {
+    border-radius: 1rem;
   }
-  
-  .warehouse-v2 .action-buttons .btn {
-    font-size: 0.75rem;
-    min-width: 60px;
-    padding: 0.25rem 0.5rem;
+
+  .warehouse-page-title {
+    align-items: flex-start;
   }
-  
-  .warehouse-v2 .action-buttons .btn span {
-    display: none;
+
+  .warehouse-page-title-icon {
+    width: 2.6rem;
+    height: 2.6rem;
   }
-  
-  .warehouse-v2 .action-buttons .btn i {
-    margin: 0;
+
+  .warehouse-v2 .nav-tabs .nav-link {
+    width: 100%;
+    justify-content: center;
   }
 }

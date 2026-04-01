@@ -27,7 +27,6 @@ const InventoryPage: React.FC = () => {
   const [productInvoiceData, setProductInvoiceData] = useState<any>(null);
 
   const handleViewBatchDetails = (batchCode: string) => {
-    // Find batch info from API or create a mock batch object
     const mockBatch: InventoryBatch = {
       BatchCode: batchCode,
       ImportDate: new Date().toISOString(),
@@ -38,7 +37,7 @@ const InventoryPage: React.FC = () => {
       TotalSoldValue: 0,
       RemainingQuantity: 0,
       ProfitLoss: 0,
-      Status: 'ACTIVE'
+      Status: 'ACTIVE',
     };
 
     setSelectedBatch(mockBatch);
@@ -48,7 +47,6 @@ const InventoryPage: React.FC = () => {
 
   const fetchActualProductCount = async (batchCode: string) => {
     try {
-      // Since we don't have batchId, we'll use batchCode to filter
       const response = await fetch(`/api/products-v2?batchCode=${batchCode}&limit=1000`);
       const result = await response.json();
 
@@ -64,7 +62,6 @@ const InventoryPage: React.FC = () => {
   };
 
   const handlePrintInvoiceFromProduct = (product: any) => {
-    // Create invoice from product data
     const invoice = {
       invoiceNumber: product.InvoiceNumber || `HD${Date.now()}`,
       saleDate: product.SoldDate || new Date().toISOString(),
@@ -74,13 +71,15 @@ const InventoryPage: React.FC = () => {
         IMEI: product.IMEI,
         ImportPrice: product.ImportPrice,
         SalePrice: product.SalePrice || product.ImportPrice * 1.2,
-        CategoryName: product.CategoryName
+        CategoryName: product.CategoryName,
       },
-      customerInfo: product.CustomerInfo ? {
-        name: product.CustomerInfo,
-        phone: '',
-        address: ''
-      } : undefined
+      customerInfo: product.CustomerInfo
+        ? {
+            name: product.CustomerInfo,
+            phone: '',
+            address: '',
+          }
+        : undefined,
     };
 
     setProductInvoiceData(invoice);
@@ -96,37 +95,39 @@ const InventoryPage: React.FC = () => {
     <Container fluid className="py-4 inventory-page">
       <Row>
         <Col>
-          {/* Breadcrumb */}
           <Breadcrumb>
             <Breadcrumb.Item href="/warehouse-v2">Quản lý kho V2</Breadcrumb.Item>
             <Breadcrumb.Item active>Tồn kho</Breadcrumb.Item>
           </Breadcrumb>
 
-          {/* Page Header */}
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <div>
-              <h2 className="mb-1">
-                <span className="text-info me-2">📦</span>
-                Báo cáo tồn kho
-              </h2>
-              <p className="text-muted mb-0">
-                Theo dõi tồn kho, lãi/lỗ và hiệu quả kinh doanh theo từng lô hàng
-              </p>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <Tabs
-            activeKey={activeTab}
-            onSelect={(k) => setActiveTab(k || 'inventory')}
-            className="mb-3"
-          >
-            <Tab eventKey="inventory" title={
-              <span>
-                <span className="me-2">📊</span>
-                Báo cáo tồn kho
+          <section className="warehouse-page-header">
+            <div className="warehouse-page-title">
+              <span className="warehouse-page-title-icon">
+                <i className="fas fa-warehouse" aria-hidden="true"></i>
               </span>
-            }>
+              <div>
+                <h2 className="mb-1">Báo cáo tồn kho</h2>
+                <p>Theo dõi số lượng tồn, hiệu quả từng lô hàng và chuyển nhanh sang danh sách sản phẩm chi tiết.</p>
+              </div>
+            </div>
+            <div className="warehouse-page-actions">
+              <div className="warehouse-status-chip">
+                <span className="warehouse-status-dot"></span>
+                Theo dõi trạng thái theo lô
+              </div>
+            </div>
+          </section>
+
+          <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'inventory')} className="mb-3">
+            <Tab
+              eventKey="inventory"
+              title={
+                <span>
+                  <i className="fas fa-chart-column me-2" aria-hidden="true"></i>
+                  Báo cáo tồn kho
+                </span>
+              }
+            >
               <InventoryReportV2 onViewBatchDetails={handleViewBatchDetails} />
             </Tab>
 
@@ -134,46 +135,37 @@ const InventoryPage: React.FC = () => {
               eventKey="products"
               title={
                 <span>
-                  <span className="me-2">📱</span>
+                  <i className="fas fa-mobile-screen-button me-2" aria-hidden="true"></i>
                   Sản phẩm trong lô
-                  {selectedBatch && (
-                    <span className="badge bg-primary ms-2">
-                      {selectedBatch.BatchCode}
-                    </span>
-                  )}
+                  {selectedBatch && <span className="badge bg-primary ms-2">{selectedBatch.BatchCode}</span>}
                 </span>
               }
               disabled={!selectedBatch}
             >
               {selectedBatch && (
                 <div>
-                  {/* Batch Info */}
-                  <div className="bg-light p-3 rounded mb-3">
-                    <Row>
-                      <Col md={3}>
-                        <strong>Mã lô hàng:</strong>
-                        <div className="text-primary">
+                  <div className="warehouse-info-panel mb-3">
+                    <Row className="g-3">
+                      <Col md={4}>
+                        <span className="warehouse-stat-label">Mã lô hàng</span>
+                        <div className="warehouse-stat-value">
                           <code>{selectedBatch.BatchCode}</code>
                         </div>
                       </Col>
-                   
-                      <Col md={3}>
-                        <strong>Ngày nhập:</strong>
-                        <div>{new Date(selectedBatch.ImportDate).toLocaleDateString('vi-VN')}</div>
+                      <Col md={4}>
+                        <span className="warehouse-stat-label">Ngày nhập</span>
+                        <div className="warehouse-stat-value">{new Date(selectedBatch.ImportDate).toLocaleDateString('vi-VN')}</div>
                       </Col>
-                      <Col md={3}>
-                        <strong>Số lượng tồn:</strong>
-                        <div className="text-warning fw-bold">
+                      <Col md={4}>
+                        <span className="warehouse-stat-label">Số lượng tồn</span>
+                        <div className="warehouse-stat-value text-warning">
                           {selectedBatch.RemainingQuantity}
-                          <small className="text-muted ms-2">
-                            (Tổng: {selectedBatch.TotalQuantity})
-                          </small>
+                          <small className="text-muted ms-2">(Tổng: {selectedBatch.TotalQuantity})</small>
                         </div>
                       </Col>
                     </Row>
                   </div>
 
-                  {/* Products in Batch */}
                   <ProductListV2
                     batchCode={selectedBatch.BatchCode}
                     onProductCountChange={() => fetchActualProductCount(selectedBatch.BatchCode)}
@@ -187,12 +179,7 @@ const InventoryPage: React.FC = () => {
             </Tab>
           </Tabs>
 
-          {/* Product Invoice Print Modal */}
-          <InvoicePrint
-            show={showProductInvoice}
-            onHide={handleCloseProductInvoice}
-            invoiceData={productInvoiceData}
-          />
+          <InvoicePrint show={showProductInvoice} onHide={handleCloseProductInvoice} invoiceData={productInvoiceData} />
         </Col>
       </Row>
     </Container>
