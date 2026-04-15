@@ -17,6 +17,7 @@ const navigationItems = [
   { href: '/warehouse-v2/import', label: 'Nhập hàng', icon: 'fas fa-box-open' },
   { href: '/warehouse-v2/sales', label: 'Bán hàng', icon: 'fas fa-cart-shopping' },
   { href: '/warehouse-v2/inventory', label: 'Tồn kho', icon: 'fas fa-warehouse' },
+  { href: '/warehouse-v2/categories', label: 'Danh mục', icon: 'fas fa-tags' },
   { href: '/warehouse-v2/reports', label: 'Báo cáo', icon: 'fas fa-file-lines' },
 ];
 
@@ -71,7 +72,64 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
         <div className="warehouse-v2 min-vh-100">
           {!isLoginPage && (
             <header className="warehouse-shell-header">
-              <Navbar expand="lg" className="warehouse-navbar">
+              {/* Top actions bar */}
+              <div 
+                className="d-flex justify-content-end align-items-center px-4 py-1" 
+                style={{ 
+                  background: 'var(--warehouse-surface-muted)', 
+                  borderBottom: '1px solid var(--warehouse-border)' 
+                }}
+              >
+                <Container fluid className="warehouse-shell-container p-0 d-flex justify-content-end">
+                  <div 
+                    className="warehouse-header-actions mt-0 mb-0" 
+                    style={{ transform: 'scale(0.85)', transformOrigin: 'right center' }}
+                  >
+                    <Button
+                      type="button"
+                      variant="outline-primary"
+                      className="warehouse-theme-toggle"
+                      onClick={handleThemeToggle}
+                      aria-label={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+                    >
+                      <i className={`fas ${isDark ? 'fa-sun' : 'fa-moon'}`} aria-hidden="true"></i>
+                      <span>{isDark ? 'Light' : 'Dark'}</span>
+                    </Button>
+                    <div className="warehouse-status-chip">
+                      <span className="warehouse-status-dot"></span>
+                      Hệ thống hoạt động
+                    </div>
+                    <Dropdown align="end">
+                      <Dropdown.Toggle className="warehouse-user-toggle" bsPrefix="btn">
+                        <span className="warehouse-user-avatar">
+                          <i className="fas fa-user-shield" aria-hidden="true"></i>
+                        </span>
+                        <span className="warehouse-user-meta">
+                          <span className="warehouse-user-role">Quản trị viên</span>
+                          <span className="warehouse-user-caption">Điều hành kho</span>
+                        </span>
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu className="warehouse-user-menu">
+                        <Dropdown.Item href="#profile">
+                          <i className="fas fa-id-card" aria-hidden="true"></i>
+                          <span>Thông tin cá nhân</span>
+                        </Dropdown.Item>
+                        <Dropdown.Item href="#change-password">
+                          <i className="fas fa-key" aria-hidden="true"></i>
+                          <span>Đổi mật khẩu</span>
+                        </Dropdown.Item>
+                        <Dropdown.Divider />
+                        <Dropdown.Item onClick={handleLogout} className="text-danger">
+                          <i className="fas fa-right-from-bracket" aria-hidden="true"></i>
+                          <span>Đăng xuất</span>
+                        </Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </div>
+                </Container>
+              </div>
+
+              <Navbar expand="lg" className="warehouse-navbar py-2">
                 <Container fluid className="warehouse-shell-container">
                   <Navbar.Brand as={Link} href="/warehouse-v2" className="warehouse-brand">
                     <span className="warehouse-brand-mark">
@@ -99,49 +157,6 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
                         </Nav.Link>
                       ))}
                     </Nav>
-
-                    <div className="warehouse-header-actions">
-                      <Button
-                        type="button"
-                        variant="outline-primary"
-                        className="warehouse-theme-toggle"
-                        onClick={handleThemeToggle}
-                        aria-label={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
-                      >
-                        <i className={`fas ${isDark ? 'fa-sun' : 'fa-moon'}`} aria-hidden="true"></i>
-                        <span>{isDark ? 'Light' : 'Dark'}</span>
-                      </Button>
-                      <div className="warehouse-status-chip">
-                        <span className="warehouse-status-dot"></span>
-                        Hệ thống hoạt động
-                      </div>
-                      <Dropdown align="end">
-                        <Dropdown.Toggle className="warehouse-user-toggle" bsPrefix="btn">
-                          <span className="warehouse-user-avatar">
-                            <i className="fas fa-user-shield" aria-hidden="true"></i>
-                          </span>
-                          <span className="warehouse-user-meta">
-                            <span className="warehouse-user-role">Quản trị viên</span>
-                            <span className="warehouse-user-caption">Điều hành kho</span>
-                          </span>
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu className="warehouse-user-menu">
-                          <Dropdown.Item href="#profile">
-                            <i className="fas fa-id-card" aria-hidden="true"></i>
-                            <span>Thông tin cá nhân</span>
-                          </Dropdown.Item>
-                          <Dropdown.Item href="#change-password">
-                            <i className="fas fa-key" aria-hidden="true"></i>
-                            <span>Đổi mật khẩu</span>
-                          </Dropdown.Item>
-                          <Dropdown.Divider />
-                          <Dropdown.Item onClick={handleLogout} className="text-danger">
-                            <i className="fas fa-right-from-bracket" aria-hidden="true"></i>
-                            <span>Đăng xuất</span>
-                          </Dropdown.Item>
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    </div>
                   </Navbar.Collapse>
                 </Container>
               </Navbar>

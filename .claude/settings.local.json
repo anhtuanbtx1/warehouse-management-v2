@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uipro init:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(git -C \"/d/Code-FE/warehouse-management-v2\" status --short)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('.next/server/chunks/219.js','utf8'\\); console.log\\(s.slice\\(55880,56040\\)\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('.next/server/chunks/219.js','utf8'\\); console.log\\(s.slice\\(0,400\\)\\);\")"
+    ]
+  }
+}

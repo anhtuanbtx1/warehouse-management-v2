@@ -490,19 +490,9 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                 variant="primary"
                 onClick={handleSearch}
                 title="Tìm kiếm"
-                className="px-3"
-                style={{
-                  backgroundColor: '#0d6efd',
-                  borderColor: '#0d6efd',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 'bold',
-                  fontSize: '16px'
-                }}
+                className="px-3 d-flex align-items-center justify-content-center"
               >
-                🔍
+                <i className="fas fa-search"></i>
               </Button>
             </InputGroup>
           </div>
@@ -582,16 +572,16 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
             <Table responsive striped hover>
               <thead>
                 <tr>
-                  <th>Tên sản phẩm</th>
-                  <th>IMEI</th>
-                  <th>Danh mục</th>
-                  <th>Lô hàng</th>
-                  <th>Giá nhập</th>
-                  {!hideColumns.includes('salePrice') && <th>Giá bán</th>}
-                  {!hideColumns.includes('profit') && <th>Lãi/Lỗ</th>}
-                  <th>Trạng thái</th>
-                  {!hideColumns.includes('saleDate') && <th>Ngày bán</th>}
-                  <th>Thao tác</th>
+                  <th className="text-nowrap">Tên sản phẩm</th>
+                  <th className="text-nowrap">IMEI</th>
+                  <th className="text-nowrap text-center">Danh mục</th>
+                  <th className="text-nowrap">Lô hàng</th>
+                  <th className="text-nowrap text-end">Giá nhập</th>
+                  {!hideColumns.includes('salePrice') && <th className="text-nowrap text-end">Giá bán</th>}
+                  {!hideColumns.includes('profit') && <th className="text-nowrap text-end">Lãi/Lỗ</th>}
+                  <th className="text-nowrap text-center">Trạng thái</th>
+                  {!hideColumns.includes('saleDate') && <th className="text-nowrap text-center">Ngày bán</th>}
+                  <th className="text-nowrap text-center">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -603,10 +593,10 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                   </tr>
                 ) : (
                   products.map(product => (
-                    <tr key={product.ProductID}>
+                    <tr key={product.ProductID} className="align-middle">
                       <td>
                         <div>
-                          <strong>{product.ProductName}</strong>
+                          <strong className="text-dark">{product.ProductName}</strong>
                           {product.Notes && (
                             <small className="d-block text-muted">
                               {product.Notes}
@@ -615,44 +605,46 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                         </div>
                       </td>
                       <td>
-                        <code className="text-primary">{product.IMEI}</code>
+                        <span className="text-primary fw-medium font-monospace">{product.IMEI}</span>
+                      </td>
+                      <td className="text-center">
+                        <Badge bg="info" className="fw-normal bg-opacity-75">{product.CategoryName}</Badge>
                       </td>
                       <td>
-                        <Badge bg="info">{product.CategoryName}</Badge>
-                      </td>
-                      <td>
-                        <small>
-                          <code>{product.BatchCode}</code>
-                          <div className="text-muted">
+                        <div className="d-flex flex-column">
+                          <Badge bg="light" text="primary" className="border border-primary-subtle px-2 py-1 mb-1 align-self-start">
+                            {product.BatchCode}
+                          </Badge>
+                          <small className="text-muted">
                             {formatDate(product.ImportDate)}
-                          </div>
-                        </small>
+                          </small>
+                        </div>
                       </td>
-                      <td>{formatCurrency(product.ImportPrice)}</td>
+                      <td className="text-end fw-medium">{formatCurrency(product.ImportPrice)}</td>
                       {!hideColumns.includes('salePrice') && (
-                        <td>
+                        <td className="text-end">
                           {product.SalePrice > 0 ? (
-                            <span className="text-success">
+                            <span className="text-success fw-bold">
                               {formatCurrency(product.SalePrice)}
                             </span>
                           ) : (
-                            <span className="text-muted">Chưa bán</span>
+                            <span className="text-muted fst-italic">Chưa bán</span>
                           )}
                         </td>
                       )}
                       {!hideColumns.includes('profit') && (
-                        <td>
-                          <span className={getProfitColor(getProfit(product))}>
+                        <td className="text-end">
+                          <span className={`${getProfitColor(getProfit(product))} fw-bold`}>
                             {getProfit(product) !== 0 ? formatCurrency(getProfit(product)) : '-'}
                           </span>
                         </td>
                       )}
-                      <td>{getStatusBadge(product.Status)}</td>
+                      <td className="text-center">{getStatusBadge(product.Status)}</td>
                       {!hideColumns.includes('saleDate') && (
-                        <td>
+                        <td className="text-center">
                           {product.SoldDate ? (
                             <div>
-                              <small>{formatDate(product.SoldDate)}</small>
+                              <small className="fw-medium">{formatDate(product.SoldDate)}</small>
                               {product.InvoiceNumber && (
                                 <div className="text-muted">
                                   <small>HĐ: {product.InvoiceNumber}</small>
@@ -660,21 +652,21 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                               )}
                             </div>
                           ) : (
-                            <span className="text-muted">-</span>
+                            <span className="text-muted fst-italic">-</span>
                           )}
                         </td>
                       )}
-                      <td>
-                        <div className="btn-group btn-group-sm">
+                      <td className="text-center">
+                        <div className="d-flex justify-content-center gap-1">
                           {product.Status === 'IN_STOCK' && (
                             <Button
                               variant="outline-warning"
                               size="sm"
                               onClick={() => handleShowEditModal(product)}
                               title="Chỉnh sửa sản phẩm"
-                              className="me-1"
+                              className="d-flex align-items-center justify-content-center"
                             >
-                              <span>✏️</span>
+                              <i className="fas fa-edit"></i>
                             </Button>
                           )}
                           {product.Status === 'IN_STOCK' && onSellProduct && (
@@ -683,8 +675,9 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                               size="sm"
                               onClick={() => onSellProduct(product)}
                               title="Bán sản phẩm"
+                              className="d-flex align-items-center justify-content-center"
                             >
-                              <span>🛒</span>
+                              <i className="fas fa-shopping-cart"></i>
                             </Button>
                           )}
                           {product.InvoiceNumber && onPrintInvoice && (
@@ -693,8 +686,9 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                               size="sm"
                               onClick={() => onPrintInvoice(product)}
                               title="In hóa đơn"
+                              className="d-flex align-items-center justify-content-center"
                             >
-                              <span>🖨️</span>
+                              <i className="fas fa-print"></i>
                             </Button>
                           )}
                         </div>

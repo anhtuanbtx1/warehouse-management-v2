@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Container, Row, Col, Breadcrumb, Tabs, Tab } from 'react-bootstrap';
+import { Container, Row, Col, Breadcrumb, Tabs, Tab, Card } from 'react-bootstrap';
 import InventoryReportV2 from '@/components/warehouse-v2/InventoryReportV2';
 import ProductListV2 from '@/components/warehouse-v2/ProductListV2';
 import InvoicePrint from '@/components/warehouse-v2/InvoicePrint';
@@ -118,53 +118,82 @@ const InventoryPage: React.FC = () => {
             </div>
           </section>
 
-          <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'inventory')} className="mb-3">
+          <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'inventory')} className="mb-4" variant="pills">
             <Tab
               eventKey="inventory"
               title={
-                <span>
+                <span className="px-2">
                   <i className="fas fa-chart-column me-2" aria-hidden="true"></i>
                   Báo cáo tồn kho
                 </span>
               }
             >
-              <InventoryReportV2 onViewBatchDetails={handleViewBatchDetails} />
+              <div className="mt-3">
+                <InventoryReportV2 onViewBatchDetails={handleViewBatchDetails} />
+              </div>
             </Tab>
 
             <Tab
               eventKey="products"
               title={
-                <span>
+                <span className="px-2">
                   <i className="fas fa-mobile-screen-button me-2" aria-hidden="true"></i>
                   Sản phẩm trong lô
-                  {selectedBatch && <span className="badge bg-primary ms-2">{selectedBatch.BatchCode}</span>}
+                  {selectedBatch && <span className="badge bg-primary ms-2 rounded-pill px-2">{selectedBatch.BatchCode}</span>}
                 </span>
               }
               disabled={!selectedBatch}
             >
               {selectedBatch && (
-                <div>
-                  <div className="warehouse-info-panel mb-3">
-                    <Row className="g-3">
-                      <Col md={4}>
-                        <span className="warehouse-stat-label">Mã lô hàng</span>
-                        <div className="warehouse-stat-value">
-                          <code>{selectedBatch.BatchCode}</code>
-                        </div>
-                      </Col>
-                      <Col md={4}>
-                        <span className="warehouse-stat-label">Ngày nhập</span>
-                        <div className="warehouse-stat-value">{new Date(selectedBatch.ImportDate).toLocaleDateString('vi-VN')}</div>
-                      </Col>
-                      <Col md={4}>
-                        <span className="warehouse-stat-label">Số lượng tồn</span>
-                        <div className="warehouse-stat-value text-warning">
-                          {selectedBatch.RemainingQuantity}
-                          <small className="text-muted ms-2">(Tổng: {selectedBatch.TotalQuantity})</small>
-                        </div>
-                      </Col>
-                    </Row>
-                  </div>
+                <div className="mt-3">
+                  <Row className="g-3 mb-4">
+                    <Col md={4}>
+                      <Card className="h-100 shadow-sm border-0 bg-primary bg-opacity-10">
+                        <Card.Body className="p-3 d-flex align-items-center">
+                          <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style={{ width: '48px', height: '48px' }}>
+                            <i className="fas fa-boxes fa-lg"></i>
+                          </div>
+                          <div>
+                            <span className="text-muted small fw-medium d-block mb-1">Mã lô hàng</span>
+                            <div className="fs-5 fw-bold text-primary text-break lh-1">
+                              {selectedBatch.BatchCode}
+                            </div>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                    <Col md={4}>
+                      <Card className="h-100 shadow-sm border-0 bg-light">
+                        <Card.Body className="p-3 d-flex align-items-center">
+                          <div className="rounded-circle bg-secondary bg-opacity-25 text-secondary d-flex align-items-center justify-content-center me-3" style={{ width: '48px', height: '48px' }}>
+                            <i className="fas fa-calendar-alt fa-lg"></i>
+                          </div>
+                          <div>
+                            <span className="text-muted small fw-medium d-block mb-1">Ngày nhập</span>
+                            <div className="fs-5 fw-bold text-dark lh-1">
+                              {new Date(selectedBatch.ImportDate).toLocaleDateString('vi-VN')}
+                            </div>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                    <Col md={4}>
+                      <Card className="h-100 shadow-sm border-0 bg-warning bg-opacity-10">
+                        <Card.Body className="p-3 d-flex align-items-center">
+                          <div className="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center me-3" style={{ width: '48px', height: '48px' }}>
+                            <i className="fas fa-cubes fa-lg"></i>
+                          </div>
+                          <div>
+                            <span className="text-muted small fw-medium d-block mb-1">Số lượng tồn</span>
+                            <div className="fs-5 fw-bold text-warning lh-1">
+                              {selectedBatch.RemainingQuantity}
+                              <small className="text-muted ms-2 fs-6 fw-normal">(Tổng: {selectedBatch.TotalQuantity})</small>
+                            </div>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  </Row>
 
                   <ProductListV2
                     batchCode={selectedBatch.BatchCode}

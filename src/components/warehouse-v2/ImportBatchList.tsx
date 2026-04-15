@@ -345,21 +345,23 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
   return (
     <>
       <Card>
-        <Card.Header className="d-flex justify-content-between align-items-center">
-          <h5 className="mb-0 fs-4">📦 Danh sách lô hàng</h5>
+        <Card.Header className="d-flex justify-content-between align-items-center py-3">
+          <h5 className="mb-0 fw-bold">
+            <i className="fas fa-boxes me-2 text-primary"></i>Danh sách lô hàng
+          </h5>
           <div className="d-flex gap-2">
             <Button
               variant="outline-success"
               onClick={exportToExcel}
-              className="btn-compact"
+              className="d-flex align-items-center shadow-sm"
               title="Xuất danh sách lô hàng ra Excel"
             >
-              <span className="me-1">📄</span>
+              <i className="fas fa-file-excel me-2"></i>
               Xuất Excel
             </Button>
             {onCreateBatch && (
-              <Button onClick={onCreateBatch} className="btn-compact btn-create">
-                <span className="me-1">➕</span>
+              <Button onClick={onCreateBatch} variant="success" className="d-flex align-items-center shadow-sm">
+                <i className="fas fa-plus me-2"></i>
                 Tạo lô hàng mới
               </Button>
             )}
@@ -413,18 +415,14 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
                 className="fs-6"
               />
             </div>
-            <div className="col-md-3">
-              <Button variant="outline-primary" onClick={handleFilter} className="px-3 btn btn-primary"  style={{
-                  backgroundColor: '#0d6efd',
-                  borderColor: '#0d6efd',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 'bold',
-                  fontSize: '16px'
-                }}>
-                <span className="me-1">🔍</span>
+            <div className="col-md-3 d-flex align-items-end">
+              <Button 
+                variant="primary" 
+                onClick={handleFilter} 
+                className="w-100 d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                style={{ height: '46px' }}
+              >
+                <i className="fas fa-search me-2"></i>Tìm kiếm
               </Button>
             </div>
           </div>
@@ -441,17 +439,17 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
               <Table responsive striped hover className="fs-6">
                 <thead>
                   <tr>
-                    <th className="fs-6 fw-bold">Mã lô hàng</th>
-                    <th className="fs-6 fw-bold">Ngày nhập</th>
-                    <th className="fs-6 fw-bold">Danh mục</th>
-                    <th className="fs-6 fw-bold">SL nhập</th>
-                    <th className="fs-6 fw-bold">SL bán</th>
-                    <th className="fs-6 fw-bold">SL tồn</th>
-                    <th className="fs-6 fw-bold">Giá trị nhập</th>
-                    <th className="fs-6 fw-bold">Giá trị bán</th>
-                    <th className="fs-6 fw-bold">Lãi/Lỗ</th>
-                    <th className="fs-6 fw-bold">Trạng thái</th>
-                    <th className="fs-6 fw-bold" style={{ minWidth: '200px' }}>Thao tác</th>
+                    <th className="px-4 text-nowrap">Mã lô hàng</th>
+                    <th className="text-nowrap">Ngày nhập</th>
+                    <th className="text-nowrap">Danh mục</th>
+                    <th className="text-center text-nowrap">SL nhập</th>
+                    <th className="text-center text-nowrap">SL bán</th>
+                    <th className="text-center text-nowrap">SL tồn</th>
+                    <th className="text-end text-nowrap">Giá trị nhập</th>
+                    <th className="text-end text-nowrap">Giá trị bán</th>
+                    <th className="text-end text-nowrap">Lãi/Lỗ</th>
+                    <th className="text-center text-nowrap">Trạng thái</th>
+                    <th className="text-center text-nowrap" style={{ width: '220px' }}>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -463,71 +461,74 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
                     </tr>
                   ) : (
                     batches.map(batch => (
-                      <tr key={batch.BatchID}>
-                        <td>
-                          <code className="text-primary">{batch.BatchCode}</code>
+                      <tr key={batch.BatchID} className="align-middle">
+                        <td className="px-4">
+                          <code className="text-primary fw-medium">{batch.BatchCode}</code>
                         </td>
-                        <td>{formatDate(batch.ImportDate)}</td>
+                        <td className="text-nowrap">{formatDate(batch.ImportDate)}</td>
                         <td>
-                          <Badge bg="info" className="me-1">
+                          <Badge bg="info" className="bg-opacity-75 rounded-pill px-3">
                             {batch.CategoryName}
                           </Badge>
                         </td>
-                        <td>
+                        <td className="text-center">
                           <span className="fw-bold">{batch.TotalQuantity}</span>
                         </td>
-                        <td>
+                        <td className="text-center">
                           <span className="text-success">{batch.TotalSoldQuantity}</span>
                         </td>
-                        <td>
+                        <td className="text-center">
                           <span className="text-warning">{batch.RemainingQuantity}</span>
                         </td>
-                        <td>
+                        <td className="text-end text-nowrap">
                           <small>{formatCurrency(batch.TotalImportValue)}</small>
                         </td>
-                        <td>
-                          <small className="text-success">
+                        <td className="text-end text-nowrap">
+                          <small className="text-success fw-medium">
                             {formatCurrency(batch.TotalSoldValue)}
                           </small>
                         </td>
-                        <td>
-                          <span className={getProfitLossColor(batch.ProfitLoss)}>
+                        <td className="text-end text-nowrap">
+                          <span className={`${getProfitLossColor(batch.ProfitLoss)} fw-bold`}>
                             <small>{formatCurrency(batch.ProfitLoss)}</small>
                           </span>
                         </td>
-                        <td>{getStatusBadge(batch.Status)}</td>
-                        <td>
-                          <div className="d-flex btn-group-compact gap-1" style={{ minWidth: '200px' }}>
+                        <td className="text-center">{getStatusBadge(batch.Status)}</td>
+                        <td className="text-center">
+                          <div className="d-flex justify-content-center gap-1">
                             {onViewDetails && (
                               <Button
-                                variant="outline-warning"
+                                variant="outline-primary"
+                                size="sm"
                                 onClick={() => onViewDetails(batch)}
-                                className="btn-compact flex-fill"
+                                className="d-inline-flex align-items-center justify-content-center"
                                 title="Xem chi tiết lô hàng"
+                                style={{ width: '32px', height: '32px' }}
                               >
-                                <span className="me-1">👁️</span>
-                                Chi tiết
+                                <i className="fas fa-eye"></i>
                               </Button>
                             )}
                             {onViewInvoice && (
                               <Button
                                 variant="outline-success"
+                                size="sm"
                                 onClick={() => onViewInvoice(batch)}
-                                className="btn-compact flex-fill"
+                                className="d-inline-flex align-items-center justify-content-center"
                                 title="Xem hóa đơn nhập hàng"
+                                style={{ width: '32px', height: '32px' }}
                               >
-                                <span className="me-1">🧾</span>
-                                Hóa đơn
+                                <i className="fas fa-file-invoice"></i>
                               </Button>
                             )}
                             <Button
                               variant="outline-info"
+                              size="sm"
                               onClick={() => handleEditBatch(batch)}
+                              className="d-inline-flex align-items-center justify-content-center"
                               title="Chỉnh sửa lô hàng"
-                              className="btn-compact flex-fill"
+                              style={{ width: '32px', height: '32px' }}
                             >
-                              <span className="me-1">✏️</span>
-                              Sửa
+                              <i className="fas fa-edit"></i>
                             </Button>
                           </div>
                         </td>
@@ -570,7 +571,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
       <Modal show={showEditModal} onHide={handleCloseEditModal} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>
-            <span className="me-2">✏️</span>
+            <i className="fas fa-edit me-2 text-primary"></i>
             Chỉnh sửa lô hàng
             {editingBatch && (
               <small className="text-muted ms-2">({editingBatch.BatchCode})</small>
@@ -724,22 +725,23 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseEditModal}>
-            <span className="me-1">❌</span>
+            <i className="fas fa-times me-2"></i>
             Hủy
           </Button>
           <Button
             variant="primary"
             onClick={handleSaveEdit}
             disabled={editLoading}
+            className="shadow-sm"
           >
             {editLoading ? (
               <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <i className="fas fa-spinner fa-spin me-2"></i>
                 Đang lưu...
               </>
             ) : (
               <>
-                <span className="me-1">💾</span>
+                <i className="fas fa-save me-2"></i>
                 Lưu thay đổi
               </>
             )}

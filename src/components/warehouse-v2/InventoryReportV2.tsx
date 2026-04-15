@@ -130,44 +130,52 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
     <div>
       {/* Summary Cards */}
       {summary && (
-        <Row className="mb-4">
+        <Row className="mb-4 g-3">
           <Col md={3}>
-            <Card className="border-primary">
-              <Card.Body className="text-center">
-                <i className="fas fa-boxes fa-2x text-primary mb-2"></i>
-                <h4 className="text-primary">{summary.totalBatches}</h4>
-                <small className="text-muted">Tổng số lô hàng</small>
+            <Card className="border-primary border-opacity-50 shadow-sm h-100">
+              <Card.Body className="d-flex flex-column align-items-center justify-content-center p-3">
+                <div className="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mb-2" style={{ width: '48px', height: '48px' }}>
+                  <i className="fas fa-boxes text-primary" style={{ fontSize: '1.25rem' }}></i>
+                </div>
+                <h5 className="text-primary fw-bold mb-1">{summary.totalBatches}</h5>
+                <span className="text-muted small">Tổng số lô hàng</span>
               </Card.Body>
             </Card>
           </Col>
           <Col md={3}>
-            <Card className="border-warning">
-              <Card.Body className="text-center">
-                <i className="fas fa-arrow-down fa-2x text-warning mb-2"></i>
-                <h6 className="text-warning">{formatCurrency(summary.totalImportValue)}</h6>
-                <small className="text-muted">Tổng giá trị nhập</small>
+            <Card className="border-warning border-opacity-50 shadow-sm h-100">
+              <Card.Body className="d-flex flex-column align-items-center justify-content-center p-3">
+                <div className="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center mb-2" style={{ width: '48px', height: '48px' }}>
+                  <i className="fas fa-arrow-down text-warning" style={{ fontSize: '1.25rem' }}></i>
+                </div>
+                <h5 className="text-warning fw-bold mb-1">{formatCurrency(summary.totalImportValue)}</h5>
+                <span className="text-muted small">Tổng giá trị nhập</span>
               </Card.Body>
             </Card>
           </Col>
           <Col md={3}>
-            <Card className="border-success">
-              <Card.Body className="text-center">
-                <i className="fas fa-arrow-up fa-2x text-success mb-2"></i>
-                <h6 className="text-success">{formatCurrency(summary.totalSoldValue)}</h6>
-                <small className="text-muted">Tổng giá trị bán</small>
+            <Card className="border-success border-opacity-50 shadow-sm h-100">
+              <Card.Body className="d-flex flex-column align-items-center justify-content-center p-3">
+                <div className="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center mb-2" style={{ width: '48px', height: '48px' }}>
+                  <i className="fas fa-arrow-up text-success" style={{ fontSize: '1.25rem' }}></i>
+                </div>
+                <h5 className="text-success fw-bold mb-1">{formatCurrency(summary.totalSoldValue)}</h5>
+                <span className="text-muted small">Tổng giá trị bán</span>
               </Card.Body>
             </Card>
           </Col>
           <Col md={3}>
-            <Card className={`border-${summary.totalProfitLoss >= 0 ? 'success' : 'danger'}`}>
-              <Card.Body className="text-center">
-                <i className={`fas fa-chart-line fa-2x ${summary.totalProfitLoss >= 0 ? 'text-success' : 'text-danger'} mb-2`}></i>
-                <h6 className={summary.totalProfitLoss >= 0 ? 'text-success' : 'text-danger'}>
+            <Card className={`border-${summary.totalProfitLoss >= 0 ? 'success' : 'danger'} border-opacity-50 shadow-sm h-100`}>
+              <Card.Body className="d-flex flex-column align-items-center justify-content-center p-3">
+                <div className={`rounded-circle bg-${summary.totalProfitLoss >= 0 ? 'success' : 'danger'} bg-opacity-10 d-flex align-items-center justify-content-center mb-2`} style={{ width: '48px', height: '48px' }}>
+                  <i className={`fas fa-chart-line text-${summary.totalProfitLoss >= 0 ? 'success' : 'danger'}`} style={{ fontSize: '1.25rem' }}></i>
+                </div>
+                <h5 className={`fw-bold mb-1 text-${summary.totalProfitLoss >= 0 ? 'success' : 'danger'}`}>
                   {formatCurrency(summary.totalProfitLoss)}
-                </h6>
-                <small className="text-muted">
+                </h5>
+                <span className="text-muted small">
                   Tổng lãi/lỗ ({summary.avgProfitMargin.toFixed(1)}%)
-                </small>
+                </span>
               </Card.Body>
             </Card>
           </Col>
@@ -185,33 +193,36 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
         
         <Card.Body>
           {/* Filters */}
-          <Row className="mb-3">
+          <Row className="mb-4 g-2 align-items-end">
             <Col md={3}>
               <Form.Group>
-                <Form.Label>Từ ngày</Form.Label>
+                <Form.Label className="small fw-medium text-muted mb-1">Từ ngày</Form.Label>
                 <Form.Control
                   type="date"
                   value={fromDate}
                   onChange={(e) => setFromDate(e.target.value)}
+                  className="shadow-none border-secondary-subtle"
                 />
               </Form.Group>
             </Col>
             <Col md={3}>
               <Form.Group>
-                <Form.Label>Đến ngày</Form.Label>
+                <Form.Label className="small fw-medium text-muted mb-1">Đến ngày</Form.Label>
                 <Form.Control
                   type="date"
                   value={toDate}
                   onChange={(e) => setToDate(e.target.value)}
+                  className="shadow-none border-secondary-subtle"
                 />
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group>
-                <Form.Label>Danh mục</Form.Label>
+                <Form.Label className="small fw-medium text-muted mb-1">Danh mục</Form.Label>
                 <Form.Select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="shadow-none border-secondary-subtle"
                 >
                   <option value="">Tất cả danh mục</option>
                   {categories.map(category => (
@@ -223,23 +234,14 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
               </Form.Group>
             </Col>
             <Col md={2}>
-              <Form.Group>
-                <Form.Label>&nbsp;</Form.Label>
-                <div>
-                  <Button variant="outline-primary" onClick={handleFilter} className="px-3 btn btn-primary"  style={{
-                                  backgroundColor: '#0d6efd',
-                                  borderColor: '#0d6efd',
-                                  color: 'white',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontWeight: 'bold',
-                                  fontSize: '16px'
-                                }}>
-                                <span className="me-1">🔍</span>
-                              </Button>
-                </div>
-              </Form.Group>
+              <Button 
+                variant="primary" 
+                onClick={handleFilter} 
+                className="w-100 d-flex align-items-center justify-content-center shadow-sm"
+                style={{ height: '38px' }}
+              >
+                <i className="fas fa-search me-2"></i> Lọc dữ liệu
+              </Button>
             </Col>
           </Row>
 
@@ -261,81 +263,88 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
                 <Table responsive striped hover>
                   <thead>
                     <tr>
-                      <th>Mã lô hàng</th>
-                      <th>Ngày nhập</th>
-                      <th>Danh mục</th>
-                      <th>SL nhập</th>
-                      <th>SL bán</th>
-                      <th>SL tồn</th>
-                      <th>Tỷ lệ bán</th>
-                      <th>Giá trị nhập</th>
-                      <th>Giá trị bán</th>
-                      <th>Lãi/Lỗ</th>
-                      <th>Tỷ lệ lãi</th>
-                      <th>Trạng thái</th>
-                      <th>Thao tác</th>
+                      <th className="text-nowrap">Mã lô hàng</th>
+                      <th className="text-nowrap">Ngày nhập</th>
+                      <th className="text-nowrap">Danh mục</th>
+                      <th className="text-nowrap text-center">SL nhập</th>
+                      <th className="text-nowrap text-center">SL bán</th>
+                      <th className="text-nowrap text-center">SL tồn</th>
+                      <th className="text-nowrap" style={{ minWidth: '120px' }}>Tỷ lệ bán</th>
+                      <th className="text-nowrap text-end">Giá trị nhập</th>
+                      <th className="text-nowrap text-end">Giá trị bán</th>
+                      <th className="text-nowrap text-end">Lãi/Lỗ</th>
+                      <th className="text-nowrap text-center">Tỷ lệ lãi</th>
+                      <th className="text-nowrap text-center">Trạng thái</th>
+                      <th className="text-nowrap text-center">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
                     {reportData.map((item, index) => (
-                      <tr key={index}>
+                      <tr key={index} className="align-middle">
                         <td>
-                          <code className="text-primary">{item.BatchCode}</code>
+                          <Badge bg="light" text="primary" className="border border-primary-subtle px-2 py-1">
+                            {item.BatchCode}
+                          </Badge>
                         </td>
-                        <td>{formatDate(item.ImportDate)}</td>
+                        <td className="text-nowrap">{formatDate(item.ImportDate)}</td>
                         <td>
-                          <Badge bg="info">{item.CategoryName}</Badge>
+                          <Badge bg="info" className="fw-normal">{item.CategoryName}</Badge>
                         </td>
-                        <td>
+                        <td className="text-center">
                           <span className="fw-bold">{item.TotalQuantity}</span>
                         </td>
-                        <td>
-                          <span className="text-success">{item.TotalSoldQuantity}</span>
+                        <td className="text-center">
+                          <span className="text-success fw-medium">{item.TotalSoldQuantity}</span>
+                        </td>
+                        <td className="text-center">
+                          <Badge bg={item.RemainingQuantity > 0 ? "warning" : "secondary"} text={item.RemainingQuantity > 0 ? "dark" : "white"}>
+                            {item.RemainingQuantity}
+                          </Badge>
                         </td>
                         <td>
-                          <span className="text-warning">{item.RemainingQuantity}</span>
-                        </td>
-                        <td>
-                          <div className="progress" style={{ height: '20px' }}>
+                          <div className="progress shadow-sm" style={{ height: '16px', borderRadius: '8px' }}>
                             <div
                               className={`progress-bar ${getProgressBarColor(item.RemainingQuantity, item.TotalQuantity)}`}
                               style={{ 
-                                width: `${((item.TotalQuantity - item.RemainingQuantity) / item.TotalQuantity) * 100}%` 
+                                width: `${((item.TotalQuantity - item.RemainingQuantity) / item.TotalQuantity) * 100}%`,
+                                fontSize: '10px',
+                                fontWeight: 'bold'
                               }}
                             >
                               {(((item.TotalQuantity - item.RemainingQuantity) / item.TotalQuantity) * 100).toFixed(0)}%
                             </div>
                           </div>
                         </td>
-                        <td>
-                          <small>{formatCurrency(item.TotalImportValue)}</small>
+                        <td className="text-end text-nowrap">
+                          <small className="fw-medium">{formatCurrency(item.TotalImportValue)}</small>
                         </td>
-                        <td>
-                          <small className="text-success">
+                        <td className="text-end text-nowrap">
+                          <small className="text-success fw-bold">
                             {formatCurrency(item.TotalSoldValue)}
                           </small>
                         </td>
-                        <td>
-                          <span className={getProfitLossColor(item.ProfitLoss)}>
+                        <td className="text-end text-nowrap">
+                          <span className={`${getProfitLossColor(item.ProfitLoss)} fw-bold`}>
                             <small>{formatCurrency(item.ProfitLoss)}</small>
                           </span>
                         </td>
-                        <td>
-                          <span className={getProfitLossColor(item.ProfitLoss)}>
-                            <small>{item.ProfitMarginPercent.toFixed(1)}%</small>
-                          </span>
+                        <td className="text-center">
+                          <Badge bg={item.ProfitLoss >= 0 ? "success" : "danger"} className="bg-opacity-75">
+                            {item.ProfitMarginPercent.toFixed(1)}%
+                          </Badge>
                         </td>
-                        <td>{getStatusBadge(item.Status)}</td>
-                        <td>
+                        <td className="text-center">{getStatusBadge(item.Status)}</td>
+                        <td className="text-center align-middle">
                           {onViewBatchDetails && (
                             <Button
-                              variant="outline-warning"
+                              variant="outline-primary"
+                              size="sm"
                               onClick={() => onViewBatchDetails(item.BatchCode)}
-                              className="btn-compact flex-fill"
                               title="Xem chi tiết lô hàng"
+                              className="d-inline-flex align-items-center justify-content-center text-nowrap px-3"
+                              style={{ height: '32px' }}
                             >
-                              <span className="me-1">👁️</span>
-                              Chi tiết
+                              <i className="fas fa-eye me-2"></i>Chi tiết
                             </Button>
                           )}
                         </td>
