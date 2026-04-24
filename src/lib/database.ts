@@ -1,18 +1,22 @@
 // Database connection configuration
 import sql from 'mssql';
 
+const dbServer = process.env.DB_SERVER || '112.78.2.70';
+const isIpAddress = /^\d{1,3}(?:\.\d{1,3}){3}$/.test(dbServer);
+
 const config: sql.config = {
   user: process.env.DB_USER || 'zen50558_ManagementStore',
   password: process.env.DB_PASSWORD || 'Passwordla@123',
-  server: process.env.DB_SERVER || '112.78.2.70',
+  server: dbServer,
   port: parseInt(process.env.DB_PORT || '1433'),
   database: process.env.DB_NAME || 'zen50558_ManagementStore',
   options: {
-    encrypt: process.env.DB_ENCRYPT === 'true',  // Use environment variable
+    encrypt: process.env.DB_ENCRYPT === 'true',
     trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
+    ...(isIpAddress ? { serverName: undefined } : {}),
     enableArithAbort: true,
-    requestTimeout: 15000,  // Reduced from 30s
-    connectTimeout: 10000  // Fixed: was connectionTimeout, should be connectTimeout
+    requestTimeout: 15000,
+    connectTimeout: 10000
   },
   pool: {
     max: 5,  // Reduced from 10
