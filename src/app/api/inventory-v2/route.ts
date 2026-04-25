@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeProcedure, executeQuery } from '@/lib/database';
+import { executeQuery } from '@/lib/database';
 import { ApiResponse } from '@/types/warehouse';
 
 export const dynamic = 'force-dynamic';
@@ -44,125 +44,95 @@ export async function GET(request: NextRequest) {
     const toDate = searchParams.get('toDate');
     const categoryId = searchParams.get('categoryId');
     
-    let result: InventoryReportV2[];
+    // Luôn dùng direct query để tính toán từ CRM_Products (source of truth)
+    // Không dùng stored procedure vì có thể bị stale
+    let whereClause = 'WHERE 1=1';
+    const params: any = {};
 
-    try {
-      // Gọi stored procedure để lấy báo cáo tồn kho
-      result = await executeProcedure<InventoryReportV2>('SP_CRM_GetInventoryReport', {
-        FromDate: fromDate || null,
-        ToDate: toDate || null,
-        CategoryID: categoryId ? parseInt(categoryId) : null
-      });
-    } catch (procError) {
-      console.error('SP_CRM_GetInventoryReport failed, attempting to create procedure:', procError);
-
-      try {
-        await executeQuery(`
-          IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'SP_CRM_GetInventoryReport')
-          DROP PROCEDURE SP_CRM_GetInventoryReport
-        `);
-
-        await executeQuery(`
-          CREATE PROCEDURE SP_CRM_GetInventoryReport
-            @FromDate DATE = NULL,
-            @ToDate DATE = NULL,
-            @CategoryID INT = NULL
-          AS
-          BEGIN
-            SET NOCOUNT ON;
-
-            SELECT
-              b.BatchCode,
-              b.ImportDate,
-              c.CategoryName,
-              b.TotalQuantity,
-              b.TotalImportValue,
-              b.TotalSoldQuantity,
-              b.TotalSoldValue,
-              b.RemainingQuantity,
-              b.TotalImportValue / NULLIF(b.TotalQuantity, 0) as AvgImportPrice,
-              CASE
-                WHEN b.TotalSoldQuantity > 0
-                THEN b.TotalSoldValue / b.TotalSoldQuantity
-                ELSE 0
-              END as AvgSalePrice,
-              b.ProfitLoss,
-              CASE
-                WHEN b.TotalImportValue > 0
-                THEN (b.ProfitLoss / b.TotalImportValue) * 100
-                ELSE 0
-              END as ProfitMarginPercent,
-              b.Status,
-              b.CreatedAt
-            FROM CRM_ImportBatches b
-            INNER JOIN CRM_Categories c ON b.CategoryID = c.CategoryID
-            WHERE
-              (@FromDate IS NULL OR b.ImportDate >= @FromDate)
-              AND (@ToDate IS NULL OR b.ImportDate <= @ToDate)
-              AND (@CategoryID IS NULL OR b.CategoryID = @CategoryID)
-            ORDER BY b.ImportDate DESC, b.CreatedAt DESC;
-          END
-        `);
-
-        console.log('SP_CRM_GetInventoryReport created successfully, retrying...');
-
-        result = await executeProcedure<InventoryReportV2>('SP_CRM_GetInventoryReport', {
-          FromDate: fromDate || null,
-          ToDate: toDate || null,
-          CategoryID: categoryId ? parseInt(categoryId) : null
-        });
-      } catch (updateError) {
-        console.error('Failed to create SP_CRM_GetInventoryReport, fallback to direct query:', updateError);
-
-        let whereClause = 'WHERE 1=1';
-        const params: any = {};
-
-        if (fromDate) {
-          whereClause += ' AND b.ImportDate >= @fromDate';
-          params.fromDate = fromDate;
-        }
-
-        if (toDate) {
-          whereClause += ' AND b.ImportDate <= @toDate';
-          params.toDate = toDate;
-        }
-
-        if (categoryId) {
-          whereClause += ' AND b.CategoryID = @categoryId';
-          params.categoryId = parseInt(categoryId);
-        }
-
-        result = await executeQuery<InventoryReportV2>(`
-          SELECT
-            b.BatchCode,
-            b.ImportDate,
-            c.CategoryName,
-            b.TotalQuantity,
-            b.TotalImportValue,
-            b.TotalSoldQuantity,
-            b.TotalSoldValue,
-            b.RemainingQuantity,
-            b.TotalImportValue / NULLIF(b.TotalQuantity, 0) as AvgImportPrice,
-            CASE
-              WHEN b.TotalSoldQuantity > 0
-              THEN b.TotalSoldValue / b.TotalSoldQuantity
-              ELSE 0
-            END as AvgSalePrice,
-            b.ProfitLoss,
-            CASE
-              WHEN b.TotalImportValue > 0
-              THEN (b.ProfitLoss / b.TotalImportValue) * 100
-              ELSE 0
-            END as ProfitMarginPercent,
-            b.Status,
-            b.CreatedAt
-          FROM CRM_ImportBatches b
-          INNER JOIN CRM_Categories c ON b.CategoryID = c.CategoryID
-          ${whereClause}
-          ORDER BY b.ImportDate DESC, b.CreatedAt DESC
-        `, params);
-      }
+    if (fromDate) {
+      whereClause += ' AND b.ImportDate >= @fromDate';
+      params.fromDate = fromDate;
     }
+
+    if (toDate) {
+      whereClause += ' AND b.ImportDate <= @toDate';
+      params.toDate = toDate;
+    }
+
+    if (categoryId) {
+      whereClause += ' AND b.CategoryID = @categoryId';
+      params.categoryId = parseInt(categoryId);
+    }
+
+    const result = await executeQuery<InventoryReportV2>(`
+      SELECT
+        b.BatchCode,
+        b.ImportDate,
+        c.CategoryName,
+        b.TotalQuantity,
+        b.TotalImportValue,
+        ISNULL((
+          SELECT COUNT(*)
+          FROM CRM_Products p
+          WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+        ), 0) as TotalSoldQuantity,
+        ISNULL((
+          SELECT SUM(ISNULL(p.SalePrice, 0))
+          FROM CRM_Products p
+          WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+        ), 0) as TotalSoldValue,
+        (b.TotalQuantity - ISNULL((
+          SELECT COUNT(*)
+          FROM CRM_Products p
+          WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+        ), 0)) as RemainingQuantity,
+        b.TotalImportValue / NULLIF(b.TotalQuantity, 0) as AvgImportPrice,
+        CASE
+          WHEN ISNULL((
+            SELECT COUNT(*)
+            FROM CRM_Products p
+            WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+          ), 0) > 0
+          THEN ISNULL((
+            SELECT SUM(ISNULL(p.SalePrice, 0))
+            FROM CRM_Products p
+            WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+          ), 0) / NULLIF((
+            SELECT COUNT(*)
+            FROM CRM_Products p
+            WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+          ), 0)
+          ELSE 0
+        END as AvgSalePrice,
+        (ISNULL((
+          SELECT SUM(ISNULL(p.SalePrice, 0))
+          FROM CRM_Products p
+          WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+        ), 0) - ISNULL((
+          SELECT SUM(ISNULL(p.ImportPrice, 0))
+          FROM CRM_Products p
+          WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+        ), 0)) as ProfitLoss,
+        CASE
+          WHEN b.TotalImportValue > 0
+          THEN ((ISNULL((
+            SELECT SUM(ISNULL(p.SalePrice, 0))
+            FROM CRM_Products p
+            WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+          ), 0) - ISNULL((
+            SELECT SUM(ISNULL(p.ImportPrice, 0))
+            FROM CRM_Products p
+            WHERE p.BatchID = b.BatchID AND p.Status = 'SOLD'
+          ), 0)) / b.TotalImportValue) * 100
+          ELSE 0
+        END as ProfitMarginPercent,
+        b.Status,
+        b.CreatedAt
+      FROM CRM_ImportBatches b
+      INNER JOIN CRM_Categories c ON b.CategoryID = c.CategoryID
+      ${whereClause}
+      ORDER BY b.ImportDate DESC, b.CreatedAt DESC
+    `, params);
     
     // Tính toán thống kê tổng quan
     const summary = {
@@ -209,6 +179,7 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
 
 
 
