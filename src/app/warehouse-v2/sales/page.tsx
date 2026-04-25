@@ -83,13 +83,11 @@ const SalesPage: React.FC = () => {
     fetchRecentSales();
   };
 
-  const handleQrImeiPaymentSuccess = useCallback(() => {
-    setRefreshKey((prev) => prev + 1);
-    setShowSellForm(false);
-    setSelectedProduct(null);
+  const handleProductFound = useCallback((product: any) => {
+    setSelectedProduct(product);
     setShowQrImeiSubmenu(false);
-    fetchRecentSales();
-  }, [fetchRecentSales]);
+    setShowSellForm(true);
+  }, []);
 
   React.useEffect(() => {
     fetchRecentSales();
@@ -325,7 +323,7 @@ const SalesPage: React.FC = () => {
           <QrImeiPaymentSubmenu
             isOpen={showQrImeiSubmenu}
             onClose={() => setShowQrImeiSubmenu(false)}
-            onPaymentSuccess={handleQrImeiPaymentSuccess}
+            onProductFound={handleProductFound}
           />
 
           <InvoicePrint show={showInvoice} onHide={() => setShowInvoice(false)} invoiceData={invoiceData} />
