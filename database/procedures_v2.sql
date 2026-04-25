@@ -41,9 +41,10 @@ CREATE PROCEDURE SP_CRM_CreateImportBatch
     @CategoryID INT,
     @ImportDate DATE,
     @TotalQuantity INT,
+    @ImportPrice DECIMAL(18,2) = NULL,
     @TotalImportValue DECIMAL(18,2),
     @Notes NVARCHAR(1000) = NULL,
-    @CreatedBy NVARCHAR(100)
+    @CreatedBy NVARCHAR(100) = 'system'
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -61,21 +62,68 @@ BEGIN
         SET @BatchCode = dbo.FN_CRM_GenerateBatchCode();
     END
 
-    -- Tạo lô hàng
-    INSERT INTO CRM_ImportBatches (
-        BatchCode, ImportDate, CategoryID, TotalQuantity,
-        TotalImportValue, Notes, CreatedBy
-    )
-    VALUES (
-        @BatchCode, @ImportDate, @CategoryID, @TotalQuantity,
-        @TotalImportValue, @Notes, @CreatedBy
-    );
+    -- Tính ImportPrice nếu không được cung cấp
+    IF @ImportPrice IS NULL AND @TotalQuantity > 0
+    BEGIN
+        SET @ImportPrice = @TotalImportValue / @TotalQuantity;
+    END
 
-    SET @BatchID = SCOPE_IDENTITY();
+    -- Kiểm tra xem BatchID có IDENTITY không
+    DECLARE @HasIdentity BIT;
+    SELECT @HasIdentity = CASE WHEN COLUMNPROPERTY(OBJECT_ID('CRM_ImportBatches'), 'BatchID', 'IsIdentity') = 1 THEN 1 ELSE 0 END;
+
+    IF @HasIdentity = 0
+    BEGIN
+        -- Nếu không có IDENTITY, tạo BatchID thủ công
+        SELECT @BatchID = ISNULL(MAX(BatchID), 0) + 1 FROM CRM_ImportBatches;
+        
+        -- Insert với BatchID thủ công
+        INSERT INTO CRM_ImportBatches (
+            BatchID, BatchCode, ImportDate, CategoryID, TotalQuantity,
+            ImportPrice, TotalImportValue, TotalSoldQuantity, TotalSoldValue,
+            Status, Notes, CreatedBy, CreatedAt, UpdatedAt
+        )
+        VALUES (
+            @BatchID, @BatchCode, @ImportDate, @CategoryID, @TotalQuantity,
+            @ImportPrice, @TotalImportValue, 0, 0,
+            'ACTIVE', @Notes, @CreatedBy, GETDATE(), GETDATE()
+        );
+    END
+    ELSE
+    BEGIN
+        -- Nếu có IDENTITY, insert bình thường
+        INSERT INTO CRM_ImportBatches (
+            BatchCode, ImportDate, CategoryID, TotalQuantity,
+            ImportPrice, TotalImportValue, TotalSoldQuantity, TotalSoldValue,
+            Status, Notes, CreatedBy, CreatedAt, UpdatedAt
+        )
+        VALUES (
+            @BatchCode, @ImportDate, @CategoryID, @TotalQuantity,
+            @ImportPrice, @TotalImportValue, 0, 0,
+            'ACTIVE', @Notes, @CreatedBy, GETDATE(), GETDATE()
+        );
+        
+        SET @BatchID = SCOPE_IDENTITY();
+    END
 
     -- Trả về thông tin lô hàng vừa tạo
     SELECT
-        b.*,
+        b.BatchID,
+        b.BatchCode,
+        b.ImportDate,
+        b.CategoryID,
+        b.TotalQuantity,
+        b.ImportPrice,
+        b.TotalImportValue,
+        b.TotalSoldQuantity,
+        b.TotalSoldValue,
+        b.RemainingQuantity,
+        b.ProfitLoss,
+        b.Status,
+        b.Notes,
+        b.CreatedBy,
+        b.CreatedAt,
+        b.UpdatedAt,
         c.CategoryName
     FROM CRM_ImportBatches b
     LEFT JOIN CRM_Categories c ON b.CategoryID = c.CategoryID
@@ -94,6 +142,8 @@ BEGIN
     SET NOCOUNT ON;
 
     DECLARE @CategoryID INT;
+    DECLARE @ProductID INT;
+    DECLARE @HasIdentity BIT;
 
     -- Lấy CategoryID từ lô hàng
     SELECT @CategoryID = CategoryID
@@ -113,16 +163,33 @@ BEGIN
         RETURN;
     END
 
-    -- Thêm sản phẩm
-    INSERT INTO CRM_Products (
-        BatchID, CategoryID, ProductName, IMEI, ImportPrice, Notes
-    )
-    VALUES (
-        @BatchID, @CategoryID, @ProductName, @IMEI, @ImportPrice, @Notes
-    );
+    SELECT @HasIdentity = CASE WHEN COLUMNPROPERTY(OBJECT_ID('CRM_Products'), 'ProductID', 'IsIdentity') = 1 THEN 1 ELSE 0 END;
+
+    IF @HasIdentity = 0
+    BEGIN
+        SELECT @ProductID = ISNULL(MAX(ProductID), 0) + 1 FROM CRM_Products;
+
+        INSERT INTO CRM_Products (
+            ProductID, BatchID, CategoryID, ProductName, IMEI, ImportPrice, Notes, CreatedAt, UpdatedAt
+        )
+        VALUES (
+            @ProductID, @BatchID, @CategoryID, @ProductName, @IMEI, @ImportPrice, @Notes, GETDATE(), GETDATE()
+        );
+    END
+    ELSE
+    BEGIN
+        INSERT INTO CRM_Products (
+            BatchID, CategoryID, ProductName, IMEI, ImportPrice, Notes, CreatedAt, UpdatedAt
+        )
+        VALUES (
+            @BatchID, @CategoryID, @ProductName, @IMEI, @ImportPrice, @Notes, GETDATE(), GETDATE()
+        );
+
+        SET @ProductID = SCOPE_IDENTITY();
+    END
 
     -- Trả về thông tin sản phẩm vừa tạo
-    SELECT * FROM CRM_Products WHERE ProductID = SCOPE_IDENTITY();
+    SELECT * FROM CRM_Products WHERE ProductID = @ProductID;
 END;
 
 -- Stored Procedure: Lấy danh sách sản phẩm còn hàng để bán

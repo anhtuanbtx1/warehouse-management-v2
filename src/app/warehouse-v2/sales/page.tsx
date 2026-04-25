@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Container, Row, Col, Breadcrumb, Tabs, Tab, Card, Table, Badge } from 'react-bootstrap';
 import ProductListV2 from '@/components/warehouse-v2/ProductListV2';
 import SellProductForm from '@/components/warehouse-v2/SellProductForm';
+import QrImeiPaymentSubmenu from '@/components/warehouse-v2/QrImeiPaymentSubmenu';
 import InvoicePrint from '@/components/warehouse-v2/InvoicePrint';
 
 interface ProductV2 {
@@ -45,6 +46,7 @@ interface SalesInvoice {
 
 const SalesPage: React.FC = () => {
   const [showSellForm, setShowSellForm] = useState(false);
+  const [showQrImeiSubmenu, setShowQrImeiSubmenu] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductV2 | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState('available');
@@ -62,14 +64,7 @@ const SalesPage: React.FC = () => {
     setSelectedProduct(null);
   };
 
-  const handleSellSuccess = () => {
-    setRefreshKey((prev) => prev + 1);
-    setShowSellForm(false);
-    setSelectedProduct(null);
-    fetchRecentSales();
-  };
-
-  const fetchRecentSales = async () => {
+  const fetchRecentSales = useCallback(async () => {
     try {
       const response = await fetch('/api/sales?limit=10');
       const result = await response.json();
@@ -79,11 +74,26 @@ const SalesPage: React.FC = () => {
     } catch (error) {
       console.error('Error fetching recent sales:', error);
     }
+  }, []);
+
+  const handleSellSuccess = () => {
+    setRefreshKey((prev) => prev + 1);
+    setShowSellForm(false);
+    setSelectedProduct(null);
+    fetchRecentSales();
   };
+
+  const handleQrImeiPaymentSuccess = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+    setShowSellForm(false);
+    setSelectedProduct(null);
+    setShowQrImeiSubmenu(false);
+    fetchRecentSales();
+  }, [fetchRecentSales]);
 
   React.useEffect(() => {
     fetchRecentSales();
-  }, []);
+  }, [fetchRecentSales]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -188,6 +198,16 @@ const SalesPage: React.FC = () => {
                 <h2 className="mb-1">Quản lý bán hàng</h2>
                 <p>Bán sản phẩm đang có sẵn và theo dõi giao dịch gần đây trong cùng một màn hình.</p>
               </div>
+            </div>
+            <div className="d-flex flex-wrap gap-2 mt-3 mt-lg-0">
+              <button
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={() => setShowQrImeiSubmenu(true)}
+              >
+                <i className="fas fa-qrcode me-2" aria-hidden="true"></i>
+                Thanh toán IMEI QR
+              </button>
             </div>
           </section>
 
@@ -301,6 +321,12 @@ const SalesPage: React.FC = () => {
           </Tabs>
 
           <SellProductForm show={showSellForm} onHide={handleCloseSellForm} onSuccess={handleSellSuccess} product={selectedProduct} />
+
+          <QrImeiPaymentSubmenu
+            isOpen={showQrImeiSubmenu}
+            onClose={() => setShowQrImeiSubmenu(false)}
+            onPaymentSuccess={handleQrImeiPaymentSuccess}
+          />
 
           <InvoicePrint show={showInvoice} onHide={() => setShowInvoice(false)} invoiceData={invoiceData} />
         </Col>

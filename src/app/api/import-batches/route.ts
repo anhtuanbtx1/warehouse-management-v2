@@ -135,11 +135,13 @@ export async function GET(request: NextRequest) {
 
 // POST /api/import-batches - Tạo lô hàng mới
 export async function POST(request: NextRequest) {
+  let body: CreateImportBatchRequest | null = null;
+  
   try {
-    const body: CreateImportBatchRequest = await request.json();
+    body = await request.json();
 
     // Validate required fields
-    if (!body.CategoryID || !body.ImportDate || !body.TotalQuantity || !body.TotalImportValue) {
+    if (!body || !body.CategoryID || !body.ImportDate || !body.TotalQuantity || !body.TotalImportValue) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
         { status: 400 }
@@ -156,16 +158,180 @@ export async function POST(request: NextRequest) {
     // Calculate ImportPrice if not provided
     const importPrice = body.ImportPrice || (body.TotalImportValue / body.TotalQuantity);
 
-    // Tạo lô hàng bằng stored procedure
-    const result = await executeProcedure<ImportBatch>('SP_CRM_CreateImportBatch', {
-      CategoryID: body.CategoryID,
-      ImportDate: body.ImportDate,
-      TotalQuantity: body.TotalQuantity,
-      ImportPrice: importPrice,
-      TotalImportValue: body.TotalImportValue,
-      Notes: body.Notes || null,
-      CreatedBy: 'system' // TODO: Get from auth
-    });
+    let result: ImportBatch[];
+    
+    try {
+      // Tạo lô hàng bằng stored procedure
+      result = await executeProcedure<ImportBatch>('SP_CRM_CreateImportBatch', {
+        CategoryID: body.CategoryID,
+        ImportDate: body.ImportDate,
+        TotalQuantity: body.TotalQuantity,
+        ImportPrice: importPrice,
+        TotalImportValue: body.TotalImportValue,
+        Notes: body.Notes || null,
+        CreatedBy: 'system' // TODO: Get from auth
+      });
+    } catch (procError) {
+      console.error('Stored procedure error, attempting to update procedure:', procError);
+      
+      // Nếu procedure lỗi, thử cập nhật procedure rồi thử lại
+      try {
+        // Drop existing procedure
+        await executeQuery(`
+          IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'SP_CRM_CreateImportBatch')
+          DROP PROCEDURE SP_CRM_CreateImportBatch
+        `);
+
+        // Create updated procedure with ImportPrice support and BatchID fallback
+        await executeQuery(`
+          CREATE PROCEDURE SP_CRM_CreateImportBatch
+            @CategoryID INT,
+            @ImportDate DATE,
+            @TotalQuantity INT,
+            @ImportPrice DECIMAL(18,2) = NULL,
+            @TotalImportValue DECIMAL(18,2),
+            @Notes NVARCHAR(1000) = NULL,
+            @CreatedBy NVARCHAR(100) = 'system'
+          AS
+          BEGIN
+            SET NOCOUNT ON;
+
+            DECLARE @BatchCode NVARCHAR(50);
+            DECLARE @BatchID INT;
+            DECLARE @HasIdentity BIT;
+
+            SET @BatchCode = 'LOT' + FORMAT(GETDATE(), 'yyyyMMddHHmmss');
+
+            WHILE EXISTS(SELECT 1 FROM CRM_ImportBatches WHERE BatchCode = @BatchCode)
+            BEGIN
+              WAITFOR DELAY '00:00:01';
+              SET @BatchCode = 'LOT' + FORMAT(GETDATE(), 'yyyyMMddHHmmss');
+            END
+
+            IF @ImportPrice IS NULL AND @TotalQuantity > 0
+            BEGIN
+              SET @ImportPrice = @TotalImportValue / @TotalQuantity;
+            END
+
+            SELECT @HasIdentity = CASE
+              WHEN COLUMNPROPERTY(OBJECT_ID('CRM_ImportBatches'), 'BatchID', 'IsIdentity') = 1 THEN 1
+              ELSE 0
+            END;
+
+            IF @HasIdentity = 0
+            BEGIN
+              SELECT @BatchID = ISNULL(MAX(BatchID), 0) + 1 FROM CRM_ImportBatches;
+
+              INSERT INTO CRM_ImportBatches (
+                BatchID,
+                BatchCode,
+                ImportDate,
+                CategoryID,
+                TotalQuantity,
+                ImportPrice,
+                TotalImportValue,
+                TotalSoldQuantity,
+                TotalSoldValue,
+                Status,
+                Notes,
+                CreatedBy,
+                CreatedAt,
+                UpdatedAt
+              )
+              VALUES (
+                @BatchID,
+                @BatchCode,
+                @ImportDate,
+                @CategoryID,
+                @TotalQuantity,
+                @ImportPrice,
+                @TotalImportValue,
+                0,
+                0,
+                'ACTIVE',
+                @Notes,
+                @CreatedBy,
+                GETDATE(),
+                GETDATE()
+              );
+            END
+            ELSE
+            BEGIN
+              INSERT INTO CRM_ImportBatches (
+                BatchCode,
+                ImportDate,
+                CategoryID,
+                TotalQuantity,
+                ImportPrice,
+                TotalImportValue,
+                TotalSoldQuantity,
+                TotalSoldValue,
+                Status,
+                Notes,
+                CreatedBy,
+                CreatedAt,
+                UpdatedAt
+              )
+              VALUES (
+                @BatchCode,
+                @ImportDate,
+                @CategoryID,
+                @TotalQuantity,
+                @ImportPrice,
+                @TotalImportValue,
+                0,
+                0,
+                'ACTIVE',
+                @Notes,
+                @CreatedBy,
+                GETDATE(),
+                GETDATE()
+              );
+
+              SET @BatchID = SCOPE_IDENTITY();
+            END
+
+            SELECT 
+              b.BatchID,
+              b.BatchCode,
+              b.ImportDate,
+              b.CategoryID,
+              b.TotalQuantity,
+              b.ImportPrice,
+              b.TotalImportValue,
+              b.TotalSoldQuantity,
+              b.TotalSoldValue,
+              b.RemainingQuantity,
+              b.ProfitLoss,
+              b.Status,
+              b.Notes,
+              b.CreatedBy,
+              b.CreatedAt,
+              b.UpdatedAt,
+              c.CategoryName
+            FROM CRM_ImportBatches b
+            LEFT JOIN CRM_Categories c ON b.CategoryID = c.CategoryID
+            WHERE b.BatchID = @BatchID;
+          END
+        `);
+
+        console.log('Procedure updated successfully, retrying batch creation...');
+
+        // Retry with updated procedure
+        result = await executeProcedure<ImportBatch>('SP_CRM_CreateImportBatch', {
+          CategoryID: body.CategoryID,
+          ImportDate: body.ImportDate,
+          TotalQuantity: body.TotalQuantity,
+          ImportPrice: importPrice,
+          TotalImportValue: body.TotalImportValue,
+          Notes: body.Notes || null,
+          CreatedBy: 'system'
+        });
+      } catch (updateError) {
+        console.error('Failed to update procedure and retry:', updateError);
+        throw procError; // Throw original error
+      }
+    }
 
     // Kiểm tra xem danh mục có phải là "Cáp sạc" không
     const categoryInfo = await executeQuery<{CategoryName: string}>(
@@ -188,12 +354,34 @@ export async function POST(request: NextRequest) {
 
         try {
           await executeQuery(`
-            INSERT INTO CRM_Products (
-              BatchID, CategoryID, ProductName, IMEI, ImportPrice, Status, Notes, CreatedAt
-            )
-            VALUES (
-              @batchId, @categoryId, @productName, @productCode, @importPrice, 'IN_STOCK', @notes, GETDATE()
-            )
+            DECLARE @HasIdentity BIT;
+            DECLARE @ProductID INT;
+
+            SELECT @HasIdentity = CASE
+              WHEN COLUMNPROPERTY(OBJECT_ID('CRM_Products'), 'ProductID', 'IsIdentity') = 1 THEN 1
+              ELSE 0
+            END;
+
+            IF @HasIdentity = 0
+            BEGIN
+              SELECT @ProductID = ISNULL(MAX(ProductID), 0) + 1 FROM CRM_Products;
+
+              INSERT INTO CRM_Products (
+                ProductID, BatchID, CategoryID, ProductName, IMEI, ImportPrice, Status, Notes, CreatedAt, UpdatedAt
+              )
+              VALUES (
+                @ProductID, @batchId, @categoryId, @productName, @productCode, @importPrice, 'IN_STOCK', @notes, GETDATE(), GETDATE()
+              );
+            END
+            ELSE
+            BEGIN
+              INSERT INTO CRM_Products (
+                BatchID, CategoryID, ProductName, IMEI, ImportPrice, Status, Notes, CreatedAt, UpdatedAt
+              )
+              VALUES (
+                @batchId, @categoryId, @productName, @productCode, @importPrice, 'IN_STOCK', @notes, GETDATE(), GETDATE()
+              );
+            END
           `, {
             batchId: batchId,
             categoryId: body.CategoryID,
@@ -225,16 +413,87 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating import batch:', error);
 
+    // Log chi tiết lỗi
+    const errorDetails = {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+      body: body,
+      timestamp: new Date().toISOString()
+    };
+    
+    console.error('Import batch creation error details:', JSON.stringify(errorDetails, null, 2));
+
     // Handle specific SQL errors
-    if (error instanceof Error && error.message.includes('Lô hàng không tồn tại')) {
+    if (error instanceof Error) {
+      // Lỗi category không tồn tại
+      if (error.message.includes('Lô hàng không tồn tại')) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Category not found',
+            details: errorDetails.message,
+            sqlError: error.message
+          },
+          { status: 404 }
+        );
+      }
+
+      // Lỗi NULL constraint
+      if (error.message.includes('Cannot insert the value NULL') || 
+          error.message.includes('does not allow nulls')) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Database constraint violation',
+            details: 'Cột BatchID không cho phép NULL. Vui lòng kiểm tra cấu trúc bảng CRM_ImportBatches có IDENTITY(1,1) trên cột BatchID.',
+            sqlError: error.message,
+            suggestion: 'Chạy: ALTER TABLE CRM_ImportBatches ALTER COLUMN BatchID INT NOT NULL; hoặc thêm IDENTITY nếu chưa có.'
+          },
+          { status: 500 }
+        );
+      }
+
+      // Lỗi permission
+      if (error.message.includes('permission') || 
+          error.message.includes('denied') ||
+          error.message.includes('CREATE PROCEDURE')) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Database permission error',
+            details: 'User không có quyền DROP/CREATE PROCEDURE. Vui lòng chạy script database/procedures_v2.sql thủ công.',
+            sqlError: error.message
+          },
+          { status: 500 }
+        );
+      }
+
+      // Trả về lỗi chi tiết hơn cho các lỗi khác
       return NextResponse.json(
-        { success: false, error: 'Category not found' },
-        { status: 404 }
+        { 
+          success: false, 
+          error: 'Failed to create import batch',
+          details: errorDetails.message,
+          errorType: errorDetails.name,
+          sqlError: error.message,
+          requestBody: body ? {
+            CategoryID: body.CategoryID,
+            ImportDate: body.ImportDate,
+            TotalQuantity: body.TotalQuantity,
+            TotalImportValue: body.TotalImportValue
+          } : null
+        },
+        { status: 500 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Failed to create import batch' },
+      { 
+        success: false, 
+        error: 'Failed to create import batch',
+        details: 'Unknown error occurred'
+      },
       { status: 500 }
     );
   }
