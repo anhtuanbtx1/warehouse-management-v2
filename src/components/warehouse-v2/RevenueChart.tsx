@@ -6,6 +6,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 
 interface RevenueChartData {
   date: string;
+  month?: string;
   revenue: number;
   profit: number;
   orders: number;
@@ -19,14 +20,31 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ className }) => {
   const [data, setData] = useState<RevenueChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'days' | 'months'>('days');
   const [period, setPeriod] = useState<number>(30);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
 
-  const fetchData = async (days: number) => {
+  useEffect(() => {
+    // Generate available years (current year and 2 years back)
+    const currentYear = new Date().getFullYear();
+    const years = [currentYear - 2, currentYear - 1, currentYear];
+    setAvailableYears(years);
+  }, []);
+
+  const fetchData = async (days?: number, year?: number) => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/dashboard/revenue-chart?days=${days}`);
+      let url = '/api/dashboard/revenue-chart?';
+      if (viewMode === 'days' && days) {
+        url += `days=${days}`;
+      } else if (viewMode === 'months' && year) {
+        url += `year=${year}`;
+      }
+      
+      const response = await fetch(url);
       const result = await response.json();
       
       if (result.success) {
@@ -43,8 +61,12 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ className }) => {
   };
 
   useEffect(() => {
-    fetchData(period);
-  }, [period]);
+    if (viewMode === 'days') {
+      fetchData(period);
+    } else {
+      fetchData(undefined, selectedYear);
+    }
+  }, [viewMode, period, selectedYear]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -56,6 +78,11 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ className }) => {
   };
 
   const formatDate = (dateStr: string) => {
+    if (viewMode === 'months') {
+      const monthNumber = parseInt(dateStr, 10);
+      return `Tháng ${monthNumber}`;
+    }
+
     const date = new Date(dateStr);
     return date.toLocaleDateString('vi-VN', {
       timeZone: 'Asia/Ho_Chi_Minh',
@@ -87,31 +114,63 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ className }) => {
 
   return (
     <Card className={className}>
-      <Card.Header className="d-flex justify-content-between align-items-center">
+      <Card.Header className="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 className="mb-0">
           <span className="me-2">📈</span>
           Biểu đồ doanh thu
         </h5>
-        <ButtonGroup size="sm">
-          <Button 
-            variant={period === 7 ? "primary" : "outline-primary"}
-            onClick={() => setPeriod(7)}
-          >
-            7 ngày
-          </Button>
-          <Button 
-            variant={period === 30 ? "primary" : "outline-primary"}
-            onClick={() => setPeriod(30)}
-          >
-            30 ngày
-          </Button>
-          <Button 
-            variant={period === 90 ? "primary" : "outline-primary"}
-            onClick={() => setPeriod(90)}
-          >
-            90 ngày
-          </Button>
-        </ButtonGroup>
+        <div className="d-flex align-items-center gap-2 flex-wrap">
+          <ButtonGroup size="sm">
+            <Button
+              variant={viewMode === 'days' ? 'primary' : 'outline-primary'}
+              onClick={() => setViewMode('days')}
+            >
+              Theo ngày
+            </Button>
+            <Button
+              variant={viewMode === 'months' ? 'primary' : 'outline-primary'}
+              onClick={() => setViewMode('months')}
+            >
+              Theo tháng
+            </Button>
+          </ButtonGroup>
+
+          {viewMode === 'days' ? (
+            <ButtonGroup size="sm">
+              <Button 
+                variant={period === 7 ? "primary" : "outline-primary"}
+                onClick={() => setPeriod(7)}
+              >
+                7 ngày
+              </Button>
+              <Button 
+                variant={period === 30 ? "primary" : "outline-primary"}
+                onClick={() => setPeriod(30)}
+              >
+                30 ngày
+              </Button>
+              <Button 
+                variant={period === 90 ? "primary" : "outline-primary"}
+                onClick={() => setPeriod(90)}
+              >
+                90 ngày
+              </Button>
+            </ButtonGroup>
+          ) : (
+            <select
+              className="form-select form-select-sm"
+              style={{ width: 'auto' }}
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
+            >
+              {availableYears.map((year) => (
+                <option key={year} value={year}>
+                  Năm {year}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
       </Card.Header>
       
       <Card.Body>
@@ -155,7 +214,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ className }) => {
                 <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
-                    dataKey="date" 
+                    dataKey={viewMode === 'months' ? 'month' : 'date'}
                     tickFormatter={formatDate}
                     tick={{ fontSize: 12 }}
                   />
