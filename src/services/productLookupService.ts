@@ -53,7 +53,11 @@ export const pickExactImeiMatch = (
 };
 
 export class ProductLookupService {
-  constructor(private readonly fetcher: ProductLookupFetcher = fetch as ProductLookupFetcher) {}
+  private readonly fetcher: ProductLookupFetcher;
+
+  constructor(fetcher?: ProductLookupFetcher) {
+    this.fetcher = fetcher || (fetch.bind(globalThis) as ProductLookupFetcher);
+  }
 
   async lookupProductByImei(imei: string): Promise<LookupProductByImeiResponse> {
     const normalizedImei = normalizeLookupImei(imei);
