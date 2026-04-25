@@ -41,29 +41,6 @@ const quickActions = [
   },
 ];
 
-const systemHighlights = [
-  {
-    icon: 'fas fa-mobile-screen-button',
-    title: 'Quản lý theo IMEI',
-    description: 'Theo dõi từng máy và lịch sử giao dịch chi tiết.',
-  },
-  {
-    icon: 'fas fa-layer-group',
-    title: 'Quản lý theo lô',
-    description: 'Đối chiếu nhập, bán và lợi nhuận trên từng đợt hàng.',
-  },
-  {
-    icon: 'fas fa-chart-line',
-    title: 'Báo cáo thời gian thực',
-    description: 'Số liệu dashboard đồng bộ theo doanh thu và lợi nhuận.',
-  },
-  {
-    icon: 'fas fa-file-invoice',
-    title: 'Hóa đơn tự động',
-    description: 'In hóa đơn bán hàng ngay từ danh sách giao dịch.',
-  },
-];
-
 const WarehouseV2Dashboard: React.FC = () => {
   const { stats, loading: statsLoading, error: statsError, refetch: refetchStats, timezoneDebug } = useDashboardStats();
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
@@ -340,26 +317,6 @@ const WarehouseV2Dashboard: React.FC = () => {
             </div>
           </Col>
         </Row>
-
-        <div className={styles.systemInfoCard}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <h5>Năng lực hệ thống</h5>
-              <p>Những nhóm chức năng chính hỗ trợ vận hành kho hàng mỗi ngày.</p>
-            </div>
-          </div>
-          <Row className="g-3">
-            {systemHighlights.map((item) => (
-              <Col md={6} xl={3} key={item.title}>
-                <div className={styles.systemInfoItem}>
-                  <span className={styles.systemInfoIcon}><i className={item.icon}></i></span>
-                  <h6 className={styles.systemInfoTitle}>{item.title}</h6>
-                  <p className={styles.systemInfoDesc}>{item.description}</p>
-                </div>
-              </Col>
-            ))}
-          </Row>
-        </div>
       </Container>
     </div>
   );
