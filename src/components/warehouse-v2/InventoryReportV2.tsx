@@ -31,7 +31,7 @@ interface InventorySummary {
 }
 
 interface InventoryReportV2Props {
-  onViewBatchDetails?: (batchCode: string) => void;
+  onViewBatchDetails?: (batch: InventoryReportV2) => void;
 }
 
 const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetails }) => {
@@ -339,7 +339,7 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
                             <Button
                               variant="outline-primary"
                               size="sm"
-                              onClick={() => onViewBatchDetails(item.BatchCode)}
+                              onClick={() => onViewBatchDetails(item)}
                               title="Xem chi tiết lô hàng"
                               className="d-inline-flex align-items-center justify-content-center text-nowrap px-3"
                               style={{ height: '32px' }}

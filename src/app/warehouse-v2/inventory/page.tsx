@@ -26,23 +26,10 @@ const InventoryPage: React.FC = () => {
   const [showProductInvoice, setShowProductInvoice] = useState(false);
   const [productInvoiceData, setProductInvoiceData] = useState<any>(null);
 
-  const handleViewBatchDetails = (batchCode: string) => {
-    const mockBatch: InventoryBatch = {
-      BatchCode: batchCode,
-      ImportDate: new Date().toISOString(),
-      CategoryName: 'Unknown',
-      TotalQuantity: 0,
-      TotalImportValue: 0,
-      TotalSoldQuantity: 0,
-      TotalSoldValue: 0,
-      RemainingQuantity: 0,
-      ProfitLoss: 0,
-      Status: 'ACTIVE',
-    };
-
-    setSelectedBatch(mockBatch);
+  const handleViewBatchDetails = (batch: InventoryBatch) => {
+    setSelectedBatch(batch);
     setActiveTab('products');
-    fetchActualProductCount(batchCode);
+    fetchActualProductCount(batch.BatchCode);
   };
 
   const fetchActualProductCount = async (batchCode: string) => {
