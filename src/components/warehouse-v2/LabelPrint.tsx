@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import { Modal, Button } from 'react-bootstrap';
+import Barcode from 'react-barcode';
 import '../../styles/label-print.css';
 
 interface LabelPrintProps {
@@ -105,11 +106,9 @@ const LabelPrint: React.FC<LabelPrintProps> = ({
               background: #f9f9f9;
             }
             
-            .label-barcode-placeholder {
-              font-size: 32pt;
-              font-family: 'Libre Barcode 128', 'Courier New', monospace;
-              letter-spacing: 0;
-              line-height: 1;
+            .label-barcode svg {
+              max-width: 100%;
+              height: auto;
             }
             
             .label-price {
@@ -204,7 +203,16 @@ const LabelPrint: React.FC<LabelPrintProps> = ({
             </div>
             
             <div className="label-barcode">
-              <div className="label-barcode-placeholder">*{imei}*</div>
+              <Barcode
+                value={imei || '000000000000000'}
+                format="CODE128"
+                width={1.5}
+                height={60}
+                displayValue={false}
+                margin={0}
+                background="#f9f9f9"
+                lineColor="#111"
+              />
             </div>
             
             {price && price > 0 && (
