@@ -16,6 +16,7 @@ const navigationItems = [
   { href: '/warehouse-v2', label: 'Tổng quan', icon: 'fas fa-chart-pie' },
   { href: '/warehouse-v2/import', label: 'Nhập hàng', icon: 'fas fa-box-open' },
   { href: '/warehouse-v2/sales', label: 'Bán hàng', icon: 'fas fa-cart-shopping' },
+  { href: '/warehouse-v2/invoices', label: 'Hóa đơn', icon: 'fas fa-receipt' },
   { href: '/warehouse-v2/inventory', label: 'Tồn kho', icon: 'fas fa-warehouse' },
   { href: '/warehouse-v2/categories', label: 'Danh mục', icon: 'fas fa-tags' },
   { href: '/warehouse-v2/reports', label: 'Báo cáo', icon: 'fas fa-file-lines' },
