@@ -43,6 +43,8 @@ interface SellProductData {
   IncludeCable: boolean;
   CableBatchId?: number;
   CablePrice?: number;
+  DiscountPercent: number;
+  CustomerPayment: number;
 }
 
 const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSuccess, product }) => {
@@ -51,21 +53,21 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
     ProductID: 0,
     SalePrice: 0,
     PaymentMethod: 'CASH',
-    IncludeCable: false
+    IncludeCable: false,
+    DiscountPercent: 0,
+    CustomerPayment: 0
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [validated, setValidated] = useState(false);
-  const [cablePrice, setCablePrice] = useState(100000); // Giá cáp sạc mặc định
+  const [cablePrice, setCablePrice] = useState(100000);
   const [cableBatches, setCableBatches] = useState<CableBatch[]>([]);
   const [selectedCableBatch, setSelectedCableBatch] = useState<CableBatch | null>(null);
 
-  // Invoice states
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState<any>(null);
 
-  // Fetch cable batches on component mount
   useEffect(() => {
     const fetchCableBatches = async () => {
       try {
@@ -73,7 +75,6 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
         const result = await response.json();
         if (result.success && result.data) {
           setCableBatches(result.data);
-          // Set default cable price from first batch
           if (result.data.length > 0) {
             setCablePrice(result.data[0].AvgPrice);
           }
@@ -90,11 +91,13 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
     if (show && product) {
       setFormData({
         ProductID: product.ProductID,
-        SalePrice: 0, // Start with 0, user must enter sale price
+        SalePrice: 0,
         PaymentMethod: 'CASH',
         IncludeCable: false,
         CableBatchId: undefined,
-        CablePrice: undefined
+        CablePrice: undefined,
+        DiscountPercent: 0,
+        CustomerPayment: 0
       });
       setValidated(false);
       setError('');
@@ -149,12 +152,18 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
     setLoading(true);
 
     try {
+      // Submit with final amount after discount
+      const finalSalePrice = calculateAmountDue();
+      
       const response = await fetch('/api/sales', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          SalePrice: finalSalePrice // Send discounted price to API
+        })
       });
 
       const result = await response.json();
@@ -165,13 +174,12 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
           `Đã bán "${product?.ProductName}" thành công`
         );
 
-        // Prepare invoice data
         const invoice = {
           invoiceNumber: result.data.InvoiceNumber || `INV${Date.now()}`,
           saleDate: new Date().toISOString(),
           product: {
             ...product,
-            SalePrice: formData.SalePrice
+            SalePrice: finalSalePrice
           },
           profit: calculateProfit(),
           profitMargin: getProfitPercentage()
@@ -203,14 +211,12 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
     }).format(amount);
   };
 
-  // Format number with thousand separators (100000 -> 100.000)
   const formatNumber = (value: string | number) => {
     if (!value) return '';
-    const numStr = value.toString().replace(/\D/g, ''); // Remove non-digits
+    const numStr = value.toString().replace(/\D/g, '');
     return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
-  // Parse formatted number back to plain number (100.000 -> 100000)
   const parseFormattedNumber = (value: string) => {
     return value.replace(/\./g, '');
   };
@@ -219,7 +225,8 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
     if (product && formData.SalePrice > 0) {
       const cableCost = formData.IncludeCable ? (formData.CablePrice || cablePrice) : 0;
       const totalCost = product.ImportPrice + cableCost;
-      return formData.SalePrice - totalCost;
+      const finalSalePrice = calculateAmountDue();
+      return finalSalePrice - totalCost;
     }
     return 0;
   };
@@ -235,16 +242,36 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
     if (product && formData.SalePrice > 0) {
       const cableCost = formData.IncludeCable ? (formData.CablePrice || cablePrice) : 0;
       const totalCost = product.ImportPrice + cableCost;
-      return ((formData.SalePrice - totalCost) / totalCost) * 100;
+      const finalSalePrice = calculateAmountDue();
+      return ((finalSalePrice - totalCost) / totalCost) * 100;
     }
     return 0;
+  };
+
+  const calculateDiscountAmount = () => {
+    if (formData.SalePrice > 0 && formData.DiscountPercent > 0) {
+      return (formData.SalePrice * formData.DiscountPercent) / 100;
+    }
+    return 0;
+  };
+
+  const calculateAmountDue = () => {
+    const amountDue = formData.SalePrice - calculateDiscountAmount();
+    return amountDue > 0 ? amountDue : 0;
+  };
+
+  const calculateChange = () => {
+    const amountDue = Number(calculateAmountDue()) || 0;
+    const customerPayment = Number(formData.CustomerPayment) || 0;
+    const change = customerPayment - amountDue;
+    return change > 0 ? change : 0;
   };
 
   if (!product) return null;
 
   return (
     <>
-      <Modal show={show} onHide={onHide} size="lg" className="sell-product-modal">
+      <Modal show={show} onHide={onHide} size="xl" scrollable dialogClassName="sell-product-modal-wide" className="sell-product-modal">
         <Modal.Header closeButton>
           <Modal.Title className="fs-4">
             <span className="me-2">🛒</span>
@@ -256,52 +283,64 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
         <Modal.Body>
           {error && <Alert variant="danger">{error}</Alert>}
 
-          {/* Product Information */}
-          <Card className="mb-4">
-            <Card.Header>
-              <h5 className="mb-0 fs-5">
-                <span className="me-2">📱</span>
-                Thông tin sản phẩm
-              </h5>
-            </Card.Header>
-            <Card.Body className="fs-5">
-              <Row>
-                <Col md={6}>
-                  <div className="mb-3">
-                    <strong className="fs-5">Tên sản phẩm:</strong>
-                    <div className="text-primary fs-5 fw-medium">{product.ProductName}</div>
-                  </div>
-                  <div className="mb-3">
-                    <strong className="fs-5">IMEI:</strong>
-                    <div className="fs-5"><code className="fs-5">{product.IMEI}</code></div>
-                  </div>
-                </Col>
-                <Col md={6}>
-                  <div className="mb-3">
-                    <strong className="fs-5">Danh mục:</strong>
-                    <div className="text-info fs-5 fw-medium">{product.CategoryName}</div>
-                  </div>
-                  <div className="mb-3">
-                    <strong className="fs-5">Lô hàng:</strong>
-                    <div className="fs-5"><code className="fs-5">{product.BatchCode}</code></div>
-                  </div>
-                </Col>
-              </Row>
-              <Row>
-                <Col md={12}>
-                  <div className="bg-light p-3 rounded">
-                    <strong className="fs-4">Giá nhập:</strong>
-                    <span className="text-succcess ms-2 fw-bold fs-4">
-                      {formatCurrency(product.ImportPrice)}
-                    </span>
-                  </div>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
+          <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center rounded-4 border p-3 mb-3" style={{ backgroundColor: 'var(--bs-secondary-bg)' }}>
+            <div>
+              <div className="text-muted small text-uppercase mb-1">Thao tác nhanh</div>
+              <div className="fw-bold">Thanh toán và in hóa đơn cho sản phẩm này</div>
+            </div>
+            <Button
+              variant="success"
+              type="submit"
+              disabled={loading || !formData.SalePrice || formData.SalePrice <= 0}
+              className="fs-5 px-4 py-2 text-nowrap"
+            >
+              {loading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" />
+                  Đang xử lý...
+                </>
+              ) : (
+                <>
+                  <span className="me-2">💳</span>
+                  Thanh toán & In hóa đơn
+                </>
+              )}
+            </Button>
+          </div>
 
-          {/* Sale Information */}
-          <Row>
+          <div className="rounded-4 border p-3 mb-4">
+            <Row className="g-3 align-items-stretch">
+              <Col md={5}>
+                <div className="h-100 rounded-3 border p-3">
+                  <div className="text-muted small text-uppercase mb-1">Sản phẩm</div>
+                  <div className="fw-bold fs-5 text-primary mb-2">{product.ProductName}</div>
+                  <code className="fs-6">IMEI: {product.IMEI}</code>
+                </div>
+              </Col>
+              <Col md={3}>
+                <div className="h-100 rounded-3 border p-3">
+                  <div className="text-muted small text-uppercase mb-1">Danh mục</div>
+                  <div className="fw-semibold fs-6 text-info">{product.CategoryName || 'Chưa phân loại'}</div>
+                </div>
+              </Col>
+              <Col md={2}>
+                <div className="h-100 rounded-3 border p-3">
+                  <div className="text-muted small text-uppercase mb-1">Lô hàng</div>
+                  <code className="fs-6">{product.BatchCode || 'N/A'}</code>
+                </div>
+              </Col>
+              <Col md={2}>
+                <div className="h-100 rounded-3 border p-3">
+                  <div className="text-muted small text-uppercase mb-1">Thanh toán</div>
+                  <div className="fw-bold fs-5 text-success">{formData.SalePrice > 0 ? formatCurrency(calculateAmountDue()) : '0 ₫'}</div>
+                </div>
+              </Col>
+            </Row>
+          </div>
+
+          <Card className="border-0 shadow-sm mb-4">
+            <Card.Body className="p-3 p-lg-4">
+              <Row className="g-3">
             <Col md={6}>
               <Form.Group className="mb-4">
                 <Form.Label className="fs-5 fw-medium">
@@ -331,6 +370,32 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
 
             <Col md={6}>
               <Form.Group className="mb-4">
+                <Form.Label className="fs-5 fw-medium">Giảm giá (%)</Form.Label>
+                <Form.Control
+                  type="number"
+                  className="fs-4 py-3"
+                  value={formData.DiscountPercent === 0 ? '' : formData.DiscountPercent}
+                  onChange={(e) => {
+                    const numValue = parseFloat(e.target.value);
+                    handleInputChange('DiscountPercent', isNaN(numValue) ? 0 : Math.min(100, Math.max(0, numValue)));
+                  }}
+                  placeholder="0"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                />
+                <Form.Text className="text-muted fs-6">
+                  {formData.DiscountPercent > 0 && formData.SalePrice > 0
+                    ? `Giảm: ${formatCurrency(calculateDiscountAmount())}`
+                    : 'Nhập phần trăm giảm giá nếu có'}
+                </Form.Text>
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-4">
                 <Form.Label className="fs-5 fw-medium">Phương thức thanh toán</Form.Label>
                 <Form.Select
                   className="fs-5 py-3"
@@ -343,7 +408,65 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
                 </Form.Select>
               </Form.Group>
             </Col>
+
+            <Col md={6}>
+              <Form.Group className="mb-4">
+                <Form.Label className="fs-5 fw-medium">Số tiền khách cần trả</Form.Label>
+                <Form.Control
+                  type="text"
+                  className="fs-4 py-3 fw-bold text-primary"
+                  value={formData.SalePrice > 0 ? formatCurrency(calculateAmountDue()) : ''}
+                  readOnly
+                  placeholder="0 ₫"
+                  style={{ backgroundColor: 'var(--bs-secondary-bg)' }}
+                />
+                <Form.Text className="text-muted fs-6">
+                  Tự động tính từ giá bán trừ giảm giá
+                </Form.Text>
+              </Form.Group>
+            </Col>
           </Row>
+
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-4">
+                <Form.Label className="fs-5 fw-medium">Khách hàng thanh toán (VNĐ)</Form.Label>
+                <Form.Control
+                  type="text"
+                  className="fs-4 py-3"
+                  value={formData.CustomerPayment === 0 ? '' : formatNumber(formData.CustomerPayment)}
+                  onChange={(e) => {
+                    const rawValue = parseFormattedNumber(e.target.value);
+                    const numValue = parseFloat(rawValue);
+                    handleInputChange('CustomerPayment', isNaN(numValue) ? 0 : numValue);
+                  }}
+                  placeholder="Nhập số tiền khách đưa"
+                />
+                <Form.Text className="text-muted fs-6">
+                  Nhập số tiền thực tế khách thanh toán
+                </Form.Text>
+              </Form.Group>
+            </Col>
+
+            <Col md={6}>
+              <Form.Group className="mb-4">
+                <Form.Label className="fs-5 fw-medium">Tiền thừa trả khách</Form.Label>
+                <Form.Control
+                  type="text"
+                  className={`fs-4 py-3 fw-bold ${calculateChange() > 0 ? 'text-success' : 'text-muted'}`}
+                  value={formatCurrency(calculateChange())}
+                  readOnly
+                  placeholder="0 ₫"
+                  style={{ backgroundColor: calculateChange() > 0 ? 'rgba(25, 135, 84, 0.1)' : 'var(--bs-secondary-bg)' }}
+                />
+                <Form.Text className="text-muted fs-6">
+                  Tự động tính khi số tiền khách đưa lớn hơn số tiền cần trả
+                </Form.Text>
+              </Form.Group>
+            </Col>
+          </Row>
+            </Card.Body>
+          </Card>
 
           {/* Cable Gift Option */}
           <Row className="mb-4">
@@ -369,41 +492,45 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
 
                   {formData.IncludeCable && (
                     <div className="mt-3">
-                      <Form.Group>
-                        <Form.Label className="fs-6 fw-medium">Chọn lô cáp sạc:</Form.Label>
-                        <Form.Select
-                          className="fs-6"
-                          value={selectedCableBatch?.BatchID || ''}
-                          onChange={(e) => handleCableBatchChange(e.target.value)}
-                        >
-                          <option value="">-- Chọn lô cáp sạc --</option>
-                          {cableBatches.map(batch => (
-                            <option key={batch.BatchID} value={batch.BatchID}>
-                              {batch.BatchCode} - {batch.AvailableProducts} sản phẩm - {formatCurrency(batch.AvgPrice)}/cái
-                              {batch.Notes && ` (${batch.Notes})`}
-                            </option>
-                          ))}
-                        </Form.Select>
-                      </Form.Group>
+                      <Row className="g-3 align-items-start">
+                        <Col lg={8}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-medium">Chọn lô cáp sạc:</Form.Label>
+                            <Form.Select
+                              className="fs-6"
+                              value={selectedCableBatch?.BatchID || ''}
+                              onChange={(e) => handleCableBatchChange(e.target.value)}
+                            >
+                              <option value="">-- Chọn lô cáp sạc --</option>
+                              {cableBatches.map(batch => (
+                                <option key={batch.BatchID} value={batch.BatchID}>
+                                  {batch.BatchCode} - {batch.AvailableProducts} sản phẩm - {formatCurrency(batch.AvgPrice)}/cái
+                                  {batch.Notes && ` (${batch.Notes})`}
+                                </option>
+                              ))}
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col lg={4}>
+                          <div className="rounded-3 border p-3 h-100">
+                            <div className="small text-muted mb-1">Giá cộng thêm</div>
+                            <div className="fw-bold text-warning fs-5">{formatCurrency(formData.CablePrice || cablePrice)}</div>
+                            <div className="small text-muted mt-2">Tổng vốn tạm tính</div>
+                            <div className="fw-semibold">{formatCurrency(product.ImportPrice + (formData.CablePrice || cablePrice))}</div>
+                          </div>
+                        </Col>
+                      </Row>
 
                       {selectedCableBatch && (
-                        <div className="mt-2 p-2 bg-light rounded">
-                          <div className="text-info fs-6">
-                            <span className="me-2">📦</span>
-                            <strong>Lô {selectedCableBatch.BatchCode}</strong>
-                          </div>
-                          <div className="text-muted fs-6">
-                            • Còn lại: {selectedCableBatch.AvailableProducts} sản phẩm<br/>
-                            • Giá: {formatCurrency(selectedCableBatch.MinPrice)} - {formatCurrency(selectedCableBatch.MaxPrice)}<br/>
-                            • Trung bình: {formatCurrency(selectedCableBatch.AvgPrice)}
+                        <div className="mt-3 rounded-3 border p-3">
+                          <div className="d-flex flex-wrap gap-3 small">
+                            <span><strong>Lô:</strong> {selectedCableBatch.BatchCode}</span>
+                            <span><strong>Còn lại:</strong> {selectedCableBatch.AvailableProducts}</span>
+                            <span><strong>Khoảng giá:</strong> {formatCurrency(selectedCableBatch.MinPrice)} - {formatCurrency(selectedCableBatch.MaxPrice)}</span>
+                            <span><strong>Trung bình:</strong> {formatCurrency(selectedCableBatch.AvgPrice)}</span>
                           </div>
                         </div>
                       )}
-
-                      <div className="mt-2 text-info fs-6">
-                        <span className="me-2">💡</span>
-                        Giá nhập sẽ được tính: {formatCurrency(product.ImportPrice)} + {formatCurrency(formData.CablePrice || cablePrice)} = {formatCurrency(product.ImportPrice + (formData.CablePrice || cablePrice))}
-                      </div>
                     </div>
                   )}
                 </Card.Body>
@@ -411,8 +538,8 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
             </Col>
           </Row>
 
-          {/* Profit Calculation */}
-          {formData.SalePrice > 0 && (
+          {/* Profit Calculation - temporarily hidden */}
+          {false && formData.SalePrice > 0 && (
             <Card className="border-success">
               <Card.Header className="bg-light">
                 <h5 className="mb-0 fs-4">
@@ -427,15 +554,15 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
                       <div className="text-muted fs-5 mb-2">
                         Giá nhập {formData.IncludeCable && '(+ cáp sạc)'}
                       </div>
-                      <div className="h3 text-success fw-bold">
-                        {formatCurrency(product.ImportPrice + (formData.IncludeCable ? (formData.CablePrice || cablePrice) : 0))}
+                      <div className="h3 text-info fw-bold">
+                        {formatCurrency((product?.ImportPrice || 0) + (formData.IncludeCable ? (formData.CablePrice || cablePrice) : 0))}
                       </div>
                       {formData.IncludeCable && (
                         <div className="text-muted fs-6">
-                          {formatCurrency(product.ImportPrice)} + {formatCurrency(formData.CablePrice || cablePrice)}
+                          {formatCurrency(product?.ImportPrice || 0)} + {formatCurrency(formData.CablePrice || cablePrice)}
                           {selectedCableBatch && (
                             <div className="text-info">
-                              (Lô {selectedCableBatch.BatchCode})
+                              (Lô {selectedCableBatch?.BatchCode})
                             </div>
                           )}
                         </div>
@@ -444,10 +571,16 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
                   </Col>
                   <Col md={4}>
                     <div className="text-center">
-                      <div className="text-muted fs-5 mb-2">Giá bán</div>
+                      <div className="text-muted fs-5 mb-2">Giá bán (sau giảm)</div>
                       <div className="h3 text-primary fw-bold">
-                        {formatCurrency(formData.SalePrice)}
+                        {formatCurrency(calculateAmountDue())}
                       </div>
+                      {formData.DiscountPercent > 0 && (
+                        <div className="text-muted fs-6">
+                          Gốc: {formatCurrency(formData.SalePrice)}<br/>
+                          Giảm {formData.DiscountPercent}%: -{formatCurrency(calculateDiscountAmount())}
+                        </div>
+                      )}
                     </div>
                   </Col>
                   <Col md={4}>
@@ -472,8 +605,11 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
           </Alert>
         </Modal.Body>
 
-        <Modal.Footer className="py-3">
-          <Button variant="secondary" onClick={onHide} disabled={loading} className="fs-5 px-4 py-2">
+        <Modal.Footer
+          className="py-3 border-top d-flex flex-wrap gap-2 justify-content-between align-items-stretch"
+          style={{ backgroundColor: 'var(--bs-body-bg)' }}
+        >
+          <Button variant="secondary" onClick={onHide} disabled={loading} className="fs-5 px-4 py-2 flex-grow-1 flex-md-grow-0">
             <span className="me-2">❌</span>
             Hủy
           </Button>
@@ -481,7 +617,7 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
             variant="success"
             type="submit"
             disabled={loading || !formData.SalePrice || formData.SalePrice <= 0}
-            className="fs-5 px-4 py-2"
+            className="fs-5 px-4 py-2 flex-grow-1 flex-md-grow-0 text-nowrap"
           >
             {loading ? (
               <>
@@ -499,7 +635,6 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
       </Form>
     </Modal>
 
-    {/* Invoice Print Modal */}
     <InvoicePrint
       show={showInvoice}
       onHide={() => setShowInvoice(false)}
