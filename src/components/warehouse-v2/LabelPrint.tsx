@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import Barcode from 'react-barcode';
+import { QRCodeSVG } from 'qrcode.react';
 import '../../styles/label-print.css';
 
 interface LabelPrintProps {
@@ -98,17 +99,32 @@ const LabelPrint: React.FC<LabelPrintProps> = ({
               word-break: break-all;
             }
             
-            .label-barcode {
-              text-align: center;
+            .label-code-grid {
+              display: grid;
+              grid-template-columns: 1fr 24mm;
+              gap: 3mm;
+              align-items: center;
               margin: 6mm 0;
-              padding: 4mm;
+            }
+            
+            .label-barcode,
+            .label-qr {
+              text-align: center;
+              padding: 3mm;
               border: 1px solid #ddd;
               background: #f9f9f9;
             }
             
-            .label-barcode svg {
+            .label-barcode svg,
+            .label-qr svg {
               max-width: 100%;
               height: auto;
+            }
+            
+            .label-code-caption {
+              margin-top: 1.5mm;
+              font-size: 7pt;
+              color: #666;
             }
             
             .label-price {
@@ -202,17 +218,31 @@ const LabelPrint: React.FC<LabelPrintProps> = ({
               <div className="label-imei-code">{imei}</div>
             </div>
             
-            <div className="label-barcode">
-              <Barcode
-                value={imei || '000000000000000'}
-                format="CODE128"
-                width={1.5}
-                height={60}
-                displayValue={false}
-                margin={0}
-                background="#f9f9f9"
-                lineColor="#111"
-              />
+            <div className="label-code-grid">
+              <div className="label-barcode">
+                <Barcode
+                  value={imei || '000000000000000'}
+                  format="CODE128"
+                  width={1.3}
+                  height={56}
+                  displayValue={false}
+                  margin={0}
+                  background="#f9f9f9"
+                  lineColor="#111"
+                />
+                <div className="label-code-caption">Barcode IMEI</div>
+              </div>
+              <div className="label-qr">
+                <QRCodeSVG
+                  value={imei || '000000000000000'}
+                  size={84}
+                  level="M"
+                  bgColor="#f9f9f9"
+                  fgColor="#111"
+                  includeMargin={false}
+                />
+                <div className="label-code-caption">QR IMEI</div>
+              </div>
             </div>
             
             {price && price > 0 && (

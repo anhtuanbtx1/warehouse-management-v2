@@ -50,20 +50,35 @@
   word-break: break-all;
 }
 
-.label-barcode {
-  text-align: center;
+.label-code-grid {
+  display: grid;
+  grid-template-columns: 1fr 24mm;
+  gap: 3mm;
+  align-items: center;
   margin: 6mm 0;
-  padding: 4mm;
+}
+
+.label-barcode,
+.label-qr {
+  text-align: center;
+  padding: 3mm;
   border: 1px solid #ddd;
   background: #f9f9f9;
 }
 
-.label-barcode-placeholder {
-  font-family: 'Courier New', monospace;
-  font-size: 22pt;
-  font-weight: 800;
-  letter-spacing: 2px;
-  word-break: break-all;
+.label-barcode svg,
+.label-qr svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.label-code-caption {
+  margin-top: 1.5mm;
+  font-size: 7pt;
+  color: #666;
+  text-align: center;
 }
 
 .label-price {
