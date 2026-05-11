@@ -13,13 +13,13 @@ interface WarehouseV2LayoutProps {
 }
 
 const navigationItems = [
-  { href: '/warehouse-v2', label: 'Tổng quan', icon: 'fas fa-chart-pie' },
-  { href: '/warehouse-v2/import', label: 'Nhập hàng', icon: 'fas fa-box-open' },
-  { href: '/warehouse-v2/sales', label: 'Bán hàng', icon: 'fas fa-cart-shopping' },
-  { href: '/warehouse-v2/invoices', label: 'Hóa đơn', icon: 'fas fa-receipt' },
-  { href: '/warehouse-v2/inventory', label: 'Tồn kho', icon: 'fas fa-warehouse' },
-  { href: '/warehouse-v2/categories', label: 'Danh mục', icon: 'fas fa-tags' },
-  { href: '/warehouse-v2/reports', label: 'Báo cáo', icon: 'fas fa-file-lines' },
+  { href: '/warehouse-v2', label: 'Tổng quan', icon: 'fas fa-chart-pie', roles: ['admin', 'manager', 'staff'] },
+  { href: '/warehouse-v2/import', label: 'Nhập hàng', icon: 'fas fa-box-open', roles: ['admin', 'manager', 'staff'] },
+  { href: '/warehouse-v2/sales', label: 'Bán hàng', icon: 'fas fa-cart-shopping', roles: ['admin', 'manager', 'staff'] },
+  { href: '/warehouse-v2/invoices', label: 'Hóa đơn', icon: 'fas fa-receipt', roles: ['admin', 'manager'] },
+  { href: '/warehouse-v2/inventory', label: 'Tồn kho', icon: 'fas fa-warehouse', roles: ['admin', 'manager'] },
+  { href: '/warehouse-v2/categories', label: 'Danh mục', icon: 'fas fa-tags', roles: ['admin'] },
+  { href: '/warehouse-v2/reports', label: 'Báo cáo', icon: 'fas fa-file-lines', roles: ['admin', 'manager'] },
 ];
 
 const STORAGE_KEY = '__REBACK_NEXT_CONFIG__';
@@ -28,15 +28,36 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const isLoginPage = pathname === '/warehouse-v2/login';
   const [isDark, setIsDark] = useState(false);
+  const [userRole, setUserRole] = useState<string>('');
 
   useEffect(() => {
     const html = document.documentElement;
     const currentTheme = html.getAttribute('data-bs-theme') || 'light';
     setIsDark(currentTheme === 'dark');
+
+    // Get user role from localStorage
+    try {
+      const userStr = localStorage.getItem('warehouse_user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setUserRole(user.role || '');
+      }
+    } catch (error) {
+      console.error('Error reading user role:', error);
+    }
   }, []);
 
   const isActive = (path: string) => {
     return pathname === path ? 'active' : '';
+  };
+
+  const getFilteredNavigationItems = () => {
+    // Admin has access to all menus
+    if (userRole === 'admin') {
+      return navigationItems;
+    }
+    // Filter menu items based on user role
+    return navigationItems.filter(item => item.roles.includes(userRole));
   };
 
   const handleThemeToggle = () => {
@@ -65,6 +86,19 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
     localStorage.removeItem('warehouse_auth_token');
     localStorage.removeItem('warehouse_user');
     window.location.href = '/warehouse-v2/login';
+  };
+
+  const getUserRoleLabel = () => {
+    switch (userRole) {
+      case 'admin':
+        return 'Quản trị viên';
+      case 'manager':
+        return 'Quản lý kho';
+      case 'staff':
+        return 'Nhân viên kho';
+      default:
+        return 'Người dùng';
+    }
   };
 
   return (
@@ -103,10 +137,10 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
                     <Dropdown align="end">
                       <Dropdown.Toggle className="warehouse-user-toggle" bsPrefix="btn">
                         <span className="warehouse-user-avatar">
-                          <i className="fas fa-user-shield" aria-hidden="true"></i>
+                          <i className={`fas ${userRole === 'admin' ? 'fa-user-shield' : userRole === 'manager' ? 'fa-user-tie' : 'fa-user'}`} aria-hidden="true"></i>
                         </span>
                         <span className="warehouse-user-meta">
-                          <span className="warehouse-user-role">Quản trị viên</span>
+                          <span className="warehouse-user-role">{getUserRoleLabel()}</span>
                           <span className="warehouse-user-caption">Điều hành kho</span>
                         </span>
                       </Dropdown.Toggle>
@@ -146,7 +180,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
 
                   <Navbar.Collapse id="warehouse-navbar">
                     <Nav className="warehouse-nav me-auto">
-                      {navigationItems.map((item) => (
+                      {getFilteredNavigationItems().map((item) => (
                         <Nav.Link
                           key={item.href}
                           as={Link}
