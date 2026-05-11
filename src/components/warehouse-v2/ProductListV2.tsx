@@ -36,6 +36,7 @@ interface ProductListV2Props {
   hideCategoryFilter?: boolean; // Ẩn tìm kiếm theo danh mục
   hideColumns?: string[]; // Ẩn các cột cụ thể
   hideResetButton?: boolean; // Ẩn button đặt lại
+  batchTotalImportValue?: number; // Tổng giá nhập của lô hiện tại
   batchInfo?: {
     totalQuantity: number; // Tổng số lượng dự kiến của lô
     currentCount: number;  // Số lượng hiện tại trong lô
@@ -53,6 +54,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
   hideCategoryFilter = false, // Mặc định hiển thị filter danh mục
   hideColumns = [], // Mặc định không ẩn cột nào
   hideResetButton = false, // Mặc định hiển thị button đặt lại
+  batchTotalImportValue,
   batchInfo
 }) => {
   const { showSuccess, showError } = useToast();
@@ -445,18 +447,25 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
 
   return (
     <Card>
-      <Card.Header className="d-flex justify-content-between align-items-center">
-        <h5 className="mb-0">
-          <span className="me-2">📱</span>
-          {availableOnly ? 'Sản phẩm có thể bán' : 'Danh sách sản phẩm'}
-          {(batchId || batchCode) && <small className="text-muted ms-2">(Lô hàng cụ thể)</small>}
-          {batchInfo && (
-            <span className={`badge ms-2 ${isBatchFull ? 'bg-danger' : 'bg-info'}`}>
-              {batchInfo.currentCount}/{batchInfo.totalQuantity}
-              {isBatchFull && ' - Đã đủ'}
-            </span>
+      <Card.Header className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h5 className="mb-1">
+            <span className="me-2">📱</span>
+            {availableOnly ? 'Sản phẩm có thể bán' : 'Danh sách sản phẩm'}
+            {(batchId || batchCode) && <small className="text-muted ms-2">(Lô hàng cụ thể)</small>}
+            {batchInfo && (
+              <span className={`badge ms-2 ${isBatchFull ? 'bg-danger' : 'bg-info'}`}>
+                {batchInfo.currentCount}/{batchInfo.totalQuantity}
+                {isBatchFull && ' - Đã đủ'}
+              </span>
+            )}
+          </h5>
+          {(batchId || batchCode) && typeof batchTotalImportValue === 'number' && (
+            <div className="small text-muted">
+              Tổng giá nhập: <span className="fw-bold text-success">{formatCurrency(batchTotalImportValue)}</span>
+            </div>
           )}
-        </h5>
+        </div>
         <div className="d-flex gap-2">
           <Button
             variant="outline-success"

@@ -33,6 +33,7 @@ const ImportPage: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState('batches');
   const [actualProductCount, setActualProductCount] = useState<number>(0);
+  const [actualBatchImportValue, setActualBatchImportValue] = useState<number>(0);
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceBatch, setInvoiceBatch] = useState<ImportBatch | null>(null);
   const [showProductInvoice, setShowProductInvoice] = useState(false);
@@ -53,8 +54,9 @@ const ImportPage: React.FC = () => {
 
   const handleViewBatchDetails = (batch: ImportBatch) => {
     setSelectedBatch(batch);
+    setActualBatchImportValue(batch.TotalImportValue || 0);
     setActiveTab('products');
-    fetchActualProductCount(batch.BatchID);
+    fetchActualBatchStats(batch.BatchID);
   };
 
   const handleViewInvoice = (batch: ImportBatch) => {
@@ -101,23 +103,32 @@ const ImportPage: React.FC = () => {
     setRefreshKey((prev) => prev + 1);
 
     if (selectedBatch && selectedBatch.BatchID === batch.BatchID) {
-      fetchActualProductCount(selectedBatch.BatchID);
+      fetchActualBatchStats(selectedBatch.BatchID);
     }
   };
 
-  const fetchActualProductCount = async (batchId: number) => {
+  const fetchActualBatchStats = async (batchId: number) => {
     try {
       const response = await fetch(`/api/products-v2?batchId=${batchId}&limit=1000`);
       const result = await response.json();
 
       if (result.success && result.data) {
-        setActualProductCount(result.data.data.length);
+        const products = result.data.data || [];
+        const totalImportValue = products.reduce(
+          (sum: number, product: { ImportPrice?: number }) => sum + (Number(product.ImportPrice) || 0),
+          0
+        );
+
+        setActualProductCount(products.length);
+        setActualBatchImportValue(totalImportValue);
       } else {
         setActualProductCount(0);
+        setActualBatchImportValue(0);
       }
     } catch (error) {
-      console.error('Error fetching product count:', error);
+      console.error('Error fetching batch stats:', error);
       setActualProductCount(0);
+      setActualBatchImportValue(0);
     }
   };
 
@@ -208,7 +219,8 @@ const ImportPage: React.FC = () => {
 
                   <ProductListV2
                     batchId={selectedBatch.BatchID}
-                    onProductCountChange={() => fetchActualProductCount(selectedBatch.BatchID)}
+                    batchTotalImportValue={actualBatchImportValue || selectedBatch.TotalImportValue}
+                    onProductCountChange={() => fetchActualBatchStats(selectedBatch.BatchID)}
                     onPrintInvoice={handlePrintInvoiceFromProduct}
                     batchInfo={{
                       totalQuantity: selectedBatch.TotalQuantity,

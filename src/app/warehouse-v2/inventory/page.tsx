@@ -217,6 +217,7 @@ const InventoryPage: React.FC = () => {
 
                   <ProductListV2
                     batchCode={selectedBatch.BatchCode}
+                    batchTotalImportValue={actualBatchImportValue || selectedBatch.TotalImportValue}
                     onProductCountChange={() => fetchActualBatchStats(selectedBatch.BatchCode)}
                     onPrintInvoice={handlePrintInvoiceFromProduct}
                     showAddButton={false}
