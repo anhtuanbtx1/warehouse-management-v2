@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Form, InputGroup, Badge, Pagination, Modal, Row, Col, Alert } from 'react-bootstrap';
 import { useToast } from '@/contexts/ToastContext';
 import * as XLSX from 'xlsx';
+import LabelPrint from './LabelPrint';
 
 interface ProductV2 {
   ProductID: number;
@@ -66,6 +67,8 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [categories, setCategories] = useState<any[]>([]);
+  const [showLabelPrint, setShowLabelPrint] = useState(false);
+  const [selectedLabelProduct, setSelectedLabelProduct] = useState<ProductV2 | null>(null);
 
   // Check if batch is full (không cho thêm sản phẩm nữa)
   const isBatchFull = batchInfo && batchInfo.currentCount >= batchInfo.totalQuantity;
@@ -311,6 +314,11 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
 
   const handlePageChange = (page: number) => {
     fetchProducts(page);
+  };
+
+  const handlePrintLabel = (product: ProductV2) => {
+    setSelectedLabelProduct(product);
+    setShowLabelPrint(true);
   };
 
   const formatCurrency = (amount: number) => {
@@ -666,7 +674,16 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                         </td>
                       )}
                       <td className="text-center">
-                        <div className="d-flex justify-content-center gap-1">
+                        <div className="d-flex justify-content-center gap-1 flex-wrap">
+                          <Button
+                            variant="outline-dark"
+                            size="sm"
+                            onClick={() => handlePrintLabel(product)}
+                            title="In tem mã theo IMEI"
+                            className="d-flex align-items-center justify-content-center"
+                          >
+                            <i className="fas fa-barcode"></i>
+                          </Button>
                           {product.Status === 'IN_STOCK' && (
                             <Button
                               variant="outline-warning"
@@ -991,6 +1008,18 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <LabelPrint
+        show={showLabelPrint}
+        onHide={() => {
+          setShowLabelPrint(false);
+          setSelectedLabelProduct(null);
+        }}
+        productName={selectedLabelProduct?.ProductName || ''}
+        imei={selectedLabelProduct?.IMEI || ''}
+        price={selectedLabelProduct?.SalePrice || selectedLabelProduct?.ImportPrice || 0}
+        categoryName={selectedLabelProduct?.CategoryName}
+      />
     </Card>
   );
 };

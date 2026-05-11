@@ -1,0 +1,94 @@
+.label-container {
+  width: 80mm;
+  min-height: 110mm;
+  padding: 8mm;
+  border: 1px solid var(--bs-border-color);
+  color: #111;
+}
+
+.label-header {
+  text-align: center;
+  margin-bottom: 6mm;
+  border-bottom: 2px solid #111;
+  padding-bottom: 4mm;
+}
+
+.label-title {
+  font-size: 18pt;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.label-category {
+  font-size: 10pt;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.label-product {
+  font-size: 14pt;
+  font-weight: 700;
+  margin-bottom: 6mm;
+  text-align: center;
+}
+
+.label-imei {
+  margin-bottom: 6mm;
+}
+
+.label-imei-title {
+  font-size: 10pt;
+  color: #666;
+  margin-bottom: 2mm;
+}
+
+.label-imei-code {
+  font-family: 'Courier New', monospace;
+  font-size: 16pt;
+  font-weight: 800;
+  letter-spacing: 1px;
+  word-break: break-all;
+}
+
+.label-barcode {
+  text-align: center;
+  margin: 6mm 0;
+  padding: 4mm;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+}
+
+.label-barcode-placeholder {
+  font-family: 'Courier New', monospace;
+  font-size: 22pt;
+  font-weight: 800;
+  letter-spacing: 2px;
+  word-break: break-all;
+}
+
+.label-price {
+  text-align: center;
+  margin-top: 6mm;
+  padding-top: 4mm;
+  border-top: 1px solid #ddd;
+}
+
+.label-price-title {
+  font-size: 10pt;
+  color: #666;
+}
+
+.label-price-value {
+  font-size: 18pt;
+  font-weight: 800;
+  color: #d9534f;
+}
+
+.label-footer {
+  text-align: center;
+  margin-top: 6mm;
+  padding-top: 4mm;
+  border-top: 1px solid #ddd;
+  font-size: 8pt;
+  color: #777;
+}
