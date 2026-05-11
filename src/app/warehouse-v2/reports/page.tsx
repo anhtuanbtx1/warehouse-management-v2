@@ -258,17 +258,7 @@ const ReportsPage: React.FC = () => {
             <Breadcrumb.Item active>Báo cáo bán hàng</Breadcrumb.Item>
           </Breadcrumb>
 
-          <section className="warehouse-page-header">
-            <div className="warehouse-page-title">
-              <span className="warehouse-page-title-icon">
-                <i className="fas fa-file-lines" aria-hidden="true"></i>
-              </span>
-              <div>
-                <h2 className="mb-1">Báo cáo bán hàng</h2>
-                <p>Lọc giao dịch, so sánh chi phí - doanh thu và xuất báo cáo Excel theo khoảng thời gian.</p>
-              </div>
-            </div>
-          </section>
+
 
           <Row className="g-3 mb-4">
             <Col md={6} xl={3}>

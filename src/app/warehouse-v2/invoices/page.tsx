@@ -168,23 +168,7 @@ const InvoicesPage: React.FC = () => {
             <Breadcrumb.Item active>Hóa đơn</Breadcrumb.Item>
           </Breadcrumb>
 
-          <section className="warehouse-page-header">
-            <div className="warehouse-page-title">
-              <span className="warehouse-page-title-icon">
-                <i className="fas fa-receipt" aria-hidden="true"></i>
-              </span>
-              <div>
-                <h2 className="mb-1">Danh sách hóa đơn bán hàng</h2>
-                <p>Theo dõi các sản phẩm đã bán có hóa đơn, tìm nhanh theo số hóa đơn hoặc số điện thoại khách hàng.</p>
-              </div>
-            </div>
-            <div className="warehouse-page-actions">
-              <div className="warehouse-status-chip">
-                <span className="warehouse-status-dot"></span>
-                Hóa đơn đã hoàn thành
-              </div>
-            </div>
-          </section>
+
 
           <Card>
             <Card.Header>

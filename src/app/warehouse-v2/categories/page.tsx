@@ -216,22 +216,7 @@ const CategoryPage: React.FC = () => {
             <Breadcrumb.Item active>Danh mục</Breadcrumb.Item>
           </Breadcrumb>
 
-          <section className="warehouse-page-header">
-            <div className="warehouse-page-title">
-              <span className="warehouse-page-title-icon">
-                <i className="fas fa-tags" aria-hidden="true"></i>
-              </span>
-              <div>
-                <h2 className="mb-1">Quản lý danh mục</h2>
-                <p>Danh sách các loại sản phẩm đang được kinh doanh và quản lý trong hệ thống.</p>
-              </div>
-            </div>
-            <div className="warehouse-page-actions">
-              <Button variant="success" onClick={handleShowAdd} className="d-flex align-items-center shadow-sm">
-                <i className="fas fa-plus me-2"></i> Thêm danh mục
-              </Button>
-            </div>
-          </section>
+
 
           <Card className="shadow-sm border-0 mt-4">
             <Card.Header className="d-flex justify-content-between align-items-center py-3">

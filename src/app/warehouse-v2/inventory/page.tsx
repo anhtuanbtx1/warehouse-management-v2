@@ -105,23 +105,7 @@ const InventoryPage: React.FC = () => {
             <Breadcrumb.Item active>Tồn kho</Breadcrumb.Item>
           </Breadcrumb>
 
-          <section className="warehouse-page-header">
-            <div className="warehouse-page-title">
-              <span className="warehouse-page-title-icon">
-                <i className="fas fa-warehouse" aria-hidden="true"></i>
-              </span>
-              <div>
-                <h2 className="mb-1">Báo cáo tồn kho</h2>
-                <p>Theo dõi số lượng tồn, hiệu quả từng lô hàng và chuyển nhanh sang danh sách sản phẩm chi tiết.</p>
-              </div>
-            </div>
-            <div className="warehouse-page-actions">
-              <div className="warehouse-status-chip">
-                <span className="warehouse-status-dot"></span>
-                Theo dõi trạng thái theo lô
-              </div>
-            </div>
-          </section>
+
 
           <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'inventory')} className="mb-4" variant="pills">
             <Tab

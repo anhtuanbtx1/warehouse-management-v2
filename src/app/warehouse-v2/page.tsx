@@ -139,26 +139,13 @@ const WarehouseV2Dashboard: React.FC = () => {
   return (
     <div className={styles.dashboardContainer}>
       <Container fluid className={styles.contentWrapper}>
-        <section className={`warehouse-page-header ${styles.pageHeader}`}>
-          <div className="warehouse-page-title">
-            <span className="warehouse-page-title-icon">
-              <i className="fas fa-chart-pie" aria-hidden="true"></i>
-            </span>
-            <div>
-              <h1 className={styles.pageTitle}>Tổng quan vận hành kho</h1>
-              <p className={styles.pageSubtitle}>
-                Xin chào. Hôm nay là {timezoneDebug?.client?.vietnamToday || new Date().toLocaleDateString('vi-VN')}.
-                Theo dõi nhanh doanh thu, tồn kho và giao dịch gần nhất.
-              </p>
-            </div>
-          </div>
-          <div className="warehouse-page-actions">
-            <Button variant="primary" onClick={fetchDashboardData}>
-              <i className="fas fa-rotate me-2"></i>
-              Làm mới dữ liệu
-            </Button>
-          </div>
-        </section>
+        <div className="d-flex justify-content-end mb-3">
+          <Button variant="outline-primary" size="sm" onClick={fetchDashboardData}>
+            <i className="fas fa-rotate me-2"></i>
+            Làm mới dữ liệu
+          </Button>
+        </div>
+
 
         {stats && (
           <Row className="g-3 mb-4">

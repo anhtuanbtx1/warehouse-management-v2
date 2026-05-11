@@ -141,23 +141,7 @@ const ImportPage: React.FC = () => {
             <Breadcrumb.Item active>Nhập hàng</Breadcrumb.Item>
           </Breadcrumb>
 
-          <section className={`warehouse-page-header ${styles.pageHeader}`}>
-            <div className="warehouse-page-title">
-              <span className="warehouse-page-title-icon">
-                <i className="fas fa-box-open" aria-hidden="true"></i>
-              </span>
-              <div>
-                <h2 className={styles.pageTitle}>Quản lý nhập hàng</h2>
-                <p className={styles.pageSubtitle}>Tạo lô hàng mới, kiểm soát số lượng và theo dõi sản phẩm theo từng lô.</p>
-              </div>
-            </div>
-            <div className="warehouse-page-actions">
-              <div className={styles.statusPill}>
-                <i className="fas fa-layer-group" aria-hidden="true"></i>
-                Đồng bộ theo lô hàng
-              </div>
-            </div>
-          </section>
+
 
           <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'batches')} className={`mb-3 ${styles.tabsContainer}`}>
             <Tab

@@ -187,17 +187,7 @@ const SalesPage: React.FC = () => {
             <Breadcrumb.Item active>Bán hàng</Breadcrumb.Item>
           </Breadcrumb>
 
-          <section className="warehouse-page-header">
-            <div className="warehouse-page-title">
-              <span className="warehouse-page-title-icon">
-                <i className="fas fa-cart-shopping" aria-hidden="true"></i>
-              </span>
-              <div>
-                <h2 className="mb-1">Quản lý bán hàng</h2>
-                <p>Bán sản phẩm đang có sẵn và theo dõi giao dịch gần đây trong cùng một màn hình.</p>
-              </div>
-            </div>
-            <div className="d-flex flex-wrap gap-2 mt-3 mt-lg-0">
+          <div className="d-flex justify-content-end mb-3">
               <button
                 type="button"
                 className="btn btn-outline-primary"
@@ -206,8 +196,7 @@ const SalesPage: React.FC = () => {
                 <i className="fas fa-qrcode me-2" aria-hidden="true"></i>
                 Thanh toán IMEI QR
               </button>
-            </div>
-          </section>
+          </div>
 
           <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'available')} className="mb-3">
             <Tab
