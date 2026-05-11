@@ -806,3 +806,45 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
     justify-content: center;
   }
 }
+
+/* Sales popup responsive fix */
+.sell-product-modal .modal-dialog {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  max-height: calc(100vh - 1.5rem);
+}
+
+.sell-product-modal .modal-content {
+  max-height: calc(100vh - 1.5rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.sell-product-modal .modal-body {
+  overflow-y: auto;
+  min-height: 0;
+}
+
+
+@media (max-width: 575.98px) {
+  .sell-product-modal .modal-dialog {
+    width: calc(100% - 1rem);
+    margin: 0.5rem auto;
+    max-height: calc(100vh - 1rem);
+  }
+
+  .sell-product-modal .modal-content {
+    max-height: calc(100vh - 1rem);
+    border-radius: 1rem;
+  }
+
+  .sell-product-modal .modal-body {
+    padding: 0.85rem;
+  }
+
+  .sell-product-modal .modal-footer .btn,
+  .sell-product-modal .modal-body .btn[type='submit'] {
+    width: 100%;
+    white-space: normal !important;
+  }
+}

@@ -271,8 +271,15 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
 
   return (
     <>
-      <Modal show={show} onHide={onHide} size="xl" scrollable dialogClassName="sell-product-modal-wide" className="sell-product-modal">
-        <Modal.Header closeButton>
+      <Modal
+        show={show}
+        onHide={onHide}
+        size="xl"
+        scrollable
+        dialogClassName="sell-product-modal-wide"
+        className="sell-product-modal"
+      >
+        <Modal.Header closeButton className="flex-shrink-0">
           <Modal.Title className="fs-4">
             <span className="me-2">🛒</span>
             Bán sản phẩm
@@ -604,34 +611,6 @@ const SellProductForm: React.FC<SellProductFormProps> = ({ show, onHide, onSucce
             <strong>Lưu ý:</strong> Sau khi bán, hệ thống sẽ tự động tạo hóa đơn và cập nhật trạng thái sản phẩm thành &quot;Đã bán&quot;.
           </Alert>
         </Modal.Body>
-
-        <Modal.Footer
-          className="py-3 border-top d-flex flex-wrap gap-2 justify-content-between align-items-stretch"
-          style={{ backgroundColor: 'var(--bs-body-bg)' }}
-        >
-          <Button variant="secondary" onClick={onHide} disabled={loading} className="fs-5 px-4 py-2 flex-grow-1 flex-md-grow-0">
-            <span className="me-2">❌</span>
-            Hủy
-          </Button>
-          <Button
-            variant="success"
-            type="submit"
-            disabled={loading || !formData.SalePrice || formData.SalePrice <= 0}
-            className="fs-5 px-4 py-2 flex-grow-1 flex-md-grow-0 text-nowrap"
-          >
-            {loading ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" />
-                Đang xử lý...
-              </>
-            ) : (
-              <>
-                <span className="me-2">🛒</span>
-                Bán & In hóa đơn
-              </>
-            )}
-          </Button>
-        </Modal.Footer>
       </Form>
     </Modal>
 
