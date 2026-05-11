@@ -23,28 +23,46 @@ const InventoryPage: React.FC = () => {
   const [selectedBatch, setSelectedBatch] = useState<InventoryBatch | null>(null);
   const [activeTab, setActiveTab] = useState('inventory');
   const [actualProductCount, setActualProductCount] = useState<number>(0);
+  const [actualBatchImportValue, setActualBatchImportValue] = useState<number>(0);
   const [showProductInvoice, setShowProductInvoice] = useState(false);
   const [productInvoiceData, setProductInvoiceData] = useState<any>(null);
 
-  const handleViewBatchDetails = (batch: InventoryBatch) => {
-    setSelectedBatch(batch);
-    setActiveTab('products');
-    fetchActualProductCount(batch.BatchCode);
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount || 0);
   };
 
-  const fetchActualProductCount = async (batchCode: string) => {
+  const handleViewBatchDetails = (batch: InventoryBatch) => {
+    setSelectedBatch(batch);
+    setActualBatchImportValue(batch.TotalImportValue || 0);
+    setActiveTab('products');
+    fetchActualBatchStats(batch.BatchCode);
+  };
+
+  const fetchActualBatchStats = async (batchCode: string) => {
     try {
       const response = await fetch(`/api/products-v2?batchCode=${batchCode}&limit=1000`);
       const result = await response.json();
 
       if (result.success && result.data) {
-        setActualProductCount(result.data.data.length);
+        const products = result.data.data || [];
+        const totalImportValue = products.reduce(
+          (sum: number, product: { ImportPrice?: number }) => sum + (Number(product.ImportPrice) || 0),
+          0
+        );
+
+        setActualProductCount(products.length);
+        setActualBatchImportValue(totalImportValue);
       } else {
         setActualProductCount(0);
+        setActualBatchImportValue(0);
       }
     } catch (error) {
-      console.error('Error fetching product count:', error);
+      console.error('Error fetching batch stats:', error);
       setActualProductCount(0);
+      setActualBatchImportValue(0);
     }
   };
 
@@ -134,7 +152,7 @@ const InventoryPage: React.FC = () => {
               {selectedBatch && (
                 <div className="mt-3">
                   <Row className="g-3 mb-4">
-                    <Col md={4}>
+                    <Col md={3}>
                       <Card className="h-100 shadow-sm border-0 bg-primary bg-opacity-10">
                         <Card.Body className="p-3 d-flex align-items-center">
                           <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style={{ width: '48px', height: '48px' }}>
@@ -149,7 +167,7 @@ const InventoryPage: React.FC = () => {
                         </Card.Body>
                       </Card>
                     </Col>
-                    <Col md={4}>
+                    <Col md={3}>
                       <Card className="h-100 shadow-sm border-0 bg-light">
                         <Card.Body className="p-3 d-flex align-items-center">
                           <div className="rounded-circle bg-secondary bg-opacity-25 text-secondary d-flex align-items-center justify-content-center me-3" style={{ width: '48px', height: '48px' }}>
@@ -164,7 +182,22 @@ const InventoryPage: React.FC = () => {
                         </Card.Body>
                       </Card>
                     </Col>
-                    <Col md={4}>
+                    <Col md={3}>
+                      <Card className="h-100 shadow-sm border-0 bg-success bg-opacity-10">
+                        <Card.Body className="p-3 d-flex align-items-center">
+                          <div className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3" style={{ width: '48px', height: '48px' }}>
+                            <i className="fas fa-money-bill-wave fa-lg"></i>
+                          </div>
+                          <div>
+                            <span className="text-muted small fw-medium d-block mb-1">Tổng giá nhập</span>
+                            <div className="fs-5 fw-bold text-success lh-1">
+                              {formatCurrency(actualBatchImportValue || selectedBatch.TotalImportValue)}
+                            </div>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                    <Col md={3}>
                       <Card className="h-100 shadow-sm border-0 bg-warning bg-opacity-10">
                         <Card.Body className="p-3 d-flex align-items-center">
                           <div className="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center me-3" style={{ width: '48px', height: '48px' }}>
@@ -184,7 +217,7 @@ const InventoryPage: React.FC = () => {
 
                   <ProductListV2
                     batchCode={selectedBatch.BatchCode}
-                    onProductCountChange={() => fetchActualProductCount(selectedBatch.BatchCode)}
+                    onProductCountChange={() => fetchActualBatchStats(selectedBatch.BatchCode)}
                     onPrintInvoice={handlePrintInvoiceFromProduct}
                     showAddButton={false}
                     hideCategoryFilter={true}
