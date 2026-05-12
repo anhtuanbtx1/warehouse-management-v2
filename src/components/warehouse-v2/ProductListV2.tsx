@@ -765,7 +765,6 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                   <th className="text-nowrap">Tên sản phẩm</th>
                   <th className="text-nowrap">IMEI</th>
                   <th className="text-nowrap text-center">Danh mục</th>
-                  <th className="text-nowrap">Lô hàng</th>
                   <th className="text-nowrap text-end">Giá nhập</th>
                   {!hideColumns.includes('salePrice') && <th className="text-nowrap text-end">Giá bán</th>}
                   {!hideColumns.includes('profit') && <th className="text-nowrap text-end">Lãi/Lỗ</th>}
@@ -799,16 +798,6 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                       </td>
                       <td className="text-center">
                         <Badge bg="info" className="fw-normal bg-opacity-75">{product.CategoryName}</Badge>
-                      </td>
-                      <td>
-                        <div className="d-flex flex-column">
-                          <Badge bg="light" text="primary" className="border border-primary-subtle px-2 py-1 mb-1 align-self-start">
-                            {product.BatchCode}
-                          </Badge>
-                          <small className="text-muted">
-                            {formatDate(product.ImportDate)}
-                          </small>
-                        </div>
                       </td>
                       <td className="text-end fw-medium">{formatCurrency(product.ImportPrice)}</td>
                       {!hideColumns.includes('salePrice') && (
