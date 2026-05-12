@@ -262,7 +262,15 @@ const InvoicesPage: React.FC = () => {
                             </div>
                           </td>
                           <td>
-                            <Badge bg="info" className="text-uppercase">{sale.PaymentMethod || 'N/A'}</Badge>
+                            {sale.PaymentMethod === 'CASH' ? (
+                              <Badge bg="success">Tiền mặt</Badge>
+                            ) : sale.PaymentMethod === 'CARD' ? (
+                              <Badge bg="primary">Thẻ</Badge>
+                            ) : sale.PaymentMethod === 'TRANSFER' ? (
+                              <Badge bg="info">Chuyển khoản</Badge>
+                            ) : (
+                              <Badge bg="secondary">{sale.PaymentMethod || 'N/A'}</Badge>
+                            )}
                           </td>
                           <td>
                             <span className="text-info">{sale.ImportPrice ? formatCurrency(sale.ImportPrice) : '-'}</span>

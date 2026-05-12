@@ -995,9 +995,12 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
             </Table>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="d-flex justify-content-center">
-                <Pagination>
+            <div className="d-flex flex-column align-items-center gap-2 mt-4">
+              <div className="small text-muted">
+                Hiển thị tối đa 10 sản phẩm mỗi trang | Trang <strong>{currentPage}</strong> / <strong>{totalPages || 1}</strong>
+              </div>
+              {totalPages > 1 && (
+                <Pagination className="mb-0">
                   <Pagination.Prev
                     disabled={currentPage === 1}
                     onClick={() => handlePageChange(currentPage - 1)}
@@ -1016,8 +1019,8 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                     onClick={() => handlePageChange(currentPage + 1)}
                   />
                 </Pagination>
-              </div>
-            )}
+              )}
+            </div>
           </>
         )}
       </Card.Body>

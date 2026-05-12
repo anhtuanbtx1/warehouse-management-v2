@@ -189,11 +189,11 @@ export async function POST(request: NextRequest) {
     // Create sales invoice - absolute minimal columns
     const invoiceQuery = `
       INSERT INTO CRM_SalesInvoices (
-        InvoiceNumber, SaleDate, TotalAmount, FinalAmount
+        InvoiceNumber, SaleDate, TotalAmount, FinalAmount, PaymentMethod
       )
       OUTPUT INSERTED.InvoiceID
       VALUES (
-        @invoiceNumber, @saleDate, @totalAmount, @finalAmount
+        @invoiceNumber, @saleDate, @totalAmount, @finalAmount, @paymentMethod
       )
     `;
 
@@ -208,7 +208,8 @@ export async function POST(request: NextRequest) {
       invoiceNumber,
       saleDate: vietnamTimeISO,
       totalAmount: totalAmount,
-      finalAmount: totalAmount
+      finalAmount: totalAmount,
+      paymentMethod
     };
 
     const invoiceInsert = await executeQuery<{ InvoiceID: number }>(invoiceQuery, invoiceParams);
