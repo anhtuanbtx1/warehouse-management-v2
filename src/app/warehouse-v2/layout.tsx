@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ToastProvider } from '@/contexts/ToastContext';
 import AuthGuard from '@/components/warehouse-v2/AuthGuard';
+import { useLayoutContext } from '@/context/useLayoutContext';
 import './globals.css';
 
 interface WarehouseV2LayoutProps {
@@ -27,14 +28,11 @@ const STORAGE_KEY = '__REBACK_NEXT_CONFIG__';
 const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const isLoginPage = pathname === '/warehouse-v2/login';
-  const [isDark, setIsDark] = useState(false);
+  const { themeMode, changeTheme } = useLayoutContext();
+  const isDark = themeMode === 'dark';
   const [userRole, setUserRole] = useState<string>('');
 
   useEffect(() => {
-    const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-bs-theme') || 'light';
-    setIsDark(currentTheme === 'dark');
-
     // Get user role from localStorage
     try {
       const userStr = localStorage.getItem('warehouse_user');
@@ -61,25 +59,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
   };
 
   const handleThemeToggle = () => {
-    const html = document.documentElement;
-    const nextTheme = isDark ? 'light' : 'dark';
-
-    html.setAttribute('data-bs-theme', nextTheme);
-    setIsDark(nextTheme === 'dark');
-
-    try {
-      const rawSettings = localStorage.getItem(STORAGE_KEY);
-      const settings = rawSettings ? JSON.parse(rawSettings) : {};
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          ...settings,
-          theme: nextTheme,
-        }),
-      );
-    } catch (error) {
-      console.error('Error saving theme preference:', error);
-    }
+    changeTheme(isDark ? 'light' : 'dark');
   };
 
   const handleLogout = () => {
