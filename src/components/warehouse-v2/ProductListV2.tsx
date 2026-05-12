@@ -99,6 +99,12 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
     Notes: ''
   });
 
+  // Import Excel modal states
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importError, setImportError] = useState('');
+  const [importResult, setImportResult] = useState<any>(null);
+
   const fetchProducts = async (page: number = 1) => {
     try {
       setLoading(true);
@@ -312,8 +318,159 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
     }
   };
 
+  // Delete product modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<ProductV2 | null>(null);
+  const [deleteProductLoading, setDeleteProductLoading] = useState(false);
+
+  const handleDeleteProductClick = (product: ProductV2) => {
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+
+    try {
+      setDeleteProductLoading(true);
+      const response = await fetch(`/api/products-v2/${productToDelete.ProductID}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showSuccess(
+          'Xoá sản phẩm thành công!',
+          `Đã xoá "${productToDelete.ProductName}" khỏi hệ thống`
+        );
+        setShowDeleteModal(false);
+        setProductToDelete(null);
+        fetchProducts(currentPage);
+        if (onProductCountChange) {
+          onProductCountChange();
+        }
+      } else {
+        showError('Lỗi xoá sản phẩm', result.error || 'Có lỗi xảy ra khi xoá sản phẩm');
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      showError('Lỗi kết nối', 'Lỗi kết nối. Vui lòng thử lại.');
+    } finally {
+      setDeleteProductLoading(false);
+    }
+  };
+
   const handlePageChange = (page: number) => {
     fetchProducts(page);
+  };
+
+  const handleExcelImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportLoading(true);
+    setImportError('');
+    setImportResult(null);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (evt) => {
+        try {
+          const bstr = evt.target?.result;
+          const wb = XLSX.read(bstr, { type: 'binary' });
+          const wsname = wb.SheetNames[0];
+          const ws = wb.Sheets[wsname];
+          const data = XLSX.utils.sheet_to_json(ws);
+
+          if (data.length === 0) {
+            setImportError('File Excel không có dữ liệu');
+            setImportLoading(false);
+            return;
+          }
+
+          // Chuẩn hóa dữ liệu từ Excel
+          const normalizedProducts: any[] = [];
+
+          data.forEach((row: any) => {
+            const productName = row['Tên hàng'] || row['ProductName'] || row['Tên'] || '';
+            const rawPrice = row['Đơn giá'] || row['ImportPrice'] || row['Giá'] || 0;
+            const price = typeof rawPrice === 'string' ? parseFloat(rawPrice.replace(/\D/g, '')) : parseFloat(rawPrice);
+            const imei = row['Serial/IMEI'] || row['Serial'] || row['IMEI'] || row['Mã hàng'] || '';
+            const quantity = parseInt(row['Số lượng'] || row['Quantity'] || '1');
+            const notes = row['Ghi chú'] || row['Notes'] || '';
+
+            if (quantity > 1 && !imei) {
+               // Nếu số lượng > 1 và không có IMEI, tạo các bản ghi với mã định danh tạm
+               const baseId = row['Mã hàng'] || 'SP';
+               for(let i=1; i<=quantity; i++) {
+                 normalizedProducts.push({
+                    ProductName: productName,
+                    IMEI: `${baseId}_${Date.now()}_${i}`,
+                    ImportPrice: price,
+                    Notes: `Sản phẩm ${i}/${quantity}. ${notes}`
+                 });
+               }
+            } else if (quantity > 1 && imei) {
+               // Có IMEI nhưng số lượng > 1 (có thể là lỗi nhập liệu hoặc hàng loạt)
+               // Ở đây ta ưu tiên IMEI là duy nhất, nên nếu quantity > 1 ta vẫn lặp nhưng phải cảnh báo hoặc xử lý
+               for(let i=1; i<=quantity; i++) {
+                 normalizedProducts.push({
+                    ProductName: productName,
+                    IMEI: i === 1 ? imei : `${imei}_${i}`,
+                    ImportPrice: price,
+                    Notes: notes
+                 });
+               }
+            } else if (imei || productName) {
+              normalizedProducts.push({
+                ProductName: productName,
+                IMEI: imei || `SP_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                ImportPrice: price,
+                Notes: notes
+              });
+            }
+          });
+
+          if (normalizedProducts.length === 0) {
+            setImportError('Không tìm thấy dữ liệu sản phẩm hợp lệ trong file (Yêu cầu ít nhất Tên hàng hoặc IMEI và Giá)');
+            setImportLoading(false);
+            return;
+          }
+
+          // Gửi dữ liệu lên API import
+          const response = await fetch('/api/products-v2/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              BatchID: batchId,
+              Products: normalizedProducts
+            }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            setImportResult(result.data);
+            showSuccess('Import Excel hoàn tất!', result.message);
+            fetchProducts(1);
+            if (onProductCountChange) onProductCountChange();
+          } else {
+            setImportError(result.error || 'Có lỗi xảy ra khi import dữ liệu');
+          }
+        } catch (err) {
+          console.error('Error processing Excel data:', err);
+          setImportError('Lỗi khi xử lý dữ liệu Excel. Vui lòng kiểm tra lại định dạng file.');
+        } finally {
+          setImportLoading(false);
+        }
+      };
+      reader.readAsBinaryString(file);
+    } catch (error) {
+      console.error('Error reading file:', error);
+      setImportError('Lỗi khi đọc file. Vui lòng thử lại.');
+      setImportLoading(false);
+    }
   };
 
   const handlePrintLabel = (product: ProductV2) => {
@@ -557,6 +714,22 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                     {isBatchFull ? "Đã đủ" : "Thêm SP"}
                   </Button>
                 )}
+                {showAddButton && batchId && (
+                  <Button
+                    variant={isBatchFull ? "secondary" : "info"}
+                    onClick={() => {
+                      setImportError('');
+                      setImportResult(null);
+                      setShowImportModal(true);
+                    }}
+                    title={isBatchFull ? "Lô hàng đã đủ số lượng" : "Import bằng Excel"}
+                    className="btn-compact ms-2 text-white"
+                    disabled={isBatchFull}
+                  >
+                    <span className="me-1">📁</span>
+                    Import
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -693,6 +866,18 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                               className="d-flex align-items-center justify-content-center"
                             >
                               <i className="fas fa-edit"></i>
+                            </Button>
+                          )}
+                          {product.Status === 'IN_STOCK' && (
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDeleteProductClick(product)}
+                              disabled={deleteProductLoading}
+                              title="Xoá sản phẩm"
+                              className="d-flex align-items-center justify-content-center"
+                            >
+                              <i className="fas fa-trash"></i>
                             </Button>
                           )}
                           {product.Status === 'IN_STOCK' && onSellProduct && (
@@ -1004,6 +1189,107 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                 <span className="me-2">✏️</span>
                 Cập nhật sản phẩm
               </>
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showImportModal} onHide={() => setShowImportModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <span className="me-2">📁</span>
+            Import danh sách sản phẩm từ Excel
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {importError && (
+            <Alert variant="danger">
+              <i className="fas fa-exclamation-triangle me-2"></i>
+              {importError}
+            </Alert>
+          )}
+
+          {importResult && (
+            <Alert variant="success">
+              <div><strong>Tổng dòng xử lý:</strong> {importResult.total}</div>
+              <div><strong>Thành công:</strong> {importResult.successCount}</div>
+              <div><strong>Thất bại:</strong> {importResult.failCount}</div>
+              {importResult.errors?.length > 0 && (
+                <div className="mt-2">
+                  <strong>Chi tiết lỗi:</strong>
+                  <ul className="mb-0 mt-1">
+                    {importResult.errors.slice(0, 10).map((err: any, idx: number) => (
+                      <li key={idx}>Dòng {err.row} - {err.imei}: {err.error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </Alert>
+          )}
+
+          <Form.Group>
+            <Form.Label>Chọn file Excel</Form.Label>
+            <Form.Control
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleExcelImport}
+              disabled={importLoading}
+            />
+            <Form.Text className="text-muted">
+              Hỗ trợ các cột: Mã hàng, Tên hàng, Đơn giá, Giảm giá (%), Số lượng, Serial/IMEI. Hệ thống sẽ tự gán vào lô hiện tại.
+            </Form.Text>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowImportModal(false)} disabled={importLoading}>
+            Đóng
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showDeleteModal} onHide={() => !deleteProductLoading && setShowDeleteModal(false)} centered>
+        <Modal.Header closeButton={!deleteProductLoading}>
+          <Modal.Title>
+            <span className="me-2 text-danger">🗑️</span>
+            Xác nhận xoá sản phẩm
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {productToDelete && (
+            <div>
+              <p className="mb-2">Bạn có chắc chắn muốn xoá sản phẩm này không?</p>
+              <div className="bg-light rounded p-3">
+                <div><strong>Tên sản phẩm:</strong> {productToDelete.ProductName}</div>
+                <div><strong>IMEI:</strong> {productToDelete.IMEI}</div>
+                <div><strong>Giá nhập:</strong> {formatCurrency(productToDelete.ImportPrice)}</div>
+              </div>
+              <div className="text-danger small mt-3">Hành động này không thể hoàn tác.</div>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowDeleteModal(false);
+              setProductToDelete(null);
+            }}
+            disabled={deleteProductLoading}
+          >
+            Huỷ
+          </Button>
+          <Button
+            variant="danger"
+            onClick={confirmDeleteProduct}
+            disabled={deleteProductLoading}
+          >
+            {deleteProductLoading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Đang xoá...
+              </>
+            ) : (
+              'Xoá sản phẩm'
             )}
           </Button>
         </Modal.Footer>
