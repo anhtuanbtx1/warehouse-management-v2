@@ -105,6 +105,11 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
   const [importError, setImportError] = useState('');
   const [importResult, setImportResult] = useState<any>(null);
 
+  // Bulk Delete States
+  const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
+
   const fetchProducts = async (page: number = 1) => {
     try {
       setLoading(true);
@@ -346,6 +351,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
         );
         setShowDeleteModal(false);
         setProductToDelete(null);
+        setSelectedProductIds(prev => prev.filter(id => id !== productToDelete.ProductID));
         fetchProducts(currentPage);
         if (onProductCountChange) {
           onProductCountChange();
@@ -358,6 +364,64 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
       showError('Lỗi kết nối', 'Lỗi kết nối. Vui lòng thử lại.');
     } finally {
       setDeleteProductLoading(false);
+    }
+  };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      const inStockIds = products
+        .filter(p => p.Status === 'IN_STOCK')
+        .map(p => p.ProductID);
+      const newSelections = new Set([...selectedProductIds, ...inStockIds]);
+      setSelectedProductIds(Array.from(newSelections));
+    } else {
+      const currentPageIds = products.map(p => p.ProductID);
+      setSelectedProductIds(selectedProductIds.filter(id => !currentPageIds.includes(id)));
+    }
+  };
+
+  const handleSelectRow = (productId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedProductIds(prev => [...prev, productId]);
+    } else {
+      setSelectedProductIds(prev => prev.filter(id => id !== productId));
+    }
+  };
+
+  const confirmBulkDelete = async () => {
+    if (selectedProductIds.length === 0) return;
+
+    try {
+      setBulkDeleteLoading(true);
+      const response = await fetch('/api/products-v2/bulk', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids: selectedProductIds })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showSuccess(
+          'Xóa hàng loạt thành công!',
+          result.message || `Đã xóa ${selectedProductIds.length} sản phẩm khỏi hệ thống`
+        );
+        setShowBulkDeleteModal(false);
+        setSelectedProductIds([]);
+        fetchProducts(1);
+        if (onProductCountChange) {
+          onProductCountChange();
+        }
+      } else {
+        showError('Lỗi xóa sản phẩm', result.error || 'Có lỗi xảy ra khi xóa hàng loạt');
+      }
+    } catch (error) {
+      console.error('Error bulk deleting products:', error);
+      showError('Lỗi kết nối', 'Lỗi kết nối. Vui lòng thử lại.');
+    } finally {
+      setBulkDeleteLoading(false);
     }
   };
 
@@ -632,6 +696,17 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
           )}
         </div>
         <div className="d-flex gap-2">
+          {selectedProductIds.length > 0 && (
+            <Button
+              variant="danger"
+              onClick={() => setShowBulkDeleteModal(true)}
+              className="btn-compact"
+              title="Xóa các sản phẩm đã chọn"
+            >
+              <span className="me-1">🗑️</span>
+              Xóa ({selectedProductIds.length})
+            </Button>
+          )}
           <Button
             variant="outline-success"
             onClick={exportToExcel}
@@ -762,6 +837,18 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
             <Table responsive striped hover>
               <thead>
                 <tr>
+                  <th style={{ width: '40px' }} className="text-center">
+                    <Form.Check
+                      type="checkbox"
+                      onChange={handleSelectAll}
+                      checked={
+                        products.length > 0 &&
+                        products.filter(p => p.Status === 'IN_STOCK').length > 0 &&
+                        products.filter(p => p.Status === 'IN_STOCK').every(p => selectedProductIds.includes(p.ProductID))
+                      }
+                      disabled={products.filter(p => p.Status === 'IN_STOCK').length === 0}
+                    />
+                  </th>
                   <th className="text-nowrap">Tên sản phẩm</th>
                   <th className="text-nowrap">IMEI</th>
                   <th className="text-nowrap text-center">Danh mục</th>
@@ -782,7 +869,15 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                   </tr>
                 ) : (
                   products.map(product => (
-                    <tr key={product.ProductID} className="align-middle">
+                    <tr key={product.ProductID} className={`align-middle ${selectedProductIds.includes(product.ProductID) ? 'table-primary' : ''}`}>
+                      <td className="text-center">
+                        <Form.Check
+                          type="checkbox"
+                          checked={selectedProductIds.includes(product.ProductID)}
+                          onChange={(e) => handleSelectRow(product.ProductID, e.target.checked)}
+                          disabled={product.Status !== 'IN_STOCK'}
+                        />
+                      </td>
                       <td>
                         <div>
                           <strong className="text-dark">{product.ProductName}</strong>
@@ -1279,6 +1374,42 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
               </>
             ) : (
               'Xoá sản phẩm'
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showBulkDeleteModal} onHide={() => !bulkDeleteLoading && setShowBulkDeleteModal(false)} centered>
+        <Modal.Header closeButton={!bulkDeleteLoading}>
+          <Modal.Title>
+            <span className="me-2 text-danger">🗑️</span>
+            Xác nhận xóa hàng loạt
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-2">Bạn có chắc chắn muốn xóa <strong>{selectedProductIds.length}</strong> sản phẩm đã chọn không?</p>
+          <div className="text-danger small mt-2">Hành động này sẽ xóa vĩnh viễn dữ liệu và không thể hoàn tác.</div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowBulkDeleteModal(false)}
+            disabled={bulkDeleteLoading}
+          >
+            Hủy
+          </Button>
+          <Button
+            variant="danger"
+            onClick={confirmBulkDelete}
+            disabled={bulkDeleteLoading}
+          >
+            {bulkDeleteLoading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Đang xóa...
+              </>
+            ) : (
+              'Xác nhận xóa tất cả'
             )}
           </Button>
         </Modal.Footer>
