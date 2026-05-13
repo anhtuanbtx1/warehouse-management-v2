@@ -148,11 +148,11 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
                 <Container fluid className="warehouse-shell-container">
                   <Navbar.Brand as={Link} href="/warehouse-v2" className="warehouse-brand">
                     <span className="warehouse-brand-mark">
-                      <i className="fas fa-layer-group" aria-hidden="true"></i>
+                      <i className="fas fa-mobile-screen-button" aria-hidden="true"></i>
                     </span>
                     <span className="warehouse-brand-text">
-                      <span className="warehouse-brand-title">Warehouse V2</span>
-                      <span className="warehouse-brand-subtitle">Quản lý kho HTran</span>
+                      <span className="warehouse-brand-title">Phone Store</span>
+                      <span className="warehouse-brand-subtitle">Hệ thống quản lý bán hàng</span>
                     </span>
                   </Navbar.Brand>
 
@@ -187,8 +187,8 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
               <Container fluid className="warehouse-shell-container">
                 <div className="warehouse-footer-content">
                   <div>
-                    <div className="warehouse-footer-title">Hệ thống Quản lý Kho HTran</div>
-                    <div className="warehouse-footer-subtitle">Theo dõi nhập hàng, bán hàng, tồn kho và báo cáo theo IMEI.</div>
+                    <div className="warehouse-footer-title">Hệ thống Cửa hàng Điện thoại</div>
+                    <div className="warehouse-footer-subtitle">Quản lý bán hàng, tồn kho điện thoại theo IMEI.</div>
                   </div>
                   <div className="warehouse-footer-meta">
                     <span>Phiên bản 2.0</span>

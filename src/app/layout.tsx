@@ -1,4 +1,3 @@
-import logoDark from '@/assets/images/logo-dark.png'
 import AppProvidersWrapper from '@/components/wrappers/AppProvidersWrapper'
 import type { Metadata } from 'next'
 import { Figtree } from 'next/font/google'
@@ -15,10 +14,15 @@ const figtree = Figtree({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Lahomes Nextjs - Real Estate Management Admin Template',
+    template: '%s | Quản lý cửa hàng điện thoại',
     default: DEFAULT_PAGE_TITLE,
   },
-  description: 'A fully responsive premium admin dashboard template, Real Estate Management Admin Template',
+  description: 'Hệ thống quản lý cửa hàng bán điện thoại',
+  icons: {
+    icon: '/phone-store.svg',
+    shortcut: '/phone-store.svg',
+    apple: '/phone-store.svg',
+  },
 }
 
 const splashScreenStyles = `
@@ -71,7 +75,11 @@ export default function RootLayout({
       </head>
       <body className={figtree.className}>
         <div id="splash-screen">
-          <Image alt="Logo" width={112} height={24} src={logoDark} style={{ height: '6%', width: 'auto' }} priority />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#2563eb', fontWeight: 700, fontSize: '28px' }}>
+            <i className="fas fa-store"></i>
+            <i className="fas fa-mobile-screen-button"></i>
+            <span>Phone Store</span>
+          </div>
         </div>
         <NextTopLoader color="#604ae3" showSpinner={false} />
         <div id="__next_splash">
