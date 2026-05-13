@@ -33,17 +33,24 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
   const [userRole, setUserRole] = useState<string>('');
 
   useEffect(() => {
-    // Get user role from localStorage
+    if (isLoginPage) {
+      setUserRole('');
+      return;
+    }
+
     try {
       const userStr = localStorage.getItem('warehouse_user');
       if (userStr) {
         const user = JSON.parse(userStr);
         setUserRole(user.role || '');
+      } else {
+        setUserRole('');
       }
     } catch (error) {
       console.error('Error reading user role:', error);
+      setUserRole('');
     }
-  }, []);
+  }, [isLoginPage, pathname]);
 
   const isActive = (path: string) => {
     return pathname === path ? 'active' : '';
