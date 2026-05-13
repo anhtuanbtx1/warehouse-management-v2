@@ -410,6 +410,29 @@ export async function POST(request: NextRequest) {
       message: 'Product sold successfully'
     };
 
+    // Gửi thông báo Telegram (Best effort)
+    try {
+      const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
+      const telegramChatId = process.env.TELEGRAM_CHAT_ID;
+
+      if (telegramBotToken && telegramChatId) {
+        const imei = product.IMEI;
+        const saleAmount = body.SalePrice + (body.IncludeCable ? (body.CablePrice || 0) : 0);
+        const telegramText = `📱 Bán thành công:\nIMEI: ${imei}\nSố tiền: ${saleAmount.toLocaleString('vi-VN')} VNĐ`;
+
+        fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: telegramChatId,
+            text: telegramText
+          })
+        }).catch(err => console.error('Telegram notification fetch error:', err));
+      }
+    } catch (teleError) {
+      console.error('Error sending telegram notification:', teleError);
+    }
+
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     console.error('Error selling product:', error);
