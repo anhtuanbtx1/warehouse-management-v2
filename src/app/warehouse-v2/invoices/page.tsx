@@ -39,7 +39,7 @@ const InvoicesPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [invoiceNumber, setInvoiceNumber] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('');
   const [fromDate, setFromDate] = useState(defaultDates.fromDate);
   const [toDate, setToDate] = useState(defaultDates.toDate);
   const [showInvoice, setShowInvoice] = useState(false);
@@ -53,7 +53,7 @@ const InvoicesPage: React.FC = () => {
           page: page.toString(),
           limit: '10',
           ...(invoiceNumber && { invoiceNumber }),
-          ...(customerPhone && { customerPhone }),
+          ...(paymentMethod && { paymentMethod }),
           ...(fromDate && { fromDate }),
           ...(toDate && { toDate }),
         });
@@ -79,7 +79,7 @@ const InvoicesPage: React.FC = () => {
         setLoading(false);
       }
     },
-    [invoiceNumber, customerPhone, fromDate, toDate]
+    [invoiceNumber, paymentMethod, fromDate, toDate]
   );
 
   useEffect(() => {
@@ -121,7 +121,7 @@ const InvoicesPage: React.FC = () => {
 
   const handleReset = () => {
     setInvoiceNumber('');
-    setCustomerPhone('');
+    setPaymentMethod('');
     setFromDate(defaultDates.fromDate);
     setToDate(defaultDates.toDate);
   };
@@ -186,13 +186,15 @@ const InvoicesPage: React.FC = () => {
                   />
                 </Col>
                 <Col md={3}>
-                  <Form.Control
-                    type="text"
-                    placeholder="Số điện thoại khách hàng..."
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  />
+                  <Form.Select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  >
+                    <option value="">Tất cả phương thức</option>
+                    <option value="CASH">Tiền mặt</option>
+                    <option value="CARD">Thẻ</option>
+                    <option value="TRANSFER">Chuyển khoản</option>
+                  </Form.Select>
                 </Col>
                 <Col md={2}>
                   <Form.Control type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />

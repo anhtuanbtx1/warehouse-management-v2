@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const fromDate = searchParams.get('fromDate');
     const toDate = searchParams.get('toDate');
-    const customerPhone = searchParams.get('customerPhone');
+    const paymentMethod = searchParams.get('paymentMethod');
     const invoiceNumber = searchParams.get('invoiceNumber');
 
     const offset = (page - 1) * limit;
@@ -62,9 +62,9 @@ export async function GET(request: NextRequest) {
       params.toDate = toDate;
     }
 
-    if (customerPhone) {
-      whereClause += ' AND i.CustomerPhone LIKE @customerPhone';
-      params.customerPhone = `%${customerPhone}%`;
+    if (paymentMethod) {
+      whereClause += ' AND i.PaymentMethod = @paymentMethod';
+      params.paymentMethod = paymentMethod;
     }
 
     if (invoiceNumber) {
