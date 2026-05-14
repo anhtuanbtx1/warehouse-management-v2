@@ -1298,12 +1298,25 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
 
           {importResult && (
             <Alert variant="success">
-              <div><strong>Tổng dòng xử lý:</strong> {importResult.total}</div>
-              <div><strong>Thành công:</strong> {importResult.successCount}</div>
-              <div><strong>Thất bại:</strong> {importResult.failCount}</div>
+              <div className="d-flex flex-wrap gap-3">
+                <div><strong>Tổng xử lý:</strong> {importResult.total}</div>
+                <div><strong>Thành công:</strong> {importResult.successCount}</div>
+                <div className="text-warning"><strong>Bỏ qua (trùng):</strong> {importResult.skippedCount || 0}</div>
+                <div className="text-danger"><strong>Lỗi:</strong> {importResult.failCount}</div>
+              </div>
+              {importResult.skipped?.length > 0 && (
+                <div className="mt-2 small text-muted">
+                  <strong>Danh sách IMEI trùng (đã bỏ qua):</strong>
+                  <ul className="mb-0 mt-1" style={{ maxHeight: '100px', overflowY: 'auto' }}>
+                    {importResult.skipped.map((s: any, idx: number) => (
+                      <li key={idx}>Dòng {s.row}: {s.imei}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               {importResult.errors?.length > 0 && (
-                <div className="mt-2">
-                  <strong>Chi tiết lỗi:</strong>
+                <div className="mt-2 small">
+                  <strong>Chi tiết lỗi khác:</strong>
                   <ul className="mb-0 mt-1">
                     {importResult.errors.slice(0, 10).map((err: any, idx: number) => (
                       <li key={idx}>Dòng {err.row} - {err.imei}: {err.error}</li>
