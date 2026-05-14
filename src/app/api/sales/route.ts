@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeProcedure, executeQuery } from '@/lib/database';
 import { ApiResponse } from '@/types/warehouse';
 import { getVietnamNowISO } from '@/lib/timezone';
+import { logProductActivity } from '@/lib/product-activity-log';
 
 // Interface cho Sales
 interface SalesInvoice {
@@ -376,6 +377,16 @@ export async function POST(request: NextRequest) {
     };
 
     await executeQuery(updateProductQuery, updateParams);
+
+    await logProductActivity({
+      productId: body.ProductID,
+      productName: product.ProductName,
+      imei: product.IMEI,
+      actionType: 'SELL',
+      description: `Bán sản phẩm, hóa đơn ${invoiceNumber}${body.IncludeCable ? ' (kèm cáp)' : ''}`,
+      amount: totalAmount,
+      performedBy: 'system',
+    });
 
     // Get the complete sale information
     const result = await executeQuery(`

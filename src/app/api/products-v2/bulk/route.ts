@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getConnection } from '@/lib/database';
 import sql from 'mssql';
+import { logProductActivity } from '@/lib/product-activity-log';
 
 interface BulkDeleteRequest {
   ids: number[];
@@ -36,7 +37,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     const checkResult = await checkRequest.query(`
-      SELECT ProductID, ProductName, Status
+      SELECT ProductID, ProductName, IMEI, Status
       FROM CRM_Products
       WHERE ProductID IN (${idParams})
     `);
@@ -68,6 +69,18 @@ export async function DELETE(request: NextRequest) {
       DELETE FROM CRM_Products
       WHERE ProductID IN (${idParams})
     `);
+
+    // Ghi log từng sản phẩm bị xoá
+    for (const p of checkResult.recordset) {
+      await logProductActivity({
+        productId: p.ProductID,
+        productName: p.ProductName,
+        imei: p.IMEI || null,
+        actionType: 'DELETE',
+        description: `Xóa hàng loạt sản phẩm ${p.ProductName} (ID: ${p.ProductID})`,
+        performedBy: 'system',
+      });
+    }
 
     return NextResponse.json({
       success: true,

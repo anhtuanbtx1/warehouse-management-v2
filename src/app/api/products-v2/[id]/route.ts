@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getConnection } from '@/lib/database';
 import sql from 'mssql';
 import { getVietnamNowISO } from '@/lib/timezone';
+import { logProductActivity } from '@/lib/product-activity-log';
 
 // PUT - Update product (only for IN_STOCK products)
 export async function PUT(
@@ -103,7 +104,7 @@ export async function PUT(
       .input('Notes', sql.NVarChar(500), Notes || null)
       .input('UpdatedAt', sql.DateTime, getVietnamNowISO())
       .query(`
-        UPDATE CRM_Products 
+        UPDATE CRM_Products
         SET
           ProductName = @ProductName,
           IMEI = @IMEI,
@@ -112,6 +113,16 @@ export async function PUT(
           UpdatedAt = @UpdatedAt
         WHERE ProductID = @ProductID AND Status = 'IN_STOCK'
       `);
+
+    await logProductActivity({
+      productId,
+      productName: ProductName,
+      imei: IMEI,
+      actionType: 'UPDATE',
+      description: `Cập nhật sản phẩm từ "${existingProduct.ProductName}" sang "${ProductName}"`,
+      amount: parseFloat(ImportPrice),
+      performedBy: 'system',
+    });
 
     if (updateResult.rowsAffected[0] === 0) {
       return NextResponse.json(
@@ -251,8 +262,8 @@ export async function DELETE(
     const checkResult = await pool.request()
       .input('ProductID', sql.Int, productId)
       .query(`
-        SELECT ProductID, Status, ProductName 
-        FROM CRM_Products 
+        SELECT ProductID, Status, ProductName, IMEI
+        FROM CRM_Products
         WHERE ProductID = @ProductID
       `);
 
@@ -274,11 +285,20 @@ export async function DELETE(
       );
     }
 
+    await logProductActivity({
+      productId,
+      productName: product.ProductName,
+      imei: product.IMEI || null,
+      actionType: 'DELETE',
+      description: `Xóa sản phẩm ${product.ProductName}`,
+      performedBy: 'system',
+    });
+
     // Delete product
     const deleteResult = await pool.request()
       .input('ProductID', sql.Int, productId)
       .query(`
-        DELETE FROM CRM_Products 
+        DELETE FROM CRM_Products
         WHERE ProductID = @ProductID AND Status = 'IN_STOCK'
       `);
 

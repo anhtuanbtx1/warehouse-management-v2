@@ -15,12 +15,13 @@ interface WarehouseV2LayoutProps {
 
 const navigationItems = [
   { href: '/warehouse-v2', label: 'Tổng quan', icon: 'fas fa-chart-pie', roles: ['admin', 'manager', 'staff'] },
-  { href: '/warehouse-v2/import', label: 'Nhập hàng', icon: 'fas fa-box-open', roles: ['admin', 'manager', 'staff'] },
+  { href: '/warehouse-v2/import', label: 'Nhập hàng', icon: 'fas fa-box-open', roles: ['admin', 'manager'] },
   { href: '/warehouse-v2/sales', label: 'Bán hàng', icon: 'fas fa-cart-shopping', roles: ['admin', 'manager', 'staff'] },
   { href: '/warehouse-v2/invoices', label: 'Hóa đơn', icon: 'fas fa-receipt', roles: ['admin', 'manager'] },
   { href: '/warehouse-v2/inventory', label: 'Tồn kho', icon: 'fas fa-warehouse', roles: ['admin', 'manager'] },
   { href: '/warehouse-v2/categories', label: 'Danh mục', icon: 'fas fa-tags', roles: ['admin'] },
   { href: '/warehouse-v2/reports', label: 'Báo cáo', icon: 'fas fa-file-lines', roles: ['admin', 'manager'] },
+  { href: '/warehouse-v2/activities', label: 'Hoạt động', icon: 'fas fa-clock-rotate-left', roles: ['admin', 'manager'] },
 ];
 
 const STORAGE_KEY = '__REBACK_NEXT_CONFIG__';

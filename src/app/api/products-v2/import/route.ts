@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeProcedure, executeQuery } from '@/lib/database';
+import { logProductActivity } from '@/lib/product-activity-log';
 
 interface ProductImportRow {
   ProductName: string;
@@ -42,15 +43,44 @@ export async function POST(request: NextRequest) {
 
     const categoryId = batchCheck[0].CategoryID;
 
+    const normalizeImei = (imei: unknown) => String(imei || '').trim();
+
+    const normalizedImeis = products
+      .map(product => normalizeImei(product.IMEI))
+      .filter((imei): imei is string => Boolean(imei));
+
+    const existingImeiRows = normalizedImeis.length > 0
+      ? await executeQuery<{ IMEI: string }>(
+          `SELECT IMEI FROM CRM_Products WHERE IMEI IN (${normalizedImeis.map((_, index) => `@imei${index}`).join(', ')})`,
+          Object.fromEntries(normalizedImeis.map((imei, index) => [`imei${index}`, imei]))
+        )
+      : [];
+
+    const existingImeis = new Set(existingImeiRows.map(row => row.IMEI));
+
     let successCount = 0;
     let failCount = 0;
+    let skippedCount = 0;
     const errors: any[] = [];
+    const skipped: any[] = [];
 
     // Chèn từng sản phẩm, bắt lỗi từng cái để không làm chết toàn bộ tiến trình
     for (const [index, product] of products.entries()) {
       try {
-        if (!product.IMEI || !product.ImportPrice) {
+        const normalizedImei = normalizeImei(product.IMEI);
+
+        if (!normalizedImei || !product.ImportPrice) {
           throw new Error('Thiếu IMEI hoặc Giá nhập');
+        }
+
+        if (existingImeis.has(normalizedImei)) {
+          skippedCount++;
+          skipped.push({
+            row: index + 1,
+            imei: normalizedImei,
+            reason: 'IMEI đã tồn tại, bỏ qua'
+          });
+          continue;
         }
 
         if (product.ImportPrice <= 0) {
@@ -58,7 +88,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate IMEI format for cables specifically if needed, but here we just try to insert
-        if (!/^\d{15}$/.test(product.IMEI) && !/^CAP\d+$/.test(product.IMEI) && !product.IMEI.match(/^[A-Za-z0-9]+$/)) {
+        if (!/^\d{15}$/.test(normalizedImei) && !/^CAP\d+$/.test(normalizedImei) && !normalizedImei.match(/^[A-Za-z0-9]+$/)) {
              // Forcing some basic validation, allowing alphanumeric IMEIs like "KHJK98942654" from example
         }
 
@@ -66,9 +96,18 @@ export async function POST(request: NextRequest) {
         await executeProcedure('SP_CRM_AddProductToBatch', {
           BatchID: batchId,
           ProductName: product.ProductName || '',
-          IMEI: product.IMEI,
+          IMEI: normalizedImei,
           ImportPrice: product.ImportPrice,
           Notes: product.Notes || null
+        });
+
+        await logProductActivity({
+          productName: product.ProductName || '',
+          imei: normalizedImei,
+          actionType: 'IMPORT',
+          description: `Import sản phẩm vào lô #${batchId}`,
+          amount: product.ImportPrice,
+          performedBy: 'system',
         });
 
         successCount++;
@@ -80,9 +119,10 @@ export async function POST(request: NextRequest) {
         // Thử insert trực tiếp nếu SP lỗi, giống như logic của route POST add product
         if (errorMessage.includes('Could not find stored procedure') || errorMessage.includes('failed')) {
            try {
+             const normalizedImei = normalizeImei(product.IMEI);
              const imeiCheck = await executeQuery<{ ProductID: number }>(
                 'SELECT ProductID FROM CRM_Products WHERE IMEI = @imei',
-                { imei: product.IMEI }
+                { imei: normalizedImei }
              );
 
              if (imeiCheck.length > 0) {
@@ -120,7 +160,7 @@ export async function POST(request: NextRequest) {
                batchId: batchId,
                categoryId: categoryId,
                productName: product.ProductName || '',
-               imei: product.IMEI,
+               imei: normalizedImei,
                importPrice: product.ImportPrice,
                notes: product.Notes || null
              });
@@ -146,9 +186,11 @@ export async function POST(request: NextRequest) {
         total: products.length,
         successCount,
         failCount,
+        skippedCount,
+        skipped,
         errors
       },
-      message: `Đã nhập thành công ${successCount}/${products.length} sản phẩm.`
+      message: `Đã nhập thành công ${successCount}/${products.length} sản phẩm. Bỏ qua ${skippedCount} IMEI đã tồn tại.`
     }, { status: 201 });
 
   } catch (error: any) {
