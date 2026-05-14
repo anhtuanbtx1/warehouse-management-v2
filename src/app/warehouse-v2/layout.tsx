@@ -200,7 +200,6 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
                   </div>
                   <div className="warehouse-footer-meta">
                     <span>Phiên bản 2.0</span>
-                    <span>© 2026</span>
                   </div>
                 </div>
               </Container>

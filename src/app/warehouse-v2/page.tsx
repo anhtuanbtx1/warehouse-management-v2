@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
-import Link from 'next/link';
+import { Container, Row, Col, Button, Badge, Table } from 'react-bootstrap';
 import RevenueChart from '@/components/warehouse-v2/RevenueChart';
 import CategoryRevenueChart from '@/components/warehouse-v2/CategoryRevenueChart';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
@@ -20,34 +19,26 @@ interface Activity {
   color: string;
 }
 
-const quickActions = [
-  {
-    href: '/warehouse-v2/import',
-    title: 'Nhập hàng',
-    description: 'Tạo lô hàng mới và cập nhật số lượng nhanh.',
-    icon: 'fas fa-box-open',
-  },
-  {
-    href: '/warehouse-v2/sales',
-    title: 'Bán hàng',
-    description: 'Chọn sản phẩm sẵn có và xử lý giao dịch ngay.',
-    icon: 'fas fa-cart-shopping',
-  },
-  {
-    href: '/warehouse-v2/inventory',
-    title: 'Tồn kho',
-    description: 'Theo dõi trạng thái lô hàng và số lượng còn lại.',
-    icon: 'fas fa-warehouse',
-  },
-];
+interface TopSellingProduct {
+  ProductName: string;
+  IMEI: string;
+  CategoryName?: string;
+  SoldCount: number;
+  TotalRevenue: number;
+  AvgPrice: number;
+}
 
 const WarehouseV2Dashboard: React.FC = () => {
   const { stats, loading: statsLoading, error: statsError, refetch: refetchStats, timezoneDebug } = useDashboardStats();
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
+  const [topWeek, setTopWeek] = useState<TopSellingProduct[]>([]);
+  const [topMonth, setTopMonth] = useState<TopSellingProduct[]>([]);
+  const [topSellingLoading, setTopSellingLoading] = useState(true);
 
   useEffect(() => {
     fetchRecentActivities();
+    fetchTopSelling();
     const clientDebug = getClientTimezoneDebug();
     console.log('Dashboard Client Timezone Debug:', clientDebug);
     if (timezoneDebug) {
@@ -70,12 +61,30 @@ const WarehouseV2Dashboard: React.FC = () => {
     }
   };
 
+  const fetchTopSelling = async () => {
+    try {
+      setTopSellingLoading(true);
+      const [weekRes, monthRes] = await Promise.all([
+        fetch('/api/dashboard/top-selling?period=week'),
+        fetch('/api/dashboard/top-selling?period=month'),
+      ]);
+      const [weekJson, monthJson] = await Promise.all([weekRes.json(), monthRes.json()]);
+      if (weekJson.success) setTopWeek(weekJson.data || []);
+      if (monthJson.success) setTopMonth(monthJson.data || []);
+    } catch (error) {
+      console.error('Error fetching top selling products:', error);
+    } finally {
+      setTopSellingLoading(false);
+    }
+  };
+
   const fetchDashboardData = async () => {
     refetchStats();
     fetchRecentActivities();
+    fetchTopSelling();
   };
 
-  const loading = statsLoading || activitiesLoading;
+  const loading = statsLoading || activitiesLoading || topSellingLoading;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -235,23 +244,82 @@ const WarehouseV2Dashboard: React.FC = () => {
             <div className={styles.quickActionsCard}>
               <div className={styles.sectionHeader}>
                 <div>
-                  <h5>Thao tác nhanh</h5>
-                  <p>Đi tới các nghiệp vụ chính với bố cục rõ ràng và ít thao tác hơn.</p>
+                  <h5>Top 10 sản phẩm bán chạy</h5>
+                  <p>Thống kê theo tuần và theo tháng để theo dõi xu hướng bán.</p>
                 </div>
               </div>
               <Row className="g-3">
-                {quickActions.map((action) => (
-                  <Col md={4} key={action.href}>
-                    <Link href={action.href} className="text-decoration-none h-100 d-block">
-                      <div className={styles.quickActionItem}>
-                        <span className={styles.actionIcon}><i className={action.icon}></i></span>
-                        <h6 className={styles.actionTitle}>{action.title}</h6>
-                        <p className={styles.actionDescription}>{action.description}</p>
-                        <span className={styles.actionLink}>Mở màn hình</span>
-                      </div>
-                    </Link>
-                  </Col>
-                ))}
+                <Col md={6}>
+                  <div className="border rounded p-3 h-100">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <h6 className="mb-0">Theo tuần</h6>
+                      <Badge bg="primary">Top 10</Badge>
+                    </div>
+                    <Table size="sm" responsive className="mb-0">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Sản phẩm</th>
+                          <th className="text-end">SL</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {topWeek.length === 0 ? (
+                          <tr>
+                            <td colSpan={3} className="text-center text-muted py-2">Chưa có dữ liệu</td>
+                          </tr>
+                        ) : (
+                          topWeek.map((item, idx) => (
+                            <tr key={`${item.IMEI}-${idx}`}>
+                              <td>{idx + 1}</td>
+                              <td>
+                                <div className="fw-medium">{item.ProductName}</div>
+                                <small className="text-muted">{item.IMEI}</small>
+                              </td>
+                              <td className="text-end fw-bold">{item.SoldCount}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </Table>
+                  </div>
+                </Col>
+
+                <Col md={6}>
+                  <div className="border rounded p-3 h-100">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <h6 className="mb-0">Theo tháng</h6>
+                      <Badge bg="success">Top 10</Badge>
+                    </div>
+                    <Table size="sm" responsive className="mb-0">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Sản phẩm</th>
+                          <th className="text-end">SL</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {topMonth.length === 0 ? (
+                          <tr>
+                            <td colSpan={3} className="text-center text-muted py-2">Chưa có dữ liệu</td>
+                          </tr>
+                        ) : (
+                          topMonth.map((item, idx) => (
+                            <tr key={`${item.IMEI}-${idx}`}>
+                              <td>{idx + 1}</td>
+                              <td>
+                                <div className="fw-medium">{item.ProductName}</div>
+                                <small className="text-muted">{item.IMEI}</small>
+                              </td>
+                              <td className="text-end fw-bold">{item.SoldCount}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </Table>
+                  </div>
+                </Col>
               </Row>
             </div>
           </Col>
