@@ -20,12 +20,11 @@ interface Activity {
 }
 
 interface TopSellingProduct {
-  ProductName: string;
-  IMEI: string;
   CategoryName?: string;
   SoldCount: number;
   TotalRevenue: number;
   AvgPrice: number;
+  DistinctProducts: number;
 }
 
 const WarehouseV2Dashboard: React.FC = () => {
@@ -259,8 +258,8 @@ const WarehouseV2Dashboard: React.FC = () => {
                       <thead>
                         <tr>
                           <th>#</th>
-                          <th>Sản phẩm</th>
-                          <th className="text-end">SL</th>
+                          <th>Danh mục</th>
+                          <th className="text-end">SL bán</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -270,13 +269,13 @@ const WarehouseV2Dashboard: React.FC = () => {
                           </tr>
                         ) : (
                           topWeek.map((item, idx) => (
-                            <tr key={`${item.IMEI}-${idx}`}>
-                              <td>{idx + 1}</td>
+                            <tr key={`week-${idx}`}>
+                              <td className="fw-bold text-muted">{idx + 1}</td>
                               <td>
-                                <div className="fw-medium">{item.ProductName}</div>
-                                <small className="text-muted">{item.IMEI}</small>
+                                <div className="fw-medium">{item.CategoryName || 'Chưa phân loại'}</div>
+                                <small className="text-muted">{item.DistinctProducts} sản phẩm</small>
                               </td>
-                              <td className="text-end fw-bold">{item.SoldCount}</td>
+                              <td className="text-end fw-bold text-success">{item.SoldCount}</td>
                             </tr>
                           ))
                         )}
@@ -295,8 +294,8 @@ const WarehouseV2Dashboard: React.FC = () => {
                       <thead>
                         <tr>
                           <th>#</th>
-                          <th>Sản phẩm</th>
-                          <th className="text-end">SL</th>
+                          <th>Danh mục</th>
+                          <th className="text-end">SL bán</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -306,13 +305,13 @@ const WarehouseV2Dashboard: React.FC = () => {
                           </tr>
                         ) : (
                           topMonth.map((item, idx) => (
-                            <tr key={`${item.IMEI}-${idx}`}>
-                              <td>{idx + 1}</td>
+                            <tr key={`month-${idx}`}>
+                              <td className="fw-bold text-muted">{idx + 1}</td>
                               <td>
-                                <div className="fw-medium">{item.ProductName}</div>
-                                <small className="text-muted">{item.IMEI}</small>
+                                <div className="fw-medium">{item.CategoryName || 'Chưa phân loại'}</div>
+                                <small className="text-muted">{item.DistinctProducts} sản phẩm</small>
                               </td>
-                              <td className="text-end fw-bold">{item.SoldCount}</td>
+                              <td className="text-end fw-bold text-success">{item.SoldCount}</td>
                             </tr>
                           ))
                         )}

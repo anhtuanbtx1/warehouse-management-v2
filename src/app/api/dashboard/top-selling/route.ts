@@ -21,19 +21,18 @@ export async function GET(request: NextRequest) {
 
     const rows = await executeQuery(`
       SELECT TOP 10
-        p.ProductName,
-        p.IMEI,
-        c.CategoryName,
+        ISNULL(c.CategoryName, N'Chưa phân loại') as CategoryName,
         COUNT(d.InvoiceDetailID) as SoldCount,
         SUM(d.SalePrice) as TotalRevenue,
-        AVG(d.SalePrice) as AvgPrice
+        AVG(d.SalePrice) as AvgPrice,
+        COUNT(DISTINCT p.ProductID) as DistinctProducts
       FROM CRM_SalesInvoiceDetails d
       INNER JOIN CRM_SalesInvoices i ON d.InvoiceID = i.InvoiceID
       INNER JOIN CRM_Products p ON d.ProductID = p.ProductID
       LEFT JOIN CRM_Categories c ON p.CategoryID = c.CategoryID
       WHERE i.SaleDate IS NOT NULL
       ${dateFilter}
-      GROUP BY p.ProductName, p.IMEI, c.CategoryName
+      GROUP BY c.CategoryName
       ORDER BY SoldCount DESC, TotalRevenue DESC
     `, { today, thisYear, thisMonth });
 
