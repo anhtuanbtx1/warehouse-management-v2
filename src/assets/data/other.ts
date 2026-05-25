@@ -35,7 +35,7 @@ import properties9 from '@/assets/images/properties/p-9.jpg'
 import mastercard from '@/assets/images/card/mastercard.svg'
 import paypal from '@/assets/images/card/paypal.svg'
 import visa from '@/assets/images/card/visa.svg'
-import { currency } from '@/context/constants'
+import { currency } from '@/contexts/constants'
 
 export const userData: UserType[] = [
   {

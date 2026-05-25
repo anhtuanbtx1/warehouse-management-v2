@@ -2,7 +2,7 @@ import React from 'react'
 import IconifyIcon from '../wrappers/IconifyIcon'
 import { Col, Container, Row } from 'react-bootstrap'
 import Link from 'next/link'
-import { currentYear } from '@/context/constants'
+import { currentYear } from '@/contexts/constants'
 
 const Footer = () => {
   return (

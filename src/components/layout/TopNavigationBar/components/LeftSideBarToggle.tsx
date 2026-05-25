@@ -2,7 +2,7 @@
 import IconifyIcon from '@/components/wrappers/IconifyIcon'
 import React, { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
-import { useLayoutContext } from '@/context/useLayoutContext'
+import { useLayoutContext } from '@/contexts/useLayoutContext'
 
 const LeftSideBarToggle = () => {
   const {

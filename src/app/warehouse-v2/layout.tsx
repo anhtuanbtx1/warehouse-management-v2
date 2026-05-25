@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ToastProvider } from '@/contexts/ToastContext';
 import AuthGuard from '@/components/warehouse-v2/AuthGuard';
-import { useLayoutContext } from '@/context/useLayoutContext';
+import { useLayoutContext } from '@/contexts/useLayoutContext';
 import './globals.css';
 
 interface WarehouseV2LayoutProps {

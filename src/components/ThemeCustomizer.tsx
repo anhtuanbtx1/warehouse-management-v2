@@ -2,7 +2,7 @@
 import { Button, Col, Offcanvas, OffcanvasBody, OffcanvasHeader, Row } from 'react-bootstrap'
 
 import type { MenuType, OffcanvasControlType, ThemeType } from '@/types/context'
-import { useLayoutContext } from '@/context/useLayoutContext'
+import { useLayoutContext } from '@/contexts/useLayoutContext'
 import { toSentenceCase } from '@/utils/change-casing'
 import SimplebarReactClient from './wrappers/SimplebarReactClient'
 

@@ -1,6 +1,6 @@
 'use client'
 import IconifyIcon from '@/components/wrappers/IconifyIcon'
-import { useLayoutContext } from '@/context/useLayoutContext'
+import { useLayoutContext } from '@/contexts/useLayoutContext'
 import useViewPort from '@/hooks/useViewPort'
 import { useEffect } from 'react'
 

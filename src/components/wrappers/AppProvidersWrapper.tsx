@@ -2,12 +2,12 @@
 import { SessionProvider } from 'next-auth/react'
 import { useEffect } from 'react'
 import { ToastContainer } from 'react-toastify'
-import { DEFAULT_PAGE_TITLE } from '@/context/constants'
+import { DEFAULT_PAGE_TITLE } from '@/contexts/constants'
 import dynamic from 'next/dynamic'
-const LayoutProvider = dynamic(() => import('@/context/useLayoutContext').then((mod) => mod.LayoutProvider), {
+const LayoutProvider = dynamic(() => import('@/contexts/useLayoutContext').then((mod) => mod.LayoutProvider), {
   ssr: false,
 })
-import { NotificationProvider } from '@/context/useNotificationContext'
+import { NotificationProvider } from '@/contexts/useNotificationContext'
 import { ChildrenType } from '@/types/component-props'
 
 const AppProvidersWrapper = ({ children }: ChildrenType) => {

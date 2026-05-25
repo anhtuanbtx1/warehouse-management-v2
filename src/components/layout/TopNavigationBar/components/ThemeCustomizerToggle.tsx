@@ -1,6 +1,6 @@
 'use client'
 import IconifyIcon from '@/components/wrappers/IconifyIcon'
-import { useLayoutContext } from '@/context/useLayoutContext'
+import { useLayoutContext } from '@/contexts/useLayoutContext'
 import dynamic from 'next/dynamic'
 import React, { useState } from 'react'
 
