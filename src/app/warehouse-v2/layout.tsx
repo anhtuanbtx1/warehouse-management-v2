@@ -190,21 +190,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
             {!isLoginPage ? <div className="warehouse-shell-container">{children}</div> : children}
           </main>
 
-          {!isLoginPage && (
-            <footer className="warehouse-footer mt-auto">
-              <Container fluid className="warehouse-shell-container">
-                <div className="warehouse-footer-content">
-                  <div>
-                    <div className="warehouse-footer-title">Hệ thống Cửa hàng Điện thoại</div>
-                    <div className="warehouse-footer-subtitle">Quản lý bán hàng, tồn kho điện thoại theo IMEI.</div>
-                  </div>
-                  <div className="warehouse-footer-meta">
-                    <span>Phiên bản 2.0</span>
-                  </div>
-                </div>
-              </Container>
-            </footer>
-          )}
+
         </div>
       </ToastProvider>
     </AuthGuard>
