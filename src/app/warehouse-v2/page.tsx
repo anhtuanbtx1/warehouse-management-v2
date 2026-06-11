@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Button, Badge, Table } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
+import Link from 'next/link';
 import RevenueChart from '@/components/warehouse-v2/RevenueChart';
 import CategoryRevenueChart from '@/components/warehouse-v2/CategoryRevenueChart';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
@@ -19,31 +20,37 @@ interface Activity {
   color: string;
 }
 
-interface TopSellingProduct {
-  CategoryName?: string;
-  SoldCount: number;
-  TotalRevenue: number;
-  AvgPrice: number;
-  DistinctProducts: number;
-}
+const quickActions = [
+  {
+    href: '/warehouse-v2/import',
+    title: 'Nhập hàng',
+    description: 'Tạo lô hàng mới và cập nhật số lượng kho nhanh chóng.',
+    icon: 'fas fa-plus-square',
+  },
+  {
+    href: '/warehouse-v2/sales',
+    title: 'Bán hàng',
+    description: 'Xử lý giao dịch và in hóa đơn cho khách hàng.',
+    icon: 'fas fa-shopping-cart',
+  },
+  {
+    href: '/warehouse-v2/inventory',
+    title: 'Tồn kho',
+    description: 'Tra cứu trạng thái máy và vị trí lưu kho theo IMEI.',
+    icon: 'fas fa-boxes-stacked',
+  },
+];
 
 const WarehouseV2Dashboard: React.FC = () => {
   const { stats, loading: statsLoading, error: statsError, refetch: refetchStats, timezoneDebug } = useDashboardStats();
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
-  const [topWeek, setTopWeek] = useState<TopSellingProduct[]>([]);
-  const [topMonth, setTopMonth] = useState<TopSellingProduct[]>([]);
-  const [topSellingLoading, setTopSellingLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     fetchRecentActivities();
-    fetchTopSelling();
-    const clientDebug = getClientTimezoneDebug();
-    console.log('Dashboard Client Timezone Debug:', clientDebug);
-    if (timezoneDebug) {
-      console.log('Dashboard Timezone Comparison:', timezoneDebug);
-    }
-  }, [timezoneDebug]);
+  }, []);
 
   const fetchRecentActivities = async () => {
     try {
@@ -60,30 +67,12 @@ const WarehouseV2Dashboard: React.FC = () => {
     }
   };
 
-  const fetchTopSelling = async () => {
-    try {
-      setTopSellingLoading(true);
-      const [weekRes, monthRes] = await Promise.all([
-        fetch('/api/dashboard/top-selling?period=week'),
-        fetch('/api/dashboard/top-selling?period=month'),
-      ]);
-      const [weekJson, monthJson] = await Promise.all([weekRes.json(), monthRes.json()]);
-      if (weekJson.success) setTopWeek(weekJson.data || []);
-      if (monthJson.success) setTopMonth(monthJson.data || []);
-    } catch (error) {
-      console.error('Error fetching top selling products:', error);
-    } finally {
-      setTopSellingLoading(false);
-    }
-  };
-
   const fetchDashboardData = async () => {
     refetchStats();
     fetchRecentActivities();
-    fetchTopSelling();
   };
 
-  const loading = statsLoading || activitiesLoading || topSellingLoading;
+  const loading = statsLoading || activitiesLoading;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -94,34 +83,25 @@ const WarehouseV2Dashboard: React.FC = () => {
 
   const formatDateTime = (dateString: string) => {
     try {
-      const isoString = dateString.includes('T') ? dateString : `${dateString}T00:00:00`;
-      const [datePart, timePart] = isoString.split('T');
-      const [year, month, day] = datePart.split('-');
-      const [hours, minutes, seconds] = timePart.split(':');
-      return `${day}/${month}/${year} ${hours}:${minutes}:${seconds.split('.')[0]}`;
-    } catch (error) {
       const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const seconds = String(date.getSeconds()).padStart(2, '0');
-      return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+      return new Intl.DateTimeFormat('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(date);
+    } catch (error) {
+      return dateString;
     }
   };
 
-  if (loading) {
+  if (loading && !isMounted) {
     return (
       <div className={styles.loadingContainer}>
         <div className="text-center">
           <div className={styles.loadingSpinner}></div>
-          <div className={styles.loadingText}>Đang tải dữ liệu dashboard...</div>
-          {timezoneDebug && (
-            <div className="mt-3">
-              <small className={styles.loadingMeta}>Timezone: {timezoneDebug.client?.vietnamToday || 'Loading...'}</small>
-            </div>
-          )}
+          <div className={styles.loadingText}>Đang tổng hợp dữ liệu...</div>
         </div>
       </div>
     );
@@ -129,38 +109,54 @@ const WarehouseV2Dashboard: React.FC = () => {
 
   if (statsError) {
     return (
-      <Container fluid className="py-4">
-        <div className="text-center py-5">
-          <div className="alert alert-danger">
-            <i className="fas fa-circle-exclamation me-2"></i>
-            Lỗi tải dữ liệu: {statsError}
+      <Container fluid className="py-5">
+        <div className="text-center">
+          <div className="alert alert-danger d-inline-block px-4">
+            <i className="fas fa-exclamation-triangle me-2"></i>
+            {statsError}
           </div>
-          <Button variant="primary" onClick={fetchDashboardData}>
-            <i className="fas fa-rotate me-2"></i>
-            Thử lại
-          </Button>
+          <div className="mt-3">
+            <Button variant="outline-primary" onClick={fetchDashboardData}>
+              Thử lại
+            </Button>
+          </div>
         </div>
       </Container>
     );
   }
 
   return (
-    <div className={styles.dashboardContainer}>
+    <div className={`${styles.dashboardContainer} ${isMounted ? 'fade-in' : 'opacity-0'}`}>
       <Container fluid className={styles.contentWrapper}>
-        <div className="d-flex justify-content-end mb-3">
-          <Button variant="outline-primary" size="sm" onClick={fetchDashboardData}>
-            <i className="fas fa-rotate me-2"></i>
-            Làm mới dữ liệu
-          </Button>
-        </div>
-
+        <section className={styles.pageHeader}>
+          <div className="d-flex justify-content-between align-items-end">
+            <div>
+              <h1 className={styles.pageTitle}>Tổng quan vận hành</h1>
+              <p className={styles.pageSubtitle}>
+                Hôm nay là {timezoneDebug?.client?.vietnamToday || new Date().toLocaleDateString('vi-VN')}. 
+                Kiểm soát luồng hàng và hiệu quả kinh doanh trong thời gian thực.
+              </p>
+            </div>
+            <div className="d-none d-md-block">
+              <Button 
+                variant="outline-secondary" 
+                size="sm"
+                className="border-0"
+                onClick={fetchDashboardData}
+              >
+                <i className={`fas fa-sync-alt me-2 ${loading ? 'fa-spin' : ''}`}></i>
+                Làm mới
+              </Button>
+            </div>
+          </div>
+        </section>
 
         {stats && (
-          <Row className="g-3 mb-4">
+          <Row className="g-3 mb-2">
             <Col md={6} xl={3}>
-              <div className={`${styles.statsCard} ${styles.revenueCard}`}>
+              <div className={styles.statsCard}>
                 <div className={styles.statsCardTop}>
-                  <span className={styles.statsIconWrapper}><i className="fas fa-sack-dollar"></i></span>
+                  <span className={styles.statsIconWrapper}><i className="fas fa-coins"></i></span>
                   <span className={styles.statsTrend}>Hôm nay</span>
                 </div>
                 <p className={styles.statsLabel}>Doanh thu</p>
@@ -170,42 +166,45 @@ const WarehouseV2Dashboard: React.FC = () => {
                   <strong>{formatCurrency(stats.revenue.thisMonth)}</strong>
                 </div>
                 {stats.revenue.growth !== 0 && (
-                  <div className={styles.statsGrowth}>
-                    <i className={`fas ${stats.revenue.growth > 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}`}></i>
-                    {Math.abs(stats.revenue.growth)}%
+                  <div className={`${styles.statsGrowth} ${stats.revenue.growth > 0 ? styles.positive : styles.negative}`}>
+                    <i className={`fas ${stats.revenue.growth > 0 ? 'fa-caret-up' : 'fa-caret-down'}`}></i>
+                    {Math.abs(stats.revenue.growth)}% so với hôm qua
                   </div>
                 )}
               </div>
             </Col>
             <Col md={6} xl={3}>
-              <div className={`${styles.statsCard} ${styles.profitCard}`}>
+              <div className={styles.statsCard}>
                 <div className={styles.statsCardTop}>
                   <span className={styles.statsIconWrapper}><i className="fas fa-chart-line"></i></span>
-                  <span className={styles.statsTrend}>Biên lợi nhuận</span>
+                  <span className={styles.statsTrend}>Lợi nhuận</span>
                 </div>
-                <p className={styles.statsLabel}>Lãi/Lỗ</p>
+                <p className={styles.statsLabel}>Lãi ròng hôm nay</p>
                 <h3 className={styles.statsValue}>{formatCurrency(stats.profit.today)}</h3>
                 <div className={styles.statsMeta}>
-                  <span>Tỷ suất</span>
+                  <span>Biên lợi nhuận</span>
                   <strong>{stats.profit.margin.toFixed(1)}%</strong>
                 </div>
                 <div className={styles.statsGrowth}>
-                  <i className={`fas ${stats.profit.today >= 0 ? 'fa-circle-check' : 'fa-triangle-exclamation'}`}></i>
-                  {stats.profit.today >= 0 ? 'Đang có lãi' : 'Cần theo dõi'}
+                   {stats.profit.today >= 0 ? (
+                     <span className="text-success"><i className="fas fa-check-circle me-1"></i>Vận hành ổn định</span>
+                   ) : (
+                     <span className="text-danger"><i className="fas fa-exclamation-circle me-1"></i>Cần tối ưu chi phí</span>
+                   )}
                 </div>
               </div>
             </Col>
             <Col md={6} xl={3}>
-              <div className={`${styles.statsCard} ${styles.inventoryCard}`}>
+              <div className={styles.statsCard}>
                 <div className={styles.statsCardTop}>
-                  <span className={styles.statsIconWrapper}><i className="fas fa-warehouse"></i></span>
-                  <span className={styles.statsTrend}>Tồn kho</span>
+                  <span className={styles.statsIconWrapper}><i className="fas fa-box"></i></span>
+                  <span className={styles.statsTrend}>Kho hàng</span>
                 </div>
                 <p className={styles.statsLabel}>Tổng sản phẩm</p>
                 <h3 className={styles.statsValue}>{stats.inventory.totalProducts}</h3>
                 <div className={styles.statsSplit}>
                   <div>
-                    <span>Có sẵn</span>
+                    <span>Trong kho</span>
                     <strong>{stats.inventory.inStock}</strong>
                   </div>
                   <div>
@@ -216,12 +215,12 @@ const WarehouseV2Dashboard: React.FC = () => {
               </div>
             </Col>
             <Col md={6} xl={3}>
-              <div className={`${styles.statsCard} ${styles.orderCard}`}>
+              <div className={styles.statsCard}>
                 <div className={styles.statsCardTop}>
-                  <span className={styles.statsIconWrapper}><i className="fas fa-bag-shopping"></i></span>
+                  <span className={styles.statsIconWrapper}><i className="fas fa-receipt"></i></span>
                   <span className={styles.statsTrend}>Giao dịch</span>
                 </div>
-                <p className={styles.statsLabel}>Đơn hàng hôm nay</p>
+                <p className={styles.statsLabel}>Đơn hàng mới</p>
                 <h3 className={styles.statsValue}>{stats.sales.todayCount}</h3>
                 <div className={styles.statsSplit}>
                   <div>
@@ -238,121 +237,56 @@ const WarehouseV2Dashboard: React.FC = () => {
           </Row>
         )}
 
-        <Row className="g-4 mb-4">
+        <Row className="g-4">
           <Col xl={8}>
+            {/* Quick Actions as a clean horizontal bar or grid */}
             <div className={styles.quickActionsCard}>
               <div className={styles.sectionHeader}>
                 <div>
-                  <h5>Top 10 sản phẩm bán chạy</h5>
-                  <p>Thống kê theo tuần và theo tháng để theo dõi xu hướng bán.</p>
+                  <h5>Thao tác nhanh</h5>
+                  <p>Truy cập nhanh các luồng nghiệp vụ lõi của hệ thống.</p>
                 </div>
               </div>
               <Row className="g-3">
-                <Col md={6}>
-                  <div className="border rounded p-3 h-100">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <h6 className="mb-0">Theo tuần</h6>
-                      <Badge bg="primary">Top 10</Badge>
-                    </div>
-                    <Table size="sm" responsive className="mb-0">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Danh mục</th>
-                          <th className="text-end">SL bán</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {topWeek.length === 0 ? (
-                          <tr>
-                            <td colSpan={3} className="text-center text-muted py-2">Chưa có dữ liệu</td>
-                          </tr>
-                        ) : (
-                          topWeek.map((item, idx) => (
-                            <tr key={`week-${idx}`}>
-                              <td className="fw-bold text-muted">{idx + 1}</td>
-                              <td>
-                                <div className="fw-medium">{item.CategoryName || 'Chưa phân loại'}</div>
-                                <small className="text-muted">{item.DistinctProducts} sản phẩm</small>
-                              </td>
-                              <td className="text-end fw-bold text-success">{item.SoldCount}</td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </Table>
-                  </div>
-                </Col>
-
-                <Col md={6}>
-                  <div className="border rounded p-3 h-100">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <h6 className="mb-0">Theo tháng</h6>
-                      <Badge bg="success">Top 10</Badge>
-                    </div>
-                    <Table size="sm" responsive className="mb-0">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Danh mục</th>
-                          <th className="text-end">SL bán</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {topMonth.length === 0 ? (
-                          <tr>
-                            <td colSpan={3} className="text-center text-muted py-2">Chưa có dữ liệu</td>
-                          </tr>
-                        ) : (
-                          topMonth.map((item, idx) => (
-                            <tr key={`month-${idx}`}>
-                              <td className="fw-bold text-muted">{idx + 1}</td>
-                              <td>
-                                <div className="fw-medium">{item.CategoryName || 'Chưa phân loại'}</div>
-                                <small className="text-muted">{item.DistinctProducts} sản phẩm</small>
-                              </td>
-                              <td className="text-end fw-bold text-success">{item.SoldCount}</td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </Table>
-                  </div>
-                </Col>
+                {quickActions.map((action) => (
+                  <Col md={4} key={action.href}>
+                    <Link href={action.href} className="text-decoration-none h-100 d-block">
+                      <div className={styles.quickActionItem}>
+                        <span className={styles.actionIcon}><i className={action.icon}></i></span>
+                        <h6 className={styles.actionTitle}>{action.title}</h6>
+                        <p className={styles.actionDescription}>{action.description}</p>
+                        <span className={styles.actionLink}>Bắt đầu</span>
+                      </div>
+                    </Link>
+                  </Col>
+                ))}
               </Row>
             </div>
-          </Col>
 
-          <Col xl={4}>
-            <CategoryRevenueChart />
-          </Col>
-        </Row>
-
-        <Row className="g-4 mb-4">
-          <Col xl={8}>
-            <div className={styles.chartContainer}>
+            <div className={`${styles.chartContainer} mt-4`}>
               <div className={styles.sectionHeader}>
                 <div>
-                  <h5>Doanh thu theo thời gian</h5>
-                  <p>Theo dõi xu hướng bán hàng để quyết định nhập hàng và giá bán.</p>
+                  <h5>Biểu đồ doanh thu</h5>
+                  <p>Xu hướng dòng tiền theo các ngày trong tháng.</p>
                 </div>
               </div>
               <RevenueChart />
             </div>
           </Col>
+
           <Col xl={4}>
             <div className={styles.activitiesCard}>
               <div className={styles.sectionHeader}>
                 <div>
-                  <h5>Hoạt động gần đây</h5>
-                  <p>Cập nhật mới nhất từ nhập hàng, bán hàng và tạo lô.</p>
+                  <h5>Giao dịch gần đây</h5>
+                  <p>Lịch sử hoạt động thực tế tại kho.</p>
                 </div>
               </div>
               <div className={styles.activitiesBody}>
                 {recentActivities.length === 0 ? (
-                  <div className="warehouse-empty-state">
-                    <i className="fas fa-clock-rotate-left"></i>
-                    <div>Chưa có hoạt động nào gần đây.</div>
+                  <div className="text-center py-5 text-muted">
+                    <i className="fas fa-inbox d-block mb-2 fs-3"></i>
+                    <small>Chưa có hoạt động nào</small>
                   </div>
                 ) : (
                   recentActivities.map((activity) => (
@@ -361,13 +295,19 @@ const WarehouseV2Dashboard: React.FC = () => {
                       <div className={styles.timelineContent}>
                         <div className={styles.timelineTitle}>{activity.title}</div>
                         <div className={styles.timelineDescription}>{activity.description}</div>
-                        <div className={styles.timelineTime}>{formatDateTime(activity.timestamp)}</div>
-                        {activity.amount && <div className={styles.timelineAmount}>{formatCurrency(activity.amount)}</div>}
+                        <div className="d-flex justify-content-between align-items-center">
+                           <span className={styles.timelineTime}>{formatDateTime(activity.timestamp)}</span>
+                           {activity.amount && <span className={styles.timelineAmount}>{formatCurrency(activity.amount)}</span>}
+                        </div>
                       </div>
                     </div>
                   ))
                 )}
               </div>
+            </div>
+
+            <div className="mt-4">
+              <CategoryRevenueChart />
             </div>
           </Col>
         </Row>
