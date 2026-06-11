@@ -164,7 +164,6 @@
   background: var(--warehouse-surface-elevated);
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
   padding: 1.5rem;
-  height: 100%;
 }
 
 .sectionHeader {
@@ -191,11 +190,10 @@
 }
 
 .quickActionItem {
-  height: 100%;
   border: 1px solid var(--warehouse-border);
   border-radius: var(--warehouse-radius-md);
   background: var(--warehouse-surface);
-  padding: 1.5rem;
+  padding: 1.25rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   position: relative;
 }
@@ -253,8 +251,8 @@
 /* Minimal timeline for activities */
 .activitiesBody {
   display: grid;
-  gap: 1.25rem;
-  max-height: 480px;
+  gap: 1rem;
+  max-height: 360px;
   overflow-y: auto;
   padding-right: 0.5rem;
 }

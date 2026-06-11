@@ -250,7 +250,7 @@ const WarehouseV2Dashboard: React.FC = () => {
               <Row className="g-3">
                 {quickActions.map((action) => (
                   <Col md={4} key={action.href}>
-                    <Link href={action.href} className="text-decoration-none h-100 d-block">
+                    <Link href={action.href} className="text-decoration-none d-block">
                       <div className={styles.quickActionItem}>
                         <span className={styles.actionIcon}><i className={action.icon}></i></span>
                         <h6 className={styles.actionTitle}>{action.title}</h6>
