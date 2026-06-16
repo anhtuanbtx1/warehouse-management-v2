@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { ToastProvider } from '@/contexts/ToastContext';
 import AuthGuard from '@/components/warehouse-v2/AuthGuard';
 import { useLayoutContext } from '@/contexts/useLayoutContext';
+import { ThemeToggle } from '@/components/warehouse-v2/ThemeToggle';
 import './globals.css';
 
 interface WarehouseV2LayoutProps {
@@ -108,16 +109,11 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
                     className="warehouse-header-actions mt-0 mb-0" 
                     style={{ transform: 'scale(0.85)', transformOrigin: 'right center' }}
                   >
-                    <Button
-                      type="button"
-                      variant="outline-primary"
-                      className="warehouse-theme-toggle"
-                      onClick={handleThemeToggle}
-                      aria-label={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
-                    >
-                      <i className={`fas ${isDark ? 'fa-sun' : 'fa-moon'}`} aria-hidden="true"></i>
-                      <span>{isDark ? 'Light' : 'Dark'}</span>
-                    </Button>
+                    <ThemeToggle
+                      isDark={isDark}
+                      onToggle={handleThemeToggle}
+                      className="me-2"
+                    />
                     <div className="warehouse-status-chip">
                       <span className="warehouse-status-dot"></span>
                       Hệ thống hoạt động
