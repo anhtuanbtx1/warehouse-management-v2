@@ -219,8 +219,10 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ className }) => {
                     tick={{ fontSize: 12 }}
                   />
                   <YAxis 
-                    tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
-                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => value === 0 ? '0' : value >= 1000000 ? `${(value / 1000000).toFixed(1)}M` : `${(value / 1000).toFixed(0)}K`}
+                    tick={{ fontSize: 12, fill: '#64748b' }}
+                    axisLine={false}
+                    tickLine={false}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />

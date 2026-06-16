@@ -246,11 +246,10 @@ const CategoryRevenueChart = () => {
       <div className={styles.categoryChartCard}>
         <div className={styles.categoryChartHeader}>
           <h5 className={styles.categoryChartTitle}>
-            <i className="fas fa-chart-pie"></i>
+            <i className="fas fa-chart-pie me-2 text-primary"></i>
             Doanh thu hôm nay
           </h5>
           <div className={styles.todayBadge}>
-            <i className="fas fa-calendar-day"></i>
             {new Date().toLocaleDateString('vi-VN')}
           </div>
         </div>
@@ -269,14 +268,13 @@ const CategoryRevenueChart = () => {
     <div className={styles.categoryChartCard}>
         <div className={styles.categoryChartHeader}>
           <h5 className={styles.categoryChartTitle}>
-            <i className="fas fa-chart-pie"></i>
+            <i className="fas fa-chart-pie me-2 text-primary"></i>
             Doanh thu hôm nay
           </h5>
           <div className={styles.todayBadge}>
-            <i className="fas fa-calendar-day"></i>
             {new Date().toLocaleDateString('vi-VN')}
           </div>
-      </div>
+        </div>
       <div className={styles.categoryChartBody}>
         {chartData.length > 0 && series.some(value => value > 0) ? (
           <>

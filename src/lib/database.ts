@@ -1,15 +1,15 @@
 // Database connection configuration
 import sql from 'mssql';
 
-const dbServer = process.env.DB_SERVER || '112.78.2.70';
+const dbServer = process.env.DB_SERVER || '45.118.151.103';
 const isIpAddress = /^\d{1,3}(?:\.\d{1,3}){3}$/.test(dbServer);
 
 const config: sql.config = {
-  user: process.env.DB_USER || 'zen50558_ManagementStore',
-  password: process.env.DB_PASSWORD || 'Passwordla@123',
+  user: process.env.DB_USER || 'sa',
+  password: process.env.DB_PASSWORD || 'Ots@123',
   server: dbServer,
   port: parseInt(process.env.DB_PORT || '1433'),
-  database: process.env.DB_NAME || 'zen50558_ManagementStore',
+  database: process.env.DB_NAME || 'PhoneStores',
   options: {
     encrypt: process.env.DB_ENCRYPT === 'true',
     trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
