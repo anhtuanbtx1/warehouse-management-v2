@@ -143,7 +143,7 @@
 }
 
 .statsGrowth.positive {
-  color: var(--warehouse-accent);
+  color: var(--warehouse-text); font-weight: 700;
 }
 
 .statsGrowth.negative {
@@ -316,7 +316,7 @@
   padding: 0.15rem 0.5rem;
   border-radius: 4px;
   background: var(--warehouse-accent-soft);
-  color: var(--warehouse-accent);
+  color: var(--warehouse-text); font-weight: 700;
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -375,4 +375,139 @@
     flex-direction: column;
     gap: 0.5rem;
   }
+}
+
+/* Additional specific styles for category chart */
+.categoryChartCard {
+  border: 1px solid var(--warehouse-border);
+  border-radius: var(--warehouse-radius-md);
+  background: var(--warehouse-surface-elevated);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.categoryChartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.categoryChartTitle {
+  margin: 0;
+  color: var(--warehouse-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.todayBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  background: var(--warehouse-surface-soft);
+  color: var(--warehouse-text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.categoryStats {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.categoryStatItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--warehouse-border);
+  border-radius: 8px;
+  background: var(--warehouse-surface);
+  transition: border-color 0.2s;
+}
+
+.categoryStatItem:hover {
+  border-color: var(--warehouse-border-strong);
+}
+
+.categoryStatIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.categoryStatInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.categoryName {
+  margin: 0 0 0.15rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--warehouse-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.categoryRevenue {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--warehouse-primary-strong);
+  margin-bottom: 0.15rem;
+}
+
+.categoryMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.categoryCount {
+  font-size: 0.75rem;
+  color: var(--warehouse-text-muted);
+}
+
+.categoryPercent {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--warehouse-text-soft);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+  color: var(--warehouse-border-strong);
+  margin-bottom: 1rem;
+}
+
+.emptyTitle {
+  font-weight: 600;
+  color: var(--warehouse-heading);
+  margin-bottom: 0.5rem;
+}
+
+.emptyDescription {
+  font-size: 0.85rem;
+  color: var(--warehouse-text-muted);
+  max-width: 250px;
 }

@@ -3,6 +3,7 @@
 :root {
   /* Pastel / Soft Theme Base */
   --warehouse-primary: #CDB4DB; /* Soft purple */
+  --warehouse-bg: radial-gradient(125% 125% at 50% 101%,#f55702 10.5%,#f57802 16%,#f58c02 17.5%,#f5aa64 25%,#eeaeca 40%,#cab3d6 65%,#94c9e9);
   --warehouse-primary-strong: #a28a99; /* Deeper purple for contrast */
   --warehouse-primary-soft: #fbeef3; /* Very light pink/purple for backgrounds */
   
@@ -44,6 +45,7 @@
 }
 
 html[data-bs-theme='dark'] {
+  --warehouse-bg: radial-gradient(circle at top right, var(--warehouse-overlay-start), transparent 22%), linear-gradient(180deg, var(--warehouse-page-bg-start) 0%, var(--warehouse-page-bg-mid) 48%, var(--warehouse-page-bg-end) 100%);
   --warehouse-primary: #22d3ee;
   --warehouse-primary-strong: #67e8f9;
   --warehouse-primary-soft: rgba(34, 211, 238, 0.12);
@@ -74,9 +76,7 @@ html[data-bs-theme='dark'] {
 
 .warehouse-v2 {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top right, var(--warehouse-overlay-start), transparent 22%),
-    linear-gradient(180deg, var(--warehouse-page-bg-start) 0%, var(--warehouse-page-bg-mid) 48%, var(--warehouse-page-bg-end) 100%);
+  background: var(--warehouse-bg);
   color: var(--warehouse-text);
   font-size: 1rem;
   line-height: 1.6;
