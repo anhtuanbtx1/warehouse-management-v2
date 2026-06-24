@@ -98,7 +98,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
             <header className="warehouse-shell-header">
               {/* Top actions bar */}
               <div 
-                className="d-flex justify-content-end align-items-center px-4 py-1" 
+                className="d-none d-lg-flex justify-content-end align-items-center px-4 py-1" 
                 style={{ 
                   background: 'var(--warehouse-surface-muted)', 
                   borderBottom: '1px solid var(--warehouse-border)' 
@@ -163,7 +163,7 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
                   <Navbar.Toggle aria-controls="warehouse-navbar" className="warehouse-navbar-toggle" />
 
                   <Navbar.Collapse id="warehouse-navbar">
-                    <Nav className="warehouse-nav me-auto">
+                    <Nav className="warehouse-nav me-auto w-100">
                       {getFilteredNavigationItems().map((item) => (
                         <Nav.Link
                           key={item.href}
@@ -175,6 +175,55 @@ const WarehouseV2Layout: React.FC<WarehouseV2LayoutProps> = ({ children }) => {
                           <span>{item.label}</span>
                         </Nav.Link>
                       ))}
+
+                      {/* Mobile-only utilities inside collapse menu */}
+                      <div className="d-lg-none mt-3 pt-3 border-top" style={{ borderColor: 'var(--warehouse-border)' }}>
+                        <div className="d-flex flex-column gap-3">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <span className="fw-semibold" style={{ color: 'var(--warehouse-text)' }}>Giao diện</span>
+                            <ThemeToggle
+                              isDark={isDark}
+                              onToggle={handleThemeToggle}
+                            />
+                          </div>
+                          
+                          <div className="d-flex justify-content-between align-items-center">
+                            <span className="fw-semibold" style={{ color: 'var(--warehouse-text)' }}>Trạng thái</span>
+                            <div className="warehouse-status-chip m-0">
+                              <span className="warehouse-status-dot"></span>
+                              Hệ thống hoạt động
+                            </div>
+                          </div>
+
+                          <div className="border-top my-1" style={{ borderColor: 'var(--warehouse-border)' }}></div>
+
+                          {/* Profile & actions on mobile */}
+                          <div className="d-flex align-items-center gap-3">
+                            <span className="warehouse-user-avatar">
+                              <i className={`fas ${userRole === 'admin' ? 'fa-user-shield' : userRole === 'manager' ? 'fa-user-tie' : 'fa-user'}`} aria-hidden="true"></i>
+                            </span>
+                            <div className="d-flex flex-column">
+                              <span className="fw-bold" style={{ color: 'var(--warehouse-heading)' }}>{getUserRoleLabel()}</span>
+                              <span className="small" style={{ color: 'var(--warehouse-text-muted)' }}>Điều hành kho</span>
+                            </div>
+                          </div>
+
+                          <div className="d-flex flex-column gap-2 mt-2">
+                            <Button href="#profile" variant="outline-primary" size="sm" className="text-start d-flex align-items-center gap-2">
+                              <i className="fas fa-id-card" aria-hidden="true"></i>
+                              <span>Thông tin cá nhân</span>
+                            </Button>
+                            <Button href="#change-password" variant="outline-primary" size="sm" className="text-start d-flex align-items-center gap-2">
+                              <i className="fas fa-key" aria-hidden="true"></i>
+                              <span>Đổi mật khẩu</span>
+                            </Button>
+                            <Button onClick={handleLogout} variant="outline-danger" size="sm" className="text-start d-flex align-items-center gap-2">
+                              <i className="fas fa-right-from-bracket" aria-hidden="true"></i>
+                              <span>Đăng xuất</span>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
                     </Nav>
                   </Navbar.Collapse>
                 </Container>
