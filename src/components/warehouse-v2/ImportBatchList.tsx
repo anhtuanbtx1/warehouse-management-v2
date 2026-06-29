@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Button, Form, Badge, Pagination, Modal } from 'react-bootstrap';
+import { Card, Table, Button, Form, Badge, Modal } from 'react-bootstrap';
+import AntPagination from '@/components/ui/pagination-ant';
 import * as XLSX from 'xlsx';
 import { useToast } from '@/contexts/ToastContext';
 
@@ -44,6 +45,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   
   // Set default date range to 1 month (Vietnam timezone)
   const getDefaultDateRange = () => {
@@ -95,6 +97,7 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
         setBatches(result.data.data);
         setTotalPages(result.data.totalPages);
         setCurrentPage(result.data.page);
+        setTotalItems(result.data.total ?? result.data.totalPages * 10);
       }
     } catch (error) {
       console.error('Error fetching batches:', error);
@@ -539,29 +542,12 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
               </Table>
 
               {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="d-flex justify-content-center">
-                  <Pagination>
-                    <Pagination.Prev
-                      disabled={currentPage === 1}
-                      onClick={() => handlePageChange(currentPage - 1)}
-                    />
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                      <Pagination.Item
-                        key={page}
-                        active={page === currentPage}
-                        onClick={() => handlePageChange(page)}
-                      >
-                        {page}
-                      </Pagination.Item>
-                    ))}
-                    <Pagination.Next
-                      disabled={currentPage === totalPages}
-                      onClick={() => handlePageChange(currentPage + 1)}
-                    />
-                  </Pagination>
-                </div>
-              )}
+              <AntPagination
+                current={currentPage}
+                total={totalItems}
+                pageSize={10}
+                onChange={(page) => handlePageChange(page)}
+              />
             </>
           )}
         </Card.Body>

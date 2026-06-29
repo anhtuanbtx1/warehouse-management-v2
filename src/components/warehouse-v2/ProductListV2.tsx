@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Button, Form, InputGroup, Badge, Pagination, Modal, Row, Col, Alert } from 'react-bootstrap';
+import { Card, Table, Button, Form, InputGroup, Badge, Modal, Row, Col, Alert } from 'react-bootstrap';
+import AntPagination from '@/components/ui/pagination-ant';
 import { useToast } from '@/contexts/ToastContext';
 import * as XLSX from 'xlsx';
 import LabelPrint from './LabelPrint';
@@ -63,6 +64,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -131,6 +133,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
         setProducts(result.data.data);
         setTotalPages(result.data.totalPages);
         setCurrentPage(result.data.page);
+        setTotalItems(result.data.total ?? result.data.totalPages * 10);
       }
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -995,32 +998,12 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
             </Table>
 
             {/* Pagination */}
-            <div className="d-flex flex-column align-items-center gap-2 mt-4">
-              <div className="small text-muted">
-                Hiển thị tối đa 10 sản phẩm mỗi trang | Trang <strong>{currentPage}</strong> / <strong>{totalPages || 1}</strong>
-              </div>
-              {totalPages > 1 && (
-                <Pagination className="mb-0">
-                  <Pagination.Prev
-                    disabled={currentPage === 1}
-                    onClick={() => handlePageChange(currentPage - 1)}
-                  />
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <Pagination.Item
-                      key={page}
-                      active={page === currentPage}
-                      onClick={() => handlePageChange(page)}
-                    >
-                      {page}
-                    </Pagination.Item>
-                  ))}
-                  <Pagination.Next
-                    disabled={currentPage === totalPages}
-                    onClick={() => handlePageChange(currentPage + 1)}
-                  />
-                </Pagination>
-              )}
-            </div>
+            <AntPagination
+              current={currentPage}
+              total={totalItems}
+              pageSize={10}
+              onChange={(page) => handlePageChange(page)}
+            />
           </>
         )}
       </Card.Body>

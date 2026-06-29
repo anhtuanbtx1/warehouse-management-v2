@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Container, Row, Col, Breadcrumb, Card, Table, Badge, Form, Button, Pagination } from 'react-bootstrap';
+import { Container, Row, Col, Breadcrumb, Card, Table, Badge, Form, Button } from 'react-bootstrap';
+import AntPagination from '@/components/ui/pagination-ant';
 import InvoicePrint from '@/components/warehouse-v2/InvoicePrint';
 
 interface SalesInvoice {
@@ -38,6 +39,7 @@ const InvoicesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [fromDate, setFromDate] = useState(defaultDates.fromDate);
@@ -65,6 +67,7 @@ const InvoicesPage: React.FC = () => {
           setInvoices(result.data.data || []);
           setCurrentPage(result.data.page || 1);
           setTotalPages(result.data.totalPages || 1);
+          setTotalItems(result.data.total ?? (result.data.totalPages || 1) * 10);
         } else {
           setInvoices([]);
           setCurrentPage(1);
@@ -304,19 +307,12 @@ const InvoicesPage: React.FC = () => {
                     </tbody>
                   </Table>
 
-                  {totalPages > 1 && (
-                    <div className="d-flex justify-content-center">
-                      <Pagination>
-                        <Pagination.Prev disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)} />
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <Pagination.Item key={page} active={page === currentPage} onClick={() => handlePageChange(page)}>
-                            {page}
-                          </Pagination.Item>
-                        ))}
-                        <Pagination.Next disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)} />
-                      </Pagination>
-                    </div>
-                  )}
+                  <AntPagination
+                    current={currentPage}
+                    total={totalItems}
+                    pageSize={10}
+                    onChange={(page) => handlePageChange(page)}
+                  />
                 </>
               )}
             </Card.Body>

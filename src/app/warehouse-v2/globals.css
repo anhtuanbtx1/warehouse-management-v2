@@ -16,8 +16,9 @@
   --warehouse-surface-elevated: rgba(255, 255, 255, 0.94);
   --warehouse-surface-glass: rgba(255, 245, 238, 0.82);
   
-  --warehouse-border: rgba(120, 70, 110, 0.12);
-  --warehouse-border-strong: rgba(120, 70, 110, 0.22);
+  --warehouse-border: #ff8c42;
+  --warehouse-border-strong: #ff8c42;
+  --warehouse-border-w: 1px;
   
   --warehouse-text: #0f172a;
   --warehouse-heading: #020617;
@@ -58,6 +59,7 @@ html[data-bs-theme='dark'] {
   --warehouse-surface-glass: rgba(15, 23, 42, 0.72);
   --warehouse-border: rgba(100, 116, 139, 0.34);
   --warehouse-border-strong: rgba(148, 163, 184, 0.42);
+  --warehouse-border-w: 1px;
   --warehouse-text: #f8fafc;
   --warehouse-heading: #ffffff;
   --warehouse-text-muted: #cbd5e1;
@@ -127,7 +129,7 @@ html[data-bs-theme='dark'] {
   z-index: 1030;
   backdrop-filter: blur(14px);
   background: var(--warehouse-surface-glass);
-  border-bottom: 1px solid var(--warehouse-border);
+  border-bottom: var(--warehouse-border-w) solid var(--warehouse-border);
 }
 
 .warehouse-navbar {
@@ -173,7 +175,7 @@ html[data-bs-theme='dark'] {
 }
 
 .warehouse-navbar-toggle {
-  border: 1px solid var(--warehouse-border);
+  border: var(--warehouse-border-w) solid var(--warehouse-border);
   border-radius: 0.85rem;
   padding: 0.5rem 0.75rem;
 }
@@ -259,7 +261,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
   display: inline-flex !important;
   align-items: center;
   gap: 0.75rem;
-  border: 1px solid var(--warehouse-border) !important;
+  border: var(--warehouse-border-w) solid var(--warehouse-border) !important;
   border-radius: 1rem !important;
   padding: 0.55rem 0.75rem !important;
   background: var(--warehouse-surface-elevated) !important;
@@ -307,7 +309,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 
 .warehouse-user-menu {
   min-width: 240px;
-  border: 1px solid var(--warehouse-border) !important;
+  border: var(--warehouse-border-w) solid var(--warehouse-border) !important;
   border-radius: 1rem !important;
   padding: 0.5rem !important;
   box-shadow: var(--warehouse-shadow-md) !important;
@@ -334,7 +336,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 }
 
 .warehouse-footer {
-  border-top: 1px solid var(--warehouse-border);
+  border-top: var(--warehouse-border-w) solid var(--warehouse-border);
   background: var(--warehouse-surface-glass);
   backdrop-filter: blur(10px);
 }
@@ -387,7 +389,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 }
 
 .warehouse-v2 .card {
-  border: 1px solid var(--warehouse-border);
+  border: var(--warehouse-border-w) solid var(--warehouse-border);
   border-radius: var(--warehouse-radius-md);
   box-shadow: var(--warehouse-shadow-sm);
   background: var(--warehouse-surface-elevated);
@@ -396,7 +398,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 .warehouse-v2 .card-header {
   padding: 1rem 1.25rem;
   background: transparent;
-  border-bottom: 1px solid var(--warehouse-border);
+  border-bottom: var(--warehouse-border-w) solid var(--warehouse-border);
   font-size: 1rem;
   font-weight: 700;
 }
@@ -496,6 +498,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
   min-height: 2.9rem;
   border-radius: 0.9rem;
   border-color: var(--warehouse-border-strong);
+  border-width: var(--warehouse-border-w);
   padding: 0.7rem 0.9rem;
   font-size: 0.95rem;
   background-color: var(--warehouse-input-bg);
@@ -528,7 +531,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 }
 
 .warehouse-v2 .nav-tabs .nav-link {
-  border: 1px solid var(--warehouse-border);
+  border: var(--warehouse-border-w) solid var(--warehouse-border);
   border-radius: 999px;
   color: var(--warehouse-text-muted);
   font-size: 0.95rem;
@@ -558,7 +561,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 .warehouse-v2 .table th {
   padding: 0.95rem 0.9rem;
   border-top: none;
-  border-bottom-width: 1px;
+  border-bottom-width: var(--warehouse-border-w);
   border-color: var(--warehouse-border);
   background: var(--warehouse-table-head-bg);
   color: var(--warehouse-heading);
@@ -573,6 +576,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
   vertical-align: middle;
   color: var(--warehouse-text);
   border-color: var(--warehouse-border);
+  border-width: var(--warehouse-border-w);
 }
 
 .warehouse-v2 .table tbody tr {
@@ -607,7 +611,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 }
 
 .warehouse-v2 .modal-content {
-  border: 1px solid var(--warehouse-border);
+  border: var(--warehouse-border-w) solid var(--warehouse-border);
   border-radius: var(--warehouse-radius-lg);
   overflow: hidden;
   background: var(--warehouse-surface-elevated);
@@ -617,6 +621,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 .warehouse-v2 .modal-footer {
   background: var(--warehouse-surface-soft);
   border-color: var(--warehouse-border);
+  border-width: var(--warehouse-border-w);
 }
 
 .warehouse-v2 .modal-title {
@@ -632,7 +637,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 }
 
 .warehouse-v2 .toast-header {
-  border-bottom: 1px solid var(--warehouse-border) !important;
+  border-bottom: var(--warehouse-border-w) solid var(--warehouse-border) !important;
 }
 
 .warehouse-v2 .btn-group-sm .btn,
@@ -658,7 +663,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding: 1.5rem 1.75rem;
-  border: 1px solid var(--warehouse-border);
+  border: var(--warehouse-border-w) solid var(--warehouse-border);
   border-radius: var(--warehouse-radius-lg);
   background: linear-gradient(180deg, var(--warehouse-surface-elevated), var(--warehouse-surface-soft));
   box-shadow: var(--warehouse-shadow-sm);
@@ -695,7 +700,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 }
 
 .warehouse-surface-panel {
-  border: 1px solid var(--warehouse-border);
+  border: var(--warehouse-border-w) solid var(--warehouse-border);
   border-radius: var(--warehouse-radius-md);
   background: var(--warehouse-surface-elevated);
   box-shadow: var(--warehouse-shadow-sm);
@@ -703,7 +708,7 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 
 .warehouse-info-panel {
   padding: 1.1rem 1.25rem;
-  border: 1px solid var(--warehouse-border);
+  border: var(--warehouse-border-w) solid var(--warehouse-border);
   border-radius: var(--warehouse-radius-md);
   background: linear-gradient(180deg, var(--warehouse-surface-elevated), var(--warehouse-surface-soft));
   box-shadow: var(--warehouse-shadow-sm);
