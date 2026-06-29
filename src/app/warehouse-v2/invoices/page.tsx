@@ -238,7 +238,6 @@ const InvoicesPage: React.FC = () => {
                         <th>Ngày bán</th>
                         <th>Sản phẩm</th>
                         <th>IMEI</th>
-                        <th>Khách hàng</th>
                         <th>Thanh toán</th>
                         <th>Giá nhập</th>
                         <th>Giá bán</th>
@@ -259,12 +258,6 @@ const InvoicesPage: React.FC = () => {
                           </td>
                           <td>
                             <code>{sale.IMEI}</code>
-                          </td>
-                          <td>
-                            <div>
-                              {sale.CustomerName || 'Khách lẻ'}
-                              {sale.CustomerPhone && <small className="d-block text-muted">{sale.CustomerPhone}</small>}
-                            </div>
                           </td>
                           <td>
                             {sale.PaymentMethod === 'CASH' ? (

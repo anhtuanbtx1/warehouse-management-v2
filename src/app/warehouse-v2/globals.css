@@ -20,10 +20,10 @@
   --warehouse-border-strong: #ff8c42;
   --warehouse-border-w: 1px;
   
-  --warehouse-text: #0f172a;
-  --warehouse-heading: #020617;
-  --warehouse-text-muted: #334155;
-  --warehouse-text-soft: #475569;
+  --warehouse-text: #3d4a5c;
+  --warehouse-heading: #1e293b;
+  --warehouse-text-muted: #64748b;
+  --warehouse-text-soft: #94a3b8;
   
   --warehouse-code-bg: rgba(205, 180, 219, 0.08);
   --warehouse-table-head-bg: #fdf7fb;
@@ -467,23 +467,23 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
 
 .warehouse-v2 .bg-info,
 .warehouse-v2 .badge.bg-info {
-  background: rgba(8, 145, 178, 0.14) !important;
-  color: var(--warehouse-primary-strong) !important;
+  background: rgba(8, 145, 178, 0.12) !important;
+  color: #0c6478 !important; /* teal đậm, rõ trên nền teal nhạt */
 }
 
 .warehouse-v2 .badge.bg-primary {
-  background: rgba(8, 145, 178, 0.12) !important;
-  color: var(--warehouse-primary-strong) !important;
+  background: rgba(99, 102, 241, 0.12) !important;
+  color: #3730a3 !important; /* indigo đậm */
 }
 
 .warehouse-v2 .badge.bg-success {
-  background: rgba(34, 197, 94, 0.14) !important;
-  color: var(--warehouse-accent) !important;
+  background: #5cc184 !important;
+  color: #ffffff !important;
 }
 
 .warehouse-v2 .badge.bg-secondary {
-  background: rgba(100, 116, 139, 0.14) !important;
-  color: #94a3b8 !important;
+  background: rgba(100, 116, 139, 0.12) !important;
+  color: #475569 !important; /* xám đậm vừa */
 }
 
 .warehouse-v2 .form-label {
@@ -819,6 +819,51 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* ─── Light mode: softer Bootstrap text colors ─── */
+html:not([data-bs-theme='dark']) .warehouse-v2 .text-primary,
+html:not([data-bs-theme='dark']) .warehouse-v2 code.text-primary {
+  color: #e07b39 !important; /* warm orange, dễ đọc hơn */
+}
+
+html:not([data-bs-theme='dark']) .warehouse-v2 .text-info {
+  color: #0e9aa7 !important; /* teal đậm vừa, không chói */
+}
+
+html:not([data-bs-theme='dark']) .warehouse-v2 .text-success {
+  color: #2e7d52 !important; /* xanh lá rừng ấm */
+}
+
+html:not([data-bs-theme='dark']) .warehouse-v2 .text-danger {
+  color: #c0392b !important; /* đỏ vừa, không quá chói */
+}
+
+html:not([data-bs-theme='dark']) .warehouse-v2 .text-muted,
+html:not([data-bs-theme='dark']) .warehouse-v2 .text-secondary {
+  color: #64748b !important;
+}
+
+html:not([data-bs-theme='dark']) .warehouse-v2 .fw-bold,
+html:not([data-bs-theme='dark']) .warehouse-v2 strong {
+  color: #1e293b;
+}
+
+/* Table: softer header text */
+html:not([data-bs-theme='dark']) .warehouse-v2 .table th {
+  color: #475569;
+  letter-spacing: 0.04em;
+}
+
+/* Table: softer body text */
+html:not([data-bs-theme='dark']) .warehouse-v2 .table td {
+  color: #3d4a5c;
+}
+
+/* code tag: warm tone */
+html:not([data-bs-theme='dark']) .warehouse-v2 code {
+  color: #b45309 !important; /* amber đậm */
+  background: rgba(251, 191, 36, 0.08);
 }
 
 /* ─── Utility: Entry fade-in animation ─── */
