@@ -3,18 +3,18 @@
 :root {
   /* Pastel / Soft Theme Base */
   --warehouse-primary: #CDB4DB; /* Soft purple */
-  --warehouse-bg: radial-gradient(125% 125% at 50% 101%,#f55702 10.5%,#f57802 16%,#f58c02 17.5%,#f5aa64 25%,#eeaeca 40%,#cab3d6 65%,#94c9e9);
+  --warehouse-bg: #fff5ee;
   --warehouse-primary-strong: #a28a99; /* Deeper purple for contrast */
   --warehouse-primary-soft: #fbeef3; /* Very light pink/purple for backgrounds */
-  
+
   --warehouse-accent: #FFC8DD; /* Pink */
   --warehouse-accent-soft: #fdf0f5; /* Light pink */
-  
+
   --warehouse-surface: #ffffff;
-  --warehouse-surface-muted: #fdf7fb;
-  --warehouse-surface-soft: #fdf7fb;
+  --warehouse-surface-muted: #fff9f5;
+  --warehouse-surface-soft: #fff9f5;
   --warehouse-surface-elevated: rgba(255, 255, 255, 0.94);
-  --warehouse-surface-glass: rgba(255, 255, 255, 0.78);
+  --warehouse-surface-glass: rgba(255, 245, 238, 0.82);
   
   --warehouse-border: rgba(120, 70, 110, 0.12);
   --warehouse-border-strong: rgba(120, 70, 110, 0.22);
@@ -28,9 +28,9 @@
   --warehouse-table-head-bg: #fdf7fb;
   --warehouse-input-bg: rgba(255, 255, 255, 0.96);
   --warehouse-overlay-start: rgba(205, 180, 219, 0.18);
-  --warehouse-page-bg-start: #fdf7fb;
-  --warehouse-page-bg-mid: #fbeef3;
-  --warehouse-page-bg-end: #fdf0f5;
+  --warehouse-page-bg-start: #fff5ee;
+  --warehouse-page-bg-mid: #fff5ee;
+  --warehouse-page-bg-end: #fff5ee;
   
   --warehouse-danger: #ef9a9a; /* Pastel Red */
   --warehouse-warning: #f7d08a; /* Pastel Yellow/Orange */

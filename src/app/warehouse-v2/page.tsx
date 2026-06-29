@@ -132,10 +132,6 @@ const WarehouseV2Dashboard: React.FC = () => {
           <div className="d-flex justify-content-between align-items-end">
             <div>
               <h1 className={styles.pageTitle}>Tổng quan vận hành</h1>
-              <p className={styles.pageSubtitle}>
-                Hôm nay là {timezoneDebug?.client?.vietnamToday || new Date().toLocaleDateString('vi-VN')}. 
-                Kiểm soát luồng hàng và hiệu quả kinh doanh trong thời gian thực.
-              </p>
             </div>
             <div className="d-none d-md-block">
               <Button 

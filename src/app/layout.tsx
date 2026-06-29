@@ -1,12 +1,12 @@
 import AppProvidersWrapper from '@/components/wrappers/AppProvidersWrapper'
 import type { Metadata } from 'next'
-import { Figtree } from 'next/font/google'
+import { Nunito_Sans } from 'next/font/google'
 import Image from 'next/image'
 import NextTopLoader from 'nextjs-toploader'
 import '@/assets/scss/app.scss'
 import { DEFAULT_PAGE_TITLE } from '@/contexts/constants'
 
-const figtree = Figtree({
+const nunitoSans = Nunito_Sans({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700', '800', '900'],
   display: 'swap',
@@ -73,7 +73,7 @@ export default function RootLayout({
           referrerPolicy="no-referrer"
         />
       </head>
-      <body className={figtree.className}>
+      <body className={nunitoSans.className}>
         <div id="splash-screen">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#2563eb', fontWeight: 700, fontSize: '28px' }}>
             <i className="fas fa-store"></i>
