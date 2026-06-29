@@ -313,12 +313,12 @@
 .timelineAmount {
   display: inline-flex;
   margin-top: 0.5rem;
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  background: var(--warehouse-accent-soft);
-  color: var(--warehouse-text); font-weight: 700;
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  background: #fff0e6;
+  color: #f97316;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 /* Loading indicators */
