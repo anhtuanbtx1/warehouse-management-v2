@@ -234,13 +234,13 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
               </Form.Group>
             </Col>
             <Col md={2}>
-              <Button 
-                variant="primary" 
-                onClick={handleFilter} 
+              <Form.Label className="small fw-medium text-muted mb-1 invisible">_</Form.Label>
+              <Button
+                variant="primary"
+                onClick={handleFilter}
                 className="w-100 d-flex align-items-center justify-content-center shadow-sm"
-                style={{ height: '38px' }}
               >
-                <i className="fas fa-search me-2"></i> Lọc dữ liệu
+                <i className="fas fa-search"></i>
               </Button>
             </Col>
           </Row>

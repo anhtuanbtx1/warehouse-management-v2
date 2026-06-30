@@ -582,6 +582,10 @@ html[data-bs-theme='dark'] .warehouse-navbar-toggle .navbar-toggler-icon {
   transition: background-color 0.2s ease;
 }
 
+.warehouse-v2 .table tbody tr:last-child td {
+  border-bottom: var(--warehouse-border-w) solid var(--warehouse-border);
+}
+
 .warehouse-v2 .table-hover tbody tr:hover {
   background: rgba(8, 145, 178, 0.06);
 }

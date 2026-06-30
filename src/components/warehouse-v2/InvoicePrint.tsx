@@ -259,26 +259,7 @@ const InvoicePrint: React.FC<InvoicePrintProps> = ({ show, onHide, invoiceData }
 
           {/* Footer */}
           <div className="border-top pt-4 mt-4">
-            <Row>
-              <Col md={6}>
-                <div className="text-center">
-                  <p className="mb-2"><strong>Khách hàng</strong></p>
-                  <p className="mb-1">(Ký và ghi rõ họ tên)</p>
-                  <div style={{height: '60px'}}></div>
-                  <p className="mb-0">_____________________</p>
-                </div>
-              </Col>
-              <Col md={6}>
-                <div className="text-center">
-                  <p className="mb-2"><strong>Người bán hàng</strong></p>
-                  <p className="mb-1">(Ký và ghi rõ họ tên)</p>
-                  <div style={{height: '60px'}}></div>
-                  <p className="mb-0">_____________________</p>
-                </div>
-              </Col>
-            </Row>
-
-            <div className="text-center mt-4 border-top pt-3">
+            <div className="text-center mt-2 border-top pt-3">
               <p className="mb-2">
                 <strong>🎉 Cảm ơn quý khách đã mua hàng! 🎉</strong>
               </p>
