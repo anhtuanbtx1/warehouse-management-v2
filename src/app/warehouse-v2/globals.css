@@ -129,7 +129,6 @@ html[data-bs-theme='dark'] {
   z-index: 1030;
   backdrop-filter: blur(14px);
   background: var(--warehouse-surface-glass);
-  border-bottom: var(--warehouse-border-w) solid var(--warehouse-border);
 }
 
 .warehouse-navbar {
@@ -884,4 +883,37 @@ html:not([data-bs-theme='dark']) .warehouse-v2 code {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ─── Animated border glow on buttons ─── */
+.warehouse-v2 .btn {
+  position: relative;
+}
+
+.warehouse-v2 .btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.9) 0%, transparent 70%);
+  filter: blur(5px);
+  pointer-events: none;
+  z-index: 0;
+  offset-path: rect(0px auto auto 0px round 10px);
+  offset-distance: 0%;
+  animation: btnBorderGlow 3s linear infinite;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.warehouse-v2 .btn:hover::after {
+  opacity: 1;
+}
+
+@keyframes btnBorderGlow {
+  0%   { offset-distance: 0%; }
+  100% { offset-distance: 100%; }
 }
