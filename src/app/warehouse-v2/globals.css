@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Global styles for Warehouse V2 */
 
 :root {
@@ -43,6 +47,28 @@
   --warehouse-radius-sm: 16px;
   --warehouse-radius-md: 24px;
   --warehouse-radius-lg: 32px;
+
+  /* shadcn/ui CSS variables */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 215 20.2% 65.1%;
+  --radius: 0.5rem;
 }
 
 html[data-bs-theme='dark'] {
@@ -74,6 +100,27 @@ html[data-bs-theme='dark'] {
   --warehouse-shadow-sm: 0 12px 28px rgba(2, 6, 23, 0.42);
   --warehouse-shadow-md: 0 22px 48px rgba(2, 6, 23, 0.5);
   --warehouse-shadow-lg: 0 30px 64px rgba(2, 6, 23, 0.6);
+
+  /* shadcn/ui dark mode variables */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
 }
 
 .warehouse-v2 {
@@ -920,4 +967,129 @@ html:not([data-bs-theme='dark']) .warehouse-v2 code {
 @keyframes btnBorderGlow {
   0%   { offset-distance: 0%; }
   100% { offset-distance: 100%; }
+}
+
+/* ── Ant Design Pagination – dark mode ──────────────────────────── */
+html[data-bs-theme='dark'] .ant-pagination-total-text {
+  color: #ffffff !important;
+}
+
+html[data-bs-theme='dark'] .ant-pagination-prev .ant-pagination-item-link,
+html[data-bs-theme='dark'] .ant-pagination-next .ant-pagination-item-link {
+  color: #ffffff !important;
+}
+
+/* ── Liquid Glass Button ─────────────────────────────────────────── */
+.liquid-glass-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  border-radius: 14px;
+  -webkit-tap-highlight-color: transparent;
+  transition: box-shadow 0.22s ease;
+}
+
+/* SVG distortion filter */
+.liquid-glass-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  /* Liquid ripple layer */
+  background: radial-gradient(
+    ellipse at 30% 25%,
+    rgba(255,255,255,0.55) 0%,
+    rgba(255,255,255,0.12) 45%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.liquid-glass-btn__inner {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--warehouse-text);
+  white-space: nowrap;
+
+  /* Glass core */
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(14px) saturate(1.6);
+  -webkit-backdrop-filter: blur(14px) saturate(1.6);
+
+  /* Specular highlight only — border is on the outer button */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    inset 0 -1px 0 rgba(0,0,0,0.06),
+    0 4px 16px rgba(0,0,0,0.08),
+    0 1px 3px rgba(0,0,0,0.06);
+
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.15s ease;
+}
+
+.liquid-glass-btn:hover .liquid-glass-btn__inner {
+  background: rgba(255, 255, 255, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.85),
+    inset 0 -1px 0 rgba(0,0,0,0.06),
+    0 6px 22px rgba(0,0,0,0.1),
+    0 2px 6px rgba(0,0,0,0.07);
+  transform: translateY(-1px);
+}
+
+.liquid-glass-btn:active .liquid-glass-btn__inner {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 2px 6px rgba(0,0,0,0.08),
+    0 2px 8px rgba(0,0,0,0.06);
+}
+
+.liquid-glass-btn:focus-visible {
+  outline: 2px solid #ff8c42;
+  outline-offset: 2px;
+}
+
+/* Dark mode */
+html[data-bs-theme='dark'] .liquid-glass-btn__inner {
+  color: var(--warehouse-text);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 -1px 0 rgba(0,0,0,0.25),
+    0 4px 16px rgba(0,0,0,0.3),
+    0 1px 3px rgba(0,0,0,0.2);
+}
+
+html[data-bs-theme='dark'] .liquid-glass-btn:hover .liquid-glass-btn__inner {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    inset 0 -1px 0 rgba(0,0,0,0.3),
+    0 6px 22px rgba(0,0,0,0.38),
+    0 2px 6px rgba(0,0,0,0.22);
+  transform: translateY(-1px);
+}
+
+html[data-bs-theme='dark'] .liquid-glass-btn:active .liquid-glass-btn__inner {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(0) scale(0.98);
 }

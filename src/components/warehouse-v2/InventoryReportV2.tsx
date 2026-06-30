@@ -1,7 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, Table, Button, Form, Row, Col, Badge, Alert } from 'react-bootstrap';
+import { Eye } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { LiquidButton } from '@/components/ui/liquid-glass-button';
 
 interface InventoryReportV2 {
   BatchCode: string;
@@ -35,6 +43,24 @@ interface InventoryReportV2Props {
 }
 
 const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetails }) => {
+  const ALL_COLUMNS = useMemo(() => [
+    'batchCode', 'importDate', 'category', 'totalQty', 'soldQty', 'remainQty',
+    'sellRate', 'importValue', 'soldValue', 'profitLoss', 'profitRate', 'status', 'actions',
+  ], []);
+
+  const COLUMN_LABELS: Record<string, string> = {
+    batchCode: 'Mã lô hàng', importDate: 'Ngày nhập', category: 'Danh mục',
+    totalQty: 'SL nhập', soldQty: 'SL bán', remainQty: 'SL tồn',
+    sellRate: 'Tỷ lệ bán', importValue: 'Giá trị nhập', soldValue: 'Giá trị bán',
+    profitLoss: 'Lãi/Lỗ', profitRate: 'Tỷ lệ lãi', status: 'Trạng thái', actions: 'Thao tác',
+  };
+
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(ALL_COLUMNS);
+  const isVisible = useCallback((col: string) => visibleColumns.includes(col), [visibleColumns]);
+  const toggleColumn = useCallback((col: string) => {
+    setVisibleColumns(prev => prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col]);
+  }, []);
+
   const [reportData, setReportData] = useState<InventoryReportV2[]>([]);
   const [summary, setSummary] = useState<InventorySummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -184,11 +210,30 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
 
       {/* Main Report */}
       <Card>
-        <Card.Header>
+        <Card.Header className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0">
             <i className="fas fa-warehouse me-2"></i>
             Báo cáo tồn kho theo lô hàng
           </h5>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <LiquidButton>
+                <Eye size={14} />
+                <span>Hiện/Ẩn cột</span>
+              </LiquidButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" style={{ minWidth: '180px' }}>
+              {ALL_COLUMNS.map(col => (
+                <DropdownMenuCheckboxItem
+                  key={col}
+                  checked={isVisible(col)}
+                  onCheckedChange={() => toggleColumn(col)}
+                >
+                  {COLUMN_LABELS[col]}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </Card.Header>
         
         <Card.Body>
@@ -263,91 +308,111 @@ const InventoryReportV2: React.FC<InventoryReportV2Props> = ({ onViewBatchDetail
                 <Table responsive striped hover>
                   <thead>
                     <tr>
-                      <th className="text-nowrap">Mã lô hàng</th>
-                      <th className="text-nowrap">Ngày nhập</th>
-                      <th className="text-nowrap">Danh mục</th>
-                      <th className="text-nowrap text-center">SL nhập</th>
-                      <th className="text-nowrap text-center">SL bán</th>
-                      <th className="text-nowrap text-center">SL tồn</th>
-                      <th className="text-nowrap" style={{ minWidth: '120px' }}>Tỷ lệ bán</th>
-                      <th className="text-nowrap text-end">Giá trị nhập</th>
-                      <th className="text-nowrap text-end">Giá trị bán</th>
-                      <th className="text-nowrap text-end">Lãi/Lỗ</th>
-                      <th className="text-nowrap text-center">Tỷ lệ lãi</th>
-                      <th className="text-nowrap text-center">Trạng thái</th>
-                      <th className="text-nowrap text-center">Thao tác</th>
+                      {isVisible('batchCode') && <th className="text-nowrap">Mã lô hàng</th>}
+                      {isVisible('importDate') && <th className="text-nowrap">Ngày nhập</th>}
+                      {isVisible('category') && <th className="text-nowrap">Danh mục</th>}
+                      {isVisible('totalQty') && <th className="text-nowrap text-center">SL nhập</th>}
+                      {isVisible('soldQty') && <th className="text-nowrap text-center">SL bán</th>}
+                      {isVisible('remainQty') && <th className="text-nowrap text-center">SL tồn</th>}
+                      {isVisible('sellRate') && <th className="text-nowrap" style={{ minWidth: '120px' }}>Tỷ lệ bán</th>}
+                      {isVisible('importValue') && <th className="text-nowrap text-end">Giá trị nhập</th>}
+                      {isVisible('soldValue') && <th className="text-nowrap text-end">Giá trị bán</th>}
+                      {isVisible('profitLoss') && <th className="text-nowrap text-end">Lãi/Lỗ</th>}
+                      {isVisible('profitRate') && <th className="text-nowrap text-center">Tỷ lệ lãi</th>}
+                      {isVisible('status') && <th className="text-nowrap text-center">Trạng thái</th>}
+                      {isVisible('actions') && <th className="text-nowrap text-center">Thao tác</th>}
                     </tr>
                   </thead>
                   <tbody>
                     {reportData.map((item, index) => (
                       <tr key={index} className="align-middle">
-                        <td>
-                          <Badge bg="light" text="primary" className="border border-primary-subtle px-2 py-1">
-                            {item.BatchCode}
-                          </Badge>
-                        </td>
-                        <td className="text-nowrap">{formatDate(item.ImportDate)}</td>
-                        <td>
-                          <Badge bg="info" className="fw-normal">{item.CategoryName}</Badge>
-                        </td>
-                        <td className="text-center">
-                          <span className="fw-bold">{item.TotalQuantity}</span>
-                        </td>
-                        <td className="text-center">
-                          <span className="text-success fw-medium">{item.TotalSoldQuantity}</span>
-                        </td>
-                        <td className="text-center">
-                          <Badge bg={item.RemainingQuantity > 0 ? "warning" : "secondary"} text={item.RemainingQuantity > 0 ? "dark" : "white"}>
-                            {item.RemainingQuantity}
-                          </Badge>
-                        </td>
-                        <td>
-                          <div className="progress shadow-sm" style={{ height: '16px', borderRadius: '8px' }}>
-                            <div
-                              className={`progress-bar ${getProgressBarColor(item.RemainingQuantity, item.TotalQuantity)}`}
-                              style={{ 
-                                width: `${((item.TotalQuantity - item.RemainingQuantity) / item.TotalQuantity) * 100}%`,
-                                fontSize: '10px',
-                                fontWeight: 'bold'
-                              }}
-                            >
-                              {(((item.TotalQuantity - item.RemainingQuantity) / item.TotalQuantity) * 100).toFixed(0)}%
+                        {isVisible('batchCode') && (
+                          <td>
+                            <Badge bg="light" text="primary" className="border border-primary-subtle px-2 py-1">
+                              {item.BatchCode}
+                            </Badge>
+                          </td>
+                        )}
+                        {isVisible('importDate') && <td className="text-nowrap">{formatDate(item.ImportDate)}</td>}
+                        {isVisible('category') && (
+                          <td>
+                            <Badge bg="info" className="fw-normal">{item.CategoryName}</Badge>
+                          </td>
+                        )}
+                        {isVisible('totalQty') && (
+                          <td className="text-center">
+                            <span className="fw-bold">{item.TotalQuantity}</span>
+                          </td>
+                        )}
+                        {isVisible('soldQty') && (
+                          <td className="text-center">
+                            <span className="text-success fw-medium">{item.TotalSoldQuantity}</span>
+                          </td>
+                        )}
+                        {isVisible('remainQty') && (
+                          <td className="text-center">
+                            <Badge bg={item.RemainingQuantity > 0 ? "warning" : "secondary"} text={item.RemainingQuantity > 0 ? "dark" : "white"}>
+                              {item.RemainingQuantity}
+                            </Badge>
+                          </td>
+                        )}
+                        {isVisible('sellRate') && (
+                          <td>
+                            <div className="progress shadow-sm" style={{ height: '16px', borderRadius: '8px' }}>
+                              <div
+                                className={`progress-bar ${getProgressBarColor(item.RemainingQuantity, item.TotalQuantity)}`}
+                                style={{
+                                  width: `${((item.TotalQuantity - item.RemainingQuantity) / item.TotalQuantity) * 100}%`,
+                                  fontSize: '10px',
+                                  fontWeight: 'bold'
+                                }}
+                              >
+                                {(((item.TotalQuantity - item.RemainingQuantity) / item.TotalQuantity) * 100).toFixed(0)}%
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="text-end text-nowrap">
-                          <small className="fw-medium">{formatCurrency(item.TotalImportValue)}</small>
-                        </td>
-                        <td className="text-end text-nowrap">
-                          <small className="text-success fw-bold">
-                            {formatCurrency(item.TotalSoldValue)}
-                          </small>
-                        </td>
-                        <td className="text-end text-nowrap">
-                          <span className={`${getProfitLossColor(item.ProfitLoss)} fw-bold`}>
-                            <small>{formatCurrency(item.ProfitLoss)}</small>
-                          </span>
-                        </td>
-                        <td className="text-center">
-                          <Badge bg={item.ProfitLoss >= 0 ? "success" : "danger"} className="bg-opacity-75">
-                            {item.ProfitMarginPercent.toFixed(1)}%
-                          </Badge>
-                        </td>
-                        <td className="text-center">{getStatusBadge(item.Status)}</td>
-                        <td className="text-center align-middle">
-                          {onViewBatchDetails && (
-                            <Button
-                              variant="outline-primary"
-                              size="sm"
-                              onClick={() => onViewBatchDetails(item)}
-                              title="Xem chi tiết lô hàng"
-                              className="d-inline-flex align-items-center justify-content-center text-nowrap px-3"
-                              style={{ height: '32px' }}
-                            >
-                              <i className="fas fa-eye me-2"></i>Chi tiết
-                            </Button>
-                          )}
-                        </td>
+                          </td>
+                        )}
+                        {isVisible('importValue') && (
+                          <td className="text-end text-nowrap">
+                            <small className="fw-medium">{formatCurrency(item.TotalImportValue)}</small>
+                          </td>
+                        )}
+                        {isVisible('soldValue') && (
+                          <td className="text-end text-nowrap">
+                            <small className="text-success fw-bold">{formatCurrency(item.TotalSoldValue)}</small>
+                          </td>
+                        )}
+                        {isVisible('profitLoss') && (
+                          <td className="text-end text-nowrap">
+                            <span className={`${getProfitLossColor(item.ProfitLoss)} fw-bold`}>
+                              <small>{formatCurrency(item.ProfitLoss)}</small>
+                            </span>
+                          </td>
+                        )}
+                        {isVisible('profitRate') && (
+                          <td className="text-center">
+                            <Badge bg={item.ProfitLoss >= 0 ? "success" : "danger"} className="bg-opacity-75">
+                              {item.ProfitMarginPercent.toFixed(1)}%
+                            </Badge>
+                          </td>
+                        )}
+                        {isVisible('status') && <td className="text-center">{getStatusBadge(item.Status)}</td>}
+                        {isVisible('actions') && (
+                          <td className="text-center align-middle">
+                            {onViewBatchDetails && (
+                              <Button
+                                variant="outline-primary"
+                                size="sm"
+                                onClick={() => onViewBatchDetails(item)}
+                                title="Xem chi tiết lô hàng"
+                                className="d-inline-flex align-items-center justify-content-center text-nowrap px-3"
+                                style={{ height: '32px' }}
+                              >
+                                <i className="fas fa-eye me-2"></i>Chi tiết
+                              </Button>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

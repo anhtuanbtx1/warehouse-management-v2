@@ -1,9 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, Table, Button, Form, InputGroup, Badge, Modal, Row, Col, Alert } from 'react-bootstrap';
 import AntPagination from '@/components/ui/pagination-ant';
 import { useToast } from '@/contexts/ToastContext';
+import { Eye } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import * as XLSX from 'xlsx';
 import LabelPrint from './LabelPrint';
 
@@ -60,6 +68,28 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
   batchInfo
 }) => {
   const { showSuccess, showError } = useToast();
+
+  const TOGGLEABLE_COLUMNS = useMemo(() => [
+    { key: 'name', label: 'Tên sản phẩm' },
+    { key: 'imei', label: 'IMEI' },
+    { key: 'category', label: 'Danh mục' },
+    { key: 'importPrice', label: 'Giá nhập' },
+    { key: 'salePrice', label: 'Giá bán' },
+    { key: 'profit', label: 'Lãi/Lỗ' },
+    { key: 'status', label: 'Trạng thái' },
+    { key: 'saleDate', label: 'Ngày bán' },
+    { key: 'actions', label: 'Thao tác' },
+  ], []);
+
+  const [visibleCols, setVisibleCols] = useState<string[]>(() =>
+    TOGGLEABLE_COLUMNS.map(c => c.key).filter(k => !hideColumns.includes(k))
+  );
+
+  const isColVisible = useCallback((col: string) => visibleCols.includes(col), [visibleCols]);
+  const toggleCol = useCallback((col: string) => {
+    setVisibleCols(prev => prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col]);
+  }, []);
+
   const [products, setProducts] = useState<ProductV2[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -698,7 +728,26 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
             </div>
           )}
         </div>
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 align-items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <LiquidButton>
+                <Eye size={14} />
+                <span>Hiện/Ẩn cột</span>
+              </LiquidButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" style={{ minWidth: '170px' }}>
+              {TOGGLEABLE_COLUMNS.map(col => (
+                <DropdownMenuCheckboxItem
+                  key={col.key}
+                  checked={isColVisible(col.key)}
+                  onCheckedChange={() => toggleCol(col.key)}
+                >
+                  {col.label}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           {selectedProductIds.length > 0 && (
             <Button
               variant="danger"
@@ -852,21 +901,21 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                       disabled={products.filter(p => p.Status === 'IN_STOCK').length === 0}
                     />
                   </th>
-                  <th className="text-nowrap">Tên sản phẩm</th>
-                  <th className="text-nowrap">IMEI</th>
-                  <th className="text-nowrap text-center">Danh mục</th>
-                  <th className="text-nowrap text-end">Giá nhập</th>
-                  {!hideColumns.includes('salePrice') && <th className="text-nowrap text-end">Giá bán</th>}
-                  {!hideColumns.includes('profit') && <th className="text-nowrap text-end">Lãi/Lỗ</th>}
-                  <th className="text-nowrap text-center">Trạng thái</th>
-                  {!hideColumns.includes('saleDate') && <th className="text-nowrap text-center">Ngày bán</th>}
-                  <th className="text-nowrap text-center">Thao tác</th>
+                  {isColVisible('name') && <th className="text-nowrap">Tên sản phẩm</th>}
+                  {isColVisible('imei') && <th className="text-nowrap">IMEI</th>}
+                  {isColVisible('category') && <th className="text-nowrap text-center">Danh mục</th>}
+                  {isColVisible('importPrice') && <th className="text-nowrap text-end">Giá nhập</th>}
+                  {isColVisible('salePrice') && <th className="text-nowrap text-end">Giá bán</th>}
+                  {isColVisible('profit') && <th className="text-nowrap text-end">Lãi/Lỗ</th>}
+                  {isColVisible('status') && <th className="text-nowrap text-center">Trạng thái</th>}
+                  {isColVisible('saleDate') && <th className="text-nowrap text-center">Ngày bán</th>}
+                  {isColVisible('actions') && <th className="text-nowrap text-center">Thao tác</th>}
                 </tr>
               </thead>
               <tbody>
                 {products.length === 0 ? (
                   <tr>
-                    <td colSpan={hideColumns.length === 3 ? 7 : 10} className="text-center py-4">
+                    <td colSpan={1 + visibleCols.length} className="text-center py-4">
                       {availableOnly ? 'Không có sản phẩm nào có thể bán' : 'Không có dữ liệu'}
                     </td>
                   </tr>
@@ -881,43 +930,47 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                           disabled={product.Status !== 'IN_STOCK'}
                         />
                       </td>
-                      <td>
-                        <div>
-                          <strong className="text-dark">{product.ProductName}</strong>
-                          {product.Notes && (
-                            <small className="d-block text-muted">
-                              {product.Notes}
-                            </small>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <span className="text-primary fw-medium font-monospace">{product.IMEI}</span>
-                      </td>
-                      <td className="text-center">
-                        <Badge bg="info" className="fw-normal bg-opacity-75">{product.CategoryName}</Badge>
-                      </td>
-                      <td className="text-end fw-medium">{formatCurrency(product.ImportPrice)}</td>
-                      {!hideColumns.includes('salePrice') && (
+                      {isColVisible('name') && (
+                        <td>
+                          <div>
+                            <strong className="text-dark">{product.ProductName}</strong>
+                            {product.Notes && (
+                              <small className="d-block text-muted">{product.Notes}</small>
+                            )}
+                          </div>
+                        </td>
+                      )}
+                      {isColVisible('imei') && (
+                        <td>
+                          <span className="text-primary fw-medium font-monospace">{product.IMEI}</span>
+                        </td>
+                      )}
+                      {isColVisible('category') && (
+                        <td className="text-center">
+                          <Badge bg="info" className="fw-normal bg-opacity-75">{product.CategoryName}</Badge>
+                        </td>
+                      )}
+                      {isColVisible('importPrice') && (
+                        <td className="text-end fw-medium">{formatCurrency(product.ImportPrice)}</td>
+                      )}
+                      {isColVisible('salePrice') && (
                         <td className="text-end">
                           {product.SalePrice > 0 ? (
-                            <span className="text-success fw-bold">
-                              {formatCurrency(product.SalePrice)}
-                            </span>
+                            <span className="text-success fw-bold">{formatCurrency(product.SalePrice)}</span>
                           ) : (
                             <span className="text-muted fst-italic">Chưa bán</span>
                           )}
                         </td>
                       )}
-                      {!hideColumns.includes('profit') && (
+                      {isColVisible('profit') && (
                         <td className="text-end">
                           <span className={`${getProfitColor(getProfit(product))} fw-bold`}>
                             {getProfit(product) !== 0 ? formatCurrency(getProfit(product)) : '-'}
                           </span>
                         </td>
                       )}
-                      <td className="text-center">{getStatusBadge(product.Status)}</td>
-                      {!hideColumns.includes('saleDate') && (
+                      {isColVisible('status') && <td className="text-center">{getStatusBadge(product.Status)}</td>}
+                      {isColVisible('saleDate') && (
                         <td className="text-center">
                           {product.SoldDate ? (
                             <div>
@@ -933,6 +986,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                           )}
                         </td>
                       )}
+                      {isColVisible('actions') && (
                       <td className="text-center">
                         <div className="d-flex justify-content-center gap-1 flex-wrap">
                           <Button
@@ -991,6 +1045,7 @@ const ProductListV2: React.FC<ProductListV2Props> = ({
                           )}
                         </div>
                       </td>
+                      )}
                     </tr>
                   ))
                 )}

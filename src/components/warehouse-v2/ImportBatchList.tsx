@@ -1,10 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, Table, Button, Form, Badge, Modal } from 'react-bootstrap';
 import AntPagination from '@/components/ui/pagination-ant';
 import * as XLSX from 'xlsx';
 import { useToast } from '@/contexts/ToastContext';
+import { Eye } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { LiquidButton } from '@/components/ui/liquid-glass-button';
 
 interface ImportBatch {
   BatchID: number;
@@ -68,6 +76,28 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
   const [categories, setCategories] = useState<any[]>([]);
 
   // Edit batch modal states
+  const ALL_COLUMNS = useMemo(() => [
+    'batchCode', 'importDate', 'category', 'totalQty', 'soldQty',
+    'remainQty', 'importValue', 'soldValue', 'profitLoss', 'status', 'actions',
+  ], []);
+
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(ALL_COLUMNS);
+
+  const isVisible = useCallback((col: string) => visibleColumns.includes(col), [visibleColumns]);
+
+  const toggleColumn = useCallback((col: string) => {
+    setVisibleColumns(prev =>
+      prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col]
+    );
+  }, []);
+
+  const COLUMN_LABELS: Record<string, string> = {
+    batchCode: 'Mã lô hàng', importDate: 'Ngày nhập', category: 'Danh mục',
+    totalQty: 'SL nhập', soldQty: 'SL bán', remainQty: 'SL tồn',
+    importValue: 'Giá trị nhập', soldValue: 'Giá trị bán', profitLoss: 'Lãi/Lỗ',
+    status: 'Trạng thái', actions: 'Thao tác',
+  };
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingBatch, setEditingBatch] = useState<ImportBatch | null>(null);
   const [editLoading, setEditLoading] = useState(false);
@@ -352,7 +382,26 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
           <h5 className="mb-0 fw-bold">
             <i className="fas fa-boxes me-2 text-primary"></i>Danh sách lô hàng
           </h5>
-          <div className="d-flex gap-2">
+          <div className="d-flex gap-2 align-items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <LiquidButton>
+                  <Eye size={14} />
+                  <span>Hiện/Ẩn cột</span>
+                </LiquidButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" style={{ minWidth: '180px' }}>
+                {ALL_COLUMNS.map(col => (
+                  <DropdownMenuCheckboxItem
+                    key={col}
+                    checked={isVisible(col)}
+                    onCheckedChange={() => toggleColumn(col)}
+                  >
+                    {COLUMN_LABELS[col]}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant="outline-success"
               onClick={exportToExcel}
@@ -442,17 +491,17 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
               <Table responsive striped hover className="fs-6">
                 <thead>
                   <tr>
-                    <th className="px-4 text-nowrap">Mã lô hàng</th>
-                    <th className="text-nowrap">Ngày nhập</th>
-                    <th className="text-nowrap">Danh mục</th>
-                    <th className="text-center text-nowrap">SL nhập</th>
-                    <th className="text-center text-nowrap">SL bán</th>
-                    <th className="text-center text-nowrap">SL tồn</th>
-                    <th className="text-end text-nowrap">Giá trị nhập</th>
-                    <th className="text-end text-nowrap">Giá trị bán</th>
-                    <th className="text-end text-nowrap">Lãi/Lỗ</th>
-                    <th className="text-center text-nowrap">Trạng thái</th>
-                    <th className="text-center text-nowrap" style={{ width: '220px' }}>Thao tác</th>
+                    {isVisible('batchCode') && <th className="px-4 text-nowrap">Mã lô hàng</th>}
+                    {isVisible('importDate') && <th className="text-nowrap">Ngày nhập</th>}
+                    {isVisible('category') && <th className="text-nowrap">Danh mục</th>}
+                    {isVisible('totalQty') && <th className="text-center text-nowrap">SL nhập</th>}
+                    {isVisible('soldQty') && <th className="text-center text-nowrap">SL bán</th>}
+                    {isVisible('remainQty') && <th className="text-center text-nowrap">SL tồn</th>}
+                    {isVisible('importValue') && <th className="text-end text-nowrap">Giá trị nhập</th>}
+                    {isVisible('soldValue') && <th className="text-end text-nowrap">Giá trị bán</th>}
+                    {isVisible('profitLoss') && <th className="text-end text-nowrap">Lãi/Lỗ</th>}
+                    {isVisible('status') && <th className="text-center text-nowrap">Trạng thái</th>}
+                    {isVisible('actions') && <th className="text-center text-nowrap" style={{ width: '220px' }}>Thao tác</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -465,76 +514,94 @@ const ImportBatchList: React.FC<ImportBatchListProps> = ({
                   ) : (
                     batches.map(batch => (
                       <tr key={batch.BatchID} className="align-middle">
-                        <td className="px-4">
-                          <code className="text-primary fw-medium">{batch.BatchCode}</code>
-                        </td>
-                        <td className="text-nowrap">{formatDate(batch.ImportDate)}</td>
-                        <td>
-                          <Badge bg="info" className="bg-opacity-75 rounded-pill px-3">
-                            {batch.CategoryName}
-                          </Badge>
-                        </td>
-                        <td className="text-center">
-                          <span className="fw-bold">{batch.TotalQuantity}</span>
-                        </td>
-                        <td className="text-center">
-                          <span className="text-success">{batch.TotalSoldQuantity}</span>
-                        </td>
-                        <td className="text-center">
-                          <span className="text-warning">{batch.RemainingQuantity}</span>
-                        </td>
-                        <td className="text-end text-nowrap">
-                          <small>{formatCurrency(batch.TotalImportValue)}</small>
-                        </td>
-                        <td className="text-end text-nowrap">
-                          <small className="text-success fw-medium">
-                            {formatCurrency(batch.TotalSoldValue)}
-                          </small>
-                        </td>
-                        <td className="text-end text-nowrap">
-                          <span className={`${getProfitLossColor(batch.ProfitLoss)} fw-bold`}>
-                            <small>{formatCurrency(batch.ProfitLoss)}</small>
-                          </span>
-                        </td>
-                        <td className="text-center">{getStatusBadge(batch.Status)}</td>
-                        <td className="text-center">
-                          <div className="d-flex justify-content-center gap-1">
-                            {onViewDetails && (
+                        {isVisible('batchCode') && (
+                          <td className="px-4">
+                            <code className="text-primary fw-medium">{batch.BatchCode}</code>
+                          </td>
+                        )}
+                        {isVisible('importDate') && <td className="text-nowrap">{formatDate(batch.ImportDate)}</td>}
+                        {isVisible('category') && (
+                          <td>
+                            <Badge bg="info" className="bg-opacity-75 rounded-pill px-3">
+                              {batch.CategoryName}
+                            </Badge>
+                          </td>
+                        )}
+                        {isVisible('totalQty') && (
+                          <td className="text-center">
+                            <span className="fw-bold">{batch.TotalQuantity}</span>
+                          </td>
+                        )}
+                        {isVisible('soldQty') && (
+                          <td className="text-center">
+                            <span className="text-success">{batch.TotalSoldQuantity}</span>
+                          </td>
+                        )}
+                        {isVisible('remainQty') && (
+                          <td className="text-center">
+                            <span className="text-warning">{batch.RemainingQuantity}</span>
+                          </td>
+                        )}
+                        {isVisible('importValue') && (
+                          <td className="text-end text-nowrap">
+                            <small>{formatCurrency(batch.TotalImportValue)}</small>
+                          </td>
+                        )}
+                        {isVisible('soldValue') && (
+                          <td className="text-end text-nowrap">
+                            <small className="text-success fw-medium">
+                              {formatCurrency(batch.TotalSoldValue)}
+                            </small>
+                          </td>
+                        )}
+                        {isVisible('profitLoss') && (
+                          <td className="text-end text-nowrap">
+                            <span className={`${getProfitLossColor(batch.ProfitLoss)} fw-bold`}>
+                              <small>{formatCurrency(batch.ProfitLoss)}</small>
+                            </span>
+                          </td>
+                        )}
+                        {isVisible('status') && <td className="text-center">{getStatusBadge(batch.Status)}</td>}
+                        {isVisible('actions') && (
+                          <td className="text-center">
+                            <div className="d-flex justify-content-center gap-1">
+                              {onViewDetails && (
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  onClick={() => onViewDetails(batch)}
+                                  className="d-inline-flex align-items-center justify-content-center"
+                                  title="Xem chi tiết lô hàng"
+                                  style={{ width: '32px', height: '32px' }}
+                                >
+                                  <i className="fas fa-eye"></i>
+                                </Button>
+                              )}
+                              {onViewInvoice && (
+                                <Button
+                                  variant="outline-success"
+                                  size="sm"
+                                  onClick={() => onViewInvoice(batch)}
+                                  className="d-inline-flex align-items-center justify-content-center"
+                                  title="Xem hóa đơn nhập hàng"
+                                  style={{ width: '32px', height: '32px' }}
+                                >
+                                  <i className="fas fa-file-invoice"></i>
+                                </Button>
+                              )}
                               <Button
-                                variant="outline-primary"
+                                variant="outline-info"
                                 size="sm"
-                                onClick={() => onViewDetails(batch)}
+                                onClick={() => handleEditBatch(batch)}
                                 className="d-inline-flex align-items-center justify-content-center"
-                                title="Xem chi tiết lô hàng"
+                                title="Chỉnh sửa lô hàng"
                                 style={{ width: '32px', height: '32px' }}
                               >
-                                <i className="fas fa-eye"></i>
+                                <i className="fas fa-edit"></i>
                               </Button>
-                            )}
-                            {onViewInvoice && (
-                              <Button
-                                variant="outline-success"
-                                size="sm"
-                                onClick={() => onViewInvoice(batch)}
-                                className="d-inline-flex align-items-center justify-content-center"
-                                title="Xem hóa đơn nhập hàng"
-                                style={{ width: '32px', height: '32px' }}
-                              >
-                                <i className="fas fa-file-invoice"></i>
-                              </Button>
-                            )}
-                            <Button
-                              variant="outline-info"
-                              size="sm"
-                              onClick={() => handleEditBatch(batch)}
-                              className="d-inline-flex align-items-center justify-content-center"
-                              title="Chỉnh sửa lô hàng"
-                              style={{ width: '32px', height: '32px' }}
-                            >
-                              <i className="fas fa-edit"></i>
-                            </Button>
-                          </div>
-                        </td>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                   )}
